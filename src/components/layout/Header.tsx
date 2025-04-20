@@ -5,6 +5,7 @@ import {
   SunIcon,
   X,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { useTheme, Theme } from "./ThemeProvider";
@@ -31,9 +32,9 @@ export const Header = (): JSX.Element => {
       <header className="relative bg-background z-50">
         {/* Mobile Header */}
         <div className="flex md:hidden items-center justify-between px-3 py-2">
-          <h1 className="text-xl font-semibold text-green-600">
+          <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
             FaNect
-          </h1>
+          </Link>
           <div className="flex items-center gap-2">
             <ToggleGroup
               type="single"
@@ -109,9 +110,9 @@ export const Header = (): JSX.Element => {
 
         {/* Desktop/Tablet Header */}
         <div className="hidden md:flex items-center justify-between px-4 lg:px-16 py-3 gap-3">
-          <h1 className="text-xl font-semibold text-green-600">
+          <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
             FaNect
-          </h1>
+          </Link>
 
           <div className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] w-[300px]">
             <SearchIcon className="w-4 h-4 text-gray-400" />
