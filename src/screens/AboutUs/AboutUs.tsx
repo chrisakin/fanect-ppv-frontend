@@ -7,7 +7,7 @@ export const AboutUs = (): JSX.Element => {
       <Header />
       <main className="min-h-screen px-4 py-8 md:px-8 lg:px-16 max-w-4xl mx-auto">
       <section className="absolute w-full h-[500px] top-0 left-0">
-          <div className="relative h-[500px] bg-[url(/image.png)] bg-cover bg-[50%_50%]">
+          <div className="relative h-[500px] bg-[url(/about-terms-privacy.svg)] bg-cover bg-[50%_50%]">
             <h1 className="absolute w-[686px] h-[140px] top-[179px] left-[355px] [font-family:'Sofia_Pro-Bold',Helvetica] font-bold text-[#eeeeee] text-[70px] text-center tracking-[-1.40px] leading-[normal]">
               Bringing the coolest events to you
             </h1>
