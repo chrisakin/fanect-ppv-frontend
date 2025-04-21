@@ -1,4 +1,4 @@
-import { EyeOffIcon, EyeIcon } from "lucide-react";
+import { EyeOffIcon, EyeIcon, Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +7,8 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { useToast } from "./ui/use-toast";
+import axios from "../lib/axios";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -39,7 +41,9 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [showVerification, setShowVerification] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [otpValues, setOtpValues] = useState(Array(6).fill(""));
+  const [isLoading, setIsLoading] = useState(false);
   const otpInputs = useRef<(HTMLInputElement | null)[]>([]);
+  const { toast } = useToast();
 
   const {
     register: registerLogin,
@@ -76,7 +80,6 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       newOtpValues[index] = value;
       setOtpValues(newOtpValues);
 
-      // Move to next input if value is entered
       if (value && index < 5) {
         otpInputs.current[index + 1]?.focus();
       }
@@ -85,44 +88,73 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-      // Move to previous input on backspace if current input is empty
       otpInputs.current[index - 1]?.focus();
     }
   };
 
   const onLogin = async (data: LoginFormData) => {
+    setIsLoading(true);
     try {
-      console.log("Login data:", data);
-      // Implement your login logic here
-    } catch (error) {
-      console.error("Login error:", error);
+      await axios.post('/auth/login', data);
+      onClose();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data?.message || "An error occurred during login",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const onSignup = async (data: SignupFormData) => {
+    setIsLoading(true);
     try {
-      console.log("Signup data:", data);
+      await axios.post('/auth/register', data);
       setUserEmail(data.email);
       setShowVerification(true);
-      // Implement your signup logic here
-    } catch (error) {
-      console.error("Signup error:", error);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data?.message || "An error occurred during registration",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const onVerify = async () => {
+    setIsLoading(true);
     try {
       const code = otpValues.join("");
-      console.log("Verification code:", code);
-      // Implement your verification logic here
-    } catch (error) {
-      console.error("Verification error:", error);
+      await axios.post('/auth/verify', { code, email: userEmail });
+      onClose();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data?.message || "An error occurred during verification",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
-    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.VITE_GOOGLE_CLIENT_ID}&redirect_uri=${window.location.origin}/auth/callback&response_type=code&scope=email profile&prompt=select_account`;
-    window.location.href = googleAuthUrl;
+    setIsLoading(true);
+    try {
+      const response = await axios.get('/auth/google');
+      window.location.href = response.data.url;
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to initiate Google authentication",
+      });
+      setIsLoading(false);
+    }
   };
 
   const toggleMode = () => {
@@ -134,9 +166,23 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     resetVerification();
   };
 
-  const resendOTP = () => {
-    // Implement resend OTP logic here
-    console.log("Resending OTP to:", userEmail);
+  const resendOTP = async () => {
+    setIsLoading(true);
+    try {
+      await axios.post('/auth/resend-otp', { email: userEmail });
+      toast({
+        title: "Success",
+        description: "OTP has been resent to your email",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to resend OTP",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -172,6 +218,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         className="w-full h-12 text-center text-lg bg-transparent border-2 rounded-lg"
                         maxLength={1}
+                        disabled={isLoading}
                       />
                     ))}
                   </div>
@@ -179,8 +226,13 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   <Button
                     type="submit"
                     className="w-full bg-green-600 hover:bg-green-700 text-white h-12"
+                    disabled={isLoading}
                   >
-                    Continue
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Continue"
+                    )}
                   </Button>
 
                   <div className="text-center">
@@ -191,6 +243,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                         variant="link"
                         onClick={resendOTP}
                         className="p-0 h-auto text-green-600 hover:text-green-700"
+                        disabled={isLoading}
                       >
                         Resend OTP
                       </Button>
@@ -224,13 +277,20 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     onClick={handleGoogleAuth}
                     variant="outline"
                     className="w-full h-10"
+                    disabled={isLoading}
                   >
-                    <img
-                      className="w-5 h-5 mr-2"
-                      alt="Google icon"
-                      src="/icon-crypto-google.svg"
-                    />
-                    {isSignup ? "Sign up with Google" : "Log in with Google"}
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <img
+                          className="w-5 h-5 mr-2"
+                          alt="Google icon"
+                          src="/icon-crypto-google.svg"
+                        />
+                        {isSignup ? "Sign up with Google" : "Log in with Google"}
+                      </>
+                    )}
                   </Button>
 
                   <div className="relative flex justify-center items-center">
@@ -252,6 +312,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             placeholder="First Name"
                             {...registerSignup("firstName")}
                             className="h-10"
+                            disabled={isLoading}
                           />
                           {signupErrors.firstName && (
                             <span className="text-xs text-red-500 mt-1">
@@ -267,6 +328,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             placeholder="Last Name"
                             {...registerSignup("lastName")}
                             className="h-10"
+                            disabled={isLoading}
                           />
                           {signupErrors.lastName && (
                             <span className="text-xs text-red-500 mt-1">
@@ -284,6 +346,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                         placeholder="Email address"
                         {...(isSignup ? registerSignup("email") : registerLogin("email"))}
                         className="h-10"
+                        disabled={isLoading}
                       />
                       {(isSignup ? signupErrors.email : loginErrors.email) && (
                         <span className="text-xs text-red-500 mt-1">
@@ -304,6 +367,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             ? registerSignup("password")
                             : registerLogin("password"))}
                           className="h-10 pr-10"
+                          disabled={isLoading}
                         />
                         <Button
                           type="button"
@@ -311,6 +375,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           size="icon"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-0 top-0 h-10 w-10"
+                          disabled={isLoading}
                         >
                           {showPassword ? (
                             <EyeIcon className="h-4 w-4" />
@@ -334,6 +399,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           type="button"
                           variant="link"
                           className="px-0 h-auto text-xs"
+                          disabled={isLoading}
                         >
                           Forgot Password?
                         </Button>
@@ -343,9 +409,13 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     <Button
                       type="submit"
                       className="w-full bg-green-600 hover:bg-green-700"
-                      disabled={isSignup ? !isSignupValid : !isLoginValid}
+                      disabled={isSignup ? !isSignupValid || isLoading : !isLoginValid || isLoading}
                     >
-                      {isSignup ? "Create Account" : "Log in"}
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        isSignup ? "Create Account" : "Log in"
+                      )}
                     </Button>
                   </div>
                 </form>
@@ -359,6 +429,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     variant="link"
                     onClick={toggleMode}
                     className="p-0 h-auto text-green-600 hover:text-green-700"
+                    disabled={isLoading}
                   >
                     {isSignup ? "Log in" : "Create Account"}
                   </Button>

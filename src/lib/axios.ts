@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from './auth';
+import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const baseURL = 'http://localhost:5000/api/v1';
 
 export const axiosInstance = axios.create({
   baseURL,
@@ -37,8 +37,8 @@ axiosInstance.interceptors.response.use(
           refreshToken,
         });
 
-        const { accessToken } = response.data;
-        setAccessToken(accessToken);
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        setTokens(accessToken, newRefreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest);

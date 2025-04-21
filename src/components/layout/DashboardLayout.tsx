@@ -12,14 +12,14 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { Button } from '../ui/button';
+import { Button } from '../../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+} from '../../components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { clearTokens } from '../../lib/auth';
 
 const sidebarItems = [

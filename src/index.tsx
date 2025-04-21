@@ -9,6 +9,7 @@ import { Event } from "./screens/Event";
 import { Dashboard } from "./screens/Dashboard";
 import { ThemeProvider } from "./components/layout/ThemeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Toaster } from "./components/ui/toaster";
 
 createRoot(document.getElementById("app") as HTMLElement).render(
   <StrictMode>
@@ -30,6 +31,7 @@ createRoot(document.getElementById("app") as HTMLElement).render(
           />
         </Routes>
       </Router>
+      <Toaster />
     </ThemeProvider>
   </StrictMode>,
 );
