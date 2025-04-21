@@ -1,0 +1,56 @@
+import axios from 'axios';
+import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from './auth';
+
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+export const axiosInstance = axios.create({
+  baseURL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = getRefreshToken();
+        const response = await axios.post(`${baseURL}/auth/refresh`, {
+          refreshToken,
+        });
+
+        const { accessToken } = response.data;
+        setAccessToken(accessToken);
+
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return axiosInstance(originalRequest);
+      } catch (error) {
+        clearTokens();
+        window.location.href = '/';
+        return Promise.reject(error);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;

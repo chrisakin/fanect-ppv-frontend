@@ -6,7 +6,9 @@ import { AboutUs } from "./screens/AboutUs";
 import { PrivacyPolicy } from "./screens/PrivacyPolicy";
 import { Terms } from "./screens/Terms";
 import { Event } from "./screens/Event";
+import { Dashboard } from "./screens/Dashboard";
 import { ThemeProvider } from "./components/layout/ThemeProvider";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 createRoot(document.getElementById("app") as HTMLElement).render(
   <StrictMode>
@@ -18,6 +20,14 @@ createRoot(document.getElementById("app") as HTMLElement).render(
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/event/:id" element={<Event />} />
+          <Route
+            path="/dashboard/*"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </ThemeProvider>
