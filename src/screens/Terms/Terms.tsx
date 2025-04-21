@@ -2,57 +2,53 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 
 export const Terms = (): JSX.Element => {
-  const policySections = [
+  const termsSections = [
     {
-      title: "1. Information We Collect",
-      content: `We collect information to provide you with the best music streaming experience possible. This includes:
-      Personal Information: When you create an account, sign up for events, or contact us, we may collect your name, email address, and other relevant details.
-      Usage Data: We collect information about how you use FaNect, including which events you view, your device type, browser, and IP address.
-      Payment Info: When you make purchases, our payment partners securely process your payment details. FaNect does not store your full payment information.
-      Cookies & Tracking Technologies: We use cookies to personalize content, analyze traffic, and improve your experience.`,
+      title: "1. Acceptance of Terms",
+      content: `By accessing or using FaNect, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our platform.`,
     },
     {
-      title: "2. Sharing Your Information",
-      content: `We do not sell your personal information. We only share your data with:
-      Trusted partners who help us run our platform
-      Payment processors to handle transactions securely
-      Legal authorities if required by law or to protect FaNect rights
-      All partners are required to treat your data with the same level of care as we do.`,
+      title: "2. User Accounts",
+      content: `You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must immediately notify us of any unauthorized use of your account.`,
     },
     {
-      title: "3. Data Security",
-      content: `We use industry-standard encryption and security practices to protect your data. However, no system is 100% secure, and we recommend keeping your login credentials confidential.`,
+      title: "3. Content and Conduct",
+      content: `Users must not post or share content that is illegal, harmful, or violates others' rights. FaNect reserves the right to remove any content that violates these terms.`,
     },
     {
-      title: "4. Changes to This Policy",
-      content: `We may update this Privacy Policy from time to time. If we make significant changes, we'll notify you through the platform or via email.`,
+      title: "4. Changes to Service",
+      content: `We may modify or discontinue any part of our service at any time. We will notify users of significant changes to our service or these terms.`,
     },
   ];
+
   return (
-    <div className="bg-background text-foreground max-w-[1440px] mx-auto">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Header />
-      <main className="min-h-screen px-4 py-8 md:px-8 lg:px-16 max-w-4xl mx-auto">
-      <section className="absolute w-full h-[500px] top-0 left-0">
-          <div className="relative h-[500px] bg-[url(/about-terms-privacy.svg)] bg-cover bg-[50%_50%]">
-            <h1 className="absolute w-[686px] h-[140px] top-[199px] left-[355px] [font-family:'Sofia_Pro-Bold',Helvetica] font-bold text-[#eeeeee] text-[70px] text-center tracking-[-1.40px] leading-[normal]">
-              Terms of Service
-            </h1>
+      <main className="flex-1">
+        <div className="relative">
+          <div className="h-[300px] md:h-[500px] bg-[url(/about-terms-privacy.svg)] bg-cover bg-center">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white text-center max-w-3xl px-4">
+                Terms of Service
+              </h1>
+            </div>
           </div>
-        </section>
-        <section className="absolute w-[890px] h-[432px] top-[561px] left-[280px] [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-black text-xl tracking-[-0.40px] leading-9">
-        <div className="max-w-[1226px]">
-            {policySections.map((section, index) => (
-              <div key={index} className="mb-6">
-                <h2 className="font-['Sofia_Pro-SemiBold',Helvetica] font-semibold text-black text-xl tracking-[-0.40px] leading-9">
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
+          <div className="space-y-8">
+            {termsSections.map((section, index) => (
+              <div key={index} className="space-y-4">
+                <h2 className="text-xl md:text-2xl font-semibold">
                   {section.title}
                 </h2>
-                <p className="font-['Sofia_Pro-Regular',Helvetica] text-black text-xl tracking-[-0.40px] leading-9 whitespace-pre-line">
+                <p className="text-base md:text-xl whitespace-pre-line">
                   {section.content}
                 </p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
       </main>
       <Footer />
     </div>

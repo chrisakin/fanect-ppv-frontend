@@ -2,7 +2,6 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 
 export const PrivacyPolicy = (): JSX.Element => {
-
   const policySections = [
     {
       title: "1. Information We Collect",
@@ -29,31 +28,35 @@ export const PrivacyPolicy = (): JSX.Element => {
       content: `We may update this Privacy Policy from time to time. If we make significant changes, we'll notify you through the platform or via email.`,
     },
   ];
+
   return (
-    <div className="bg-background text-foreground max-w-[1440px] mx-auto">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Header />
-      <main className="min-h-screen px-4 py-8 md:px-8 lg:px-16 max-w-4xl mx-auto">
-      <section className="absolute w-full h-[500px] top-0 left-0">
-          <div className="relative h-[500px] bg-[url(/about-terms-privacy.svg)] bg-cover bg-[50%_50%]">
-            <h1 className="absolute w-[686px] h-[140px] top-[199px] left-[355px] [font-family:'Sofia_Pro-Bold',Helvetica] font-bold text-[#eeeeee] text-[70px] text-center tracking-[-1.40px] leading-[normal]">
-              Privacy Policy
-            </h1>
+      <main className="flex-1">
+        <div className="relative">
+          <div className="h-[300px] md:h-[500px] bg-[url(/about-terms-privacy.svg)] bg-cover bg-center">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white text-center max-w-3xl px-4">
+                Privacy Policy
+              </h1>
+            </div>
           </div>
-        </section>
-        <section className="absolute w-[890px] h-[432px] top-[561px] left-[280px] [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-black text-xl tracking-[-0.40px] leading-9">
-        <div className="max-w-[1226px]">
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
+          <div className="space-y-8">
             {policySections.map((section, index) => (
-              <div key={index} className="mb-6">
-                <h2 className="font-['Sofia_Pro-SemiBold',Helvetica] font-semibold text-black text-xl tracking-[-0.40px] leading-9">
+              <div key={index} className="space-y-4">
+                <h2 className="text-xl md:text-2xl font-semibold">
                   {section.title}
                 </h2>
-                <p className="font-['Sofia_Pro-Regular',Helvetica] text-black text-xl tracking-[-0.40px] leading-9 whitespace-pre-line">
+                <p className="text-base md:text-xl whitespace-pre-line">
                   {section.content}
                 </p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
       </main>
       <Footer />
     </div>

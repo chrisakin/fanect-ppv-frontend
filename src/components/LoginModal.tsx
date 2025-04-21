@@ -13,25 +13,46 @@ const loginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+const signupSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 type LoginFormData = z.infer<typeof loginSchema>;
+type SignupFormData = z.infer<typeof signupSchema>;
 
 export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
+
   const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
+    register: registerLogin,
+    handleSubmit: handleLoginSubmit,
+    formState: { errors: loginErrors, isValid: isLoginValid },
+    reset: resetLogin,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const {
+    register: registerSignup,
+    handleSubmit: handleSignupSubmit,
+    formState: { errors: signupErrors, isValid: isSignupValid },
+    reset: resetSignup,
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    mode: "onChange",
+  });
+
+  const onLogin = async (data: LoginFormData) => {
     try {
       console.log("Login data:", data);
       // Implement your login logic here
@@ -40,28 +61,57 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const onSignup = async (data: SignupFormData) => {
+    try {
+      console.log("Signup data:", data);
+      // Implement your signup logic here
+    } catch (error) {
+      console.error("Signup error:", error);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.VITE_GOOGLE_CLIENT_ID}&redirect_uri=${window.location.origin}/auth/callback&response_type=code&scope=email profile&prompt=select_account`;
     window.location.href = googleAuthUrl;
+  };
+
+  const toggleMode = () => {
+    setIsSignup(!isSignup);
+    setShowPassword(false);
+    resetLogin();
+    resetSignup();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] p-0">
-        <DialogTitle className="sr-only">Login to FaNect</DialogTitle>
+        <DialogTitle className="sr-only">
+          {isSignup ? "Create Account" : "Login to FaNect"}
+        </DialogTitle>
         <Card className="border-none">
           <CardContent className="flex flex-col items-center space-y-6 p-6">
             <div className="flex flex-col items-center space-y-2 w-full">
-              <h1 className="text-2xl font-semibold tracking-tight">Log in</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {isSignup ? "Create Account" : "Log in"}
+              </h1>
               <p className="text-sm text-muted-foreground text-center">
-                Log in to discover the coolest events around you
+                {isSignup
+                  ? "Sign up to discover the coolest events around you"
+                  : "Log in to discover the coolest events around you"}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
+            <form
+              onSubmit={
+                isSignup
+                  ? handleSignupSubmit(onSignup)
+                  : handleLoginSubmit(onLogin)
+              }
+              className="w-full space-y-4"
+            >
               <Button
                 type="button"
-                onClick={handleGoogleLogin}
+                onClick={handleGoogleAuth}
                 variant="outline"
                 className="w-full h-10"
               >
@@ -70,7 +120,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   alt="Google icon"
                   src="/icon-crypto-google.svg"
                 />
-                Log in with Google
+                {isSignup ? "Sign up with Google" : "Log in with Google"}
               </Button>
 
               <div className="relative flex justify-center items-center">
@@ -83,17 +133,53 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               </div>
 
               <div className="space-y-4">
+                {isSignup && (
+                  <>
+                    <div>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="First Name"
+                        {...registerSignup("firstName")}
+                        className="h-10"
+                      />
+                      {signupErrors.firstName && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {signupErrors.firstName.message}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder="Last Name"
+                        {...registerSignup("lastName")}
+                        className="h-10"
+                      />
+                      {signupErrors.lastName && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {signupErrors.lastName.message}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
+
                 <div>
                   <Input
                     id="email"
                     type="email"
                     placeholder="Email address"
-                    {...register("email")}
+                    {...(isSignup ? registerSignup("email") : registerLogin("email"))}
                     className="h-10"
                   />
-                  {errors.email && (
+                  {(isSignup ? signupErrors.email : loginErrors.email) && (
                     <span className="text-xs text-red-500 mt-1">
-                      {errors.email.message}
+                      {isSignup
+                        ? signupErrors.email?.message
+                        : loginErrors.email?.message}
                     </span>
                   )}
                 </div>
@@ -104,7 +190,9 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      {...register("password")}
+                      {...(isSignup
+                        ? registerSignup("password")
+                        : registerLogin("password"))}
                       className="h-10 pr-10"
                     />
                     <Button
@@ -121,43 +209,48 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       )}
                     </Button>
                   </div>
-                  {errors.password && (
+                  {(isSignup ? signupErrors.password : loginErrors.password) && (
                     <span className="text-xs text-red-500 mt-1">
-                      {errors.password.message}
+                      {isSignup
+                        ? signupErrors.password?.message
+                        : loginErrors.password?.message}
                     </span>
                   )}
                 </div>
 
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="px-0 h-auto text-xs"
-                  >
-                    Forgot Password?
-                  </Button>
-                </div>
+                {!isSignup && (
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="px-0 h-auto text-xs"
+                    >
+                      Forgot Password?
+                    </Button>
+                  </div>
+                )}
 
                 <Button
                   type="submit"
                   className="w-full bg-green-600 hover:bg-green-700"
-                  disabled={!isValid}
+                  disabled={isSignup ? !isSignupValid : !isLoginValid}
                 >
-                  Log in
+                  {isSignup ? "Create Account" : "Log in"}
                 </Button>
               </div>
             </form>
 
             <div className="text-sm text-center">
               <span className="text-muted-foreground">
-                Don't have an account?{" "}
+                {isSignup ? "Have an account? " : "Don't have an account? "}
               </span>
               <Button
                 type="button"
                 variant="link"
+                onClick={toggleMode}
                 className="p-0 h-auto text-green-600 hover:text-green-700"
               >
-                Create Account
+                {isSignup ? "Log in" : "Create Account"}
               </Button>
             </div>
           </CardContent>

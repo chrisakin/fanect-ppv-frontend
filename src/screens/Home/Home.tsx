@@ -14,36 +14,43 @@ import {
 } from "../../components/ui/pagination";
 import { Footer } from "../../components/layout/Footer";
 import { Header } from "../../components/layout/Header";
+import { Link } from "react-router-dom";
 
 export const Home = (): JSX.Element => {
   // Event data for mapping
   const events = [
     {
+      id: "1",
       title: "Fido Live in Atlanta",
       date: "Saturday, 26th December, 2025",
       image: "/image-6.png",
     },
     {
+      id: "2",
       title: "Fido Live in Atlanta",
       date: "Saturday, 26th December, 2025",
       image: "/image-6.png",
     },
     {
+      id: "3",
       title: "Fido Live in Atlanta",
       date: "Saturday, 26th December, 2025",
       image: "/image-6.png",
     },
     {
+      id: "4",
       title: "Fido Live in Atlanta",
       date: "Saturday, 26th December, 2025",
       image: "/image-6.png",
     },
     {
+      id: "5",
       title: "Fido Live in Atlanta",
       date: "Saturday, 26th December, 2025",
       image: "/image-6.png",
     },
     {
+      id: "6",
       title: "Fido Live in Atlanta",
       date: "Saturday, 26th December, 2025",
       image: "/image-6.png",
@@ -67,8 +74,8 @@ export const Home = (): JSX.Element => {
 
             <div className="flex items-center gap-2">
               <div className="bg-green-600 w-3 h-3 rounded-full" />
-              <div className="bg-gray-300 w-3 h-3 rounded-full" />
-              <div className="bg-gray-300 w-3 h-3 rounded-full" />
+              <div className="bg-gray-300 dark:bg-gray-700 w-3 h-3 rounded-full" />
+              <div className="bg-gray-300 dark:bg-gray-700 w-3 h-3 rounded-full" />
             </div>
           </section>
 
@@ -77,32 +84,33 @@ export const Home = (): JSX.Element => {
             <section className="flex flex-col items-start gap-8 w-full">
               <div className="flex flex-col items-start gap-6 w-full">
                 <div className="flex flex-col items-start gap-4 w-full">
-                  <h2 className="text-lg font-medium text-[#828b86]">
+                  <h2 className="text-lg font-medium text-foreground">
                     Upcoming Events
                   </h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     {events.map((event, index) => (
-                      <Card
-                        key={index}
-                        className="w-full h-[250px] rounded-lg overflow-hidden border border-solid border-[#d5d7da]"
-                      >
-                        <img
-                          className="w-full h-[160px] object-cover"
-                          alt={event.title}
-                          src={event.image}
-                        />
-                        <CardContent className="p-3">
-                          <div className="flex flex-col gap-1">
-                            <h3 className="text-base font-semibold text-gray-700">
-                              {event.title}
-                            </h3>
-                            <p className="text-sm text-gray-700">
-                              {event.date}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <Link to={`/event/${event.id}`} key={index}>
+                        <Card
+                          className="w-full h-[250px] rounded-lg overflow-hidden border border-solid border-[#d5d7da] hover:shadow-lg transition-shadow"
+                        >
+                          <img
+                            className="w-full h-[160px] object-cover"
+                            alt={event.title}
+                            src={event.image}
+                          />
+                          <CardContent className="p-3">
+                            <div className="flex flex-col gap-1">
+                              <h3 className="text-base font-semibold text-foreground">
+                                {event.title}
+                              </h3>
+                              <p className="text-sm text-foreground">
+                                {event.date}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -113,7 +121,7 @@ export const Home = (): JSX.Element => {
                     <PaginationContent className="flex items-center gap-2 flex-wrap justify-center">
                       <PaginationItem>
                         <PaginationPrevious
-                          className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md border border-solid border-[#d5d7da]"
+                          className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md border border-solid border-[#d5d7da] text-foreground"
                         >
                           <ChevronLeftIcon className="w-3 h-3" />
                         </PaginationPrevious>
@@ -121,7 +129,7 @@ export const Home = (): JSX.Element => {
 
                       <PaginationItem>
                         <PaginationLink
-                          className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md text-sm"
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md text-sm text-foreground"
                           href="#"
                         >
                           1
@@ -130,7 +138,7 @@ export const Home = (): JSX.Element => {
 
                       <PaginationItem>
                         <PaginationLink
-                          className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md text-sm"
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md text-sm text-foreground"
                           href="#"
                         >
                           2
@@ -139,7 +147,7 @@ export const Home = (): JSX.Element => {
 
                       <PaginationItem>
                         <PaginationLink
-                          className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md text-sm"
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md text-sm text-foreground"
                           href="#"
                         >
                           3
@@ -147,12 +155,12 @@ export const Home = (): JSX.Element => {
                       </PaginationItem>
 
                       <PaginationItem>
-                        <PaginationEllipsis className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md text-sm" />
+                        <PaginationEllipsis className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md text-sm text-foreground" />
                       </PaginationItem>
 
                       <PaginationItem>
                         <PaginationLink
-                          className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md text-sm"
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md text-sm text-foreground"
                           href="#"
                         >
                           50
@@ -161,7 +169,7 @@ export const Home = (): JSX.Element => {
 
                       <PaginationItem>
                         <PaginationNext
-                          className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md border border-solid border-[#d5d7da]"
+                          className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md border border-solid border-[#d5d7da] text-foreground"
                         >
                           <ChevronRightIcon className="w-3 h-3" />
                         </PaginationNext>
