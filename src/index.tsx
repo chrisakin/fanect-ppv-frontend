@@ -10,6 +10,10 @@ import { Dashboard } from "./screens/Dashboard";
 import { ThemeProvider } from "./components/layout/ThemeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Toaster } from "./components/ui/toaster";
+import { useAuthStore } from "./store/authStore";
+
+// Initialize auth state before rendering
+useAuthStore.getState().initAuth();
 
 createRoot(document.getElementById("app") as HTMLElement).render(
   <StrictMode>
@@ -33,5 +37,5 @@ createRoot(document.getElementById("app") as HTMLElement).render(
       </Router>
       <Toaster />
     </ThemeProvider>
-  </StrictMode>,
+  </StrictMode>
 );
