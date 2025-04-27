@@ -9,6 +9,9 @@ import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { useToast } from "./ui/use-toast";
 import axios from "../lib/axios";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
+import { setTokens } from "@/lib/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -44,6 +47,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const otpInputs = useRef<(HTMLInputElement | null)[]>([]);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { setAuth, setUser } = useAuthStore();
 
   const {
     register: registerLogin,
@@ -92,11 +97,24 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
   };
 
+  const fetchUserProfile = async () => {
+    try {
+      const response = await axios.get('/auth/profile');
+      setUser(response.data);
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
   const onLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      await axios.post('/auth/login', data);
+      const { accessToken, refreshToken } = (await axios.post('/auth/login', data)).data?.data;
+      setTokens(accessToken, refreshToken);
+      await fetchUserProfile();
+      setAuth(true);
       onClose();
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -129,8 +147,13 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     setIsLoading(true);
     try {
       const code = otpValues.join("");
-      await axios.post('/auth/verify', { code, email: userEmail });
+      const { accessToken, refreshToken } = (await axios.post('/auth/verify', { code, email: userEmail })).data?.data;
+      setTokens(accessToken, refreshToken);
+      await fetchUserProfile();
+      setAuth(true);
+      await fetchUserProfile();
       onClose();
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
