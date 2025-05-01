@@ -4,18 +4,29 @@ import {
   SearchIcon,
   SunIcon,
   X,
+  User,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { useTheme, Theme } from "./ThemeProvider";
 import { useState } from "react";
 import { LoginModal } from "../LoginModal";
+import { useAuthStore } from "../../store/authStore";
+import { clearTokens } from "../../lib/auth";
 
 export const Header = (): JSX.Element => {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearTokens();
+    logout();
+    navigate('/');
+  };
 
   return (
     <>
@@ -95,16 +106,29 @@ export const Header = (): JSX.Element => {
             >
               Create Events
             </Button>
-            <Button
-              size="sm"
-              className="w-full bg-green-600 text-white text-sm"
-              onClick={() => {
-                setIsMenuOpen(false);
-                setIsLoginModalOpen(true);
-              }}
-            >
-              Log in
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start text-sm text-gray-500"
+                  onClick={handleLogout}
+                >
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                className="w-full bg-green-600 text-white text-sm"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsLoginModalOpen(true);
+                }}
+              >
+                Log in
+              </Button>
+            )}
           </div>
         </div>
 
@@ -160,13 +184,23 @@ export const Header = (): JSX.Element => {
               Create Events
             </Button>
 
-            <Button 
-              size="sm"
-              className="bg-green-600 text-white text-sm rounded-lg"
-              onClick={() => setIsLoginModalOpen(true)}
-            >
-              Log in
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                variant="outline"
+                className="h-auto border-[#717680] text-[#717680] dark:text-gray-300 rounded-[10px] flex items-center gap-2.5"
+              >
+                <User className="w-6 h-6" />
+                <span className="font-text-lg-medium">{user?.name}</span>
+              </Button>
+            ) : (
+              <Button 
+                size="sm"
+                className="bg-green-600 text-white text-sm rounded-lg"
+                onClick={() => setIsLoginModalOpen(true)}
+              >
+                Log in
+              </Button>
+            )}
           </div>
         </div>
       </header>
