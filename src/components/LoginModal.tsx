@@ -1,8 +1,9 @@
 import { EyeOffIcon, EyeIcon, Loader2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useGoogleLogin } from '@react-oauth/google';
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
@@ -72,12 +73,36 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   const {
     handleSubmit: handleVerificationSubmit,
-    formState: { errors: verificationErrors },
     reset: resetVerification,
   } = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
     mode: "onChange",
   });
+
+  // Handle OTP paste
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      const pastedData = e.clipboardData?.getData('text');
+      if (pastedData && /^\d{6}$/.test(pastedData)) {
+        const digits = pastedData.split('');
+        setOtpValues(digits);
+        // Focus the last input after paste
+        otpInputs.current[5]?.focus();
+      }
+    };
+
+    // Add paste event listener to each OTP input
+    otpInputs.current.forEach(input => {
+      input?.addEventListener('paste', handlePaste);
+    });
+
+    return () => {
+      otpInputs.current.forEach(input => {
+        input?.removeEventListener('paste', handlePaste);
+      });
+    };
+  }, []);
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length <= 1 && /^[0-9]*$/.test(value)) {
@@ -109,18 +134,24 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const onLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const { accessToken, refreshToken } = (await axios.post('/auth/login', data)).data?.data;
+      const response = await axios.post('/auth/login', data);
+      const { accessToken, refreshToken } = response.data?.data;
       setTokens(accessToken, refreshToken);
       await fetchUserProfile();
       setAuth(true);
       onClose();
       navigate('/dashboard');
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.response?.data?.message || "An error occurred during login",
-      });
+      if (error.response?.data?.message === 'User is not verified') {
+        setUserEmail(data.email);
+        setShowVerification(true);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.response?.data?.message || "An error occurred during login",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -151,7 +182,6 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       setTokens(accessToken, refreshToken);
       await fetchUserProfile();
       setAuth(true);
-      await fetchUserProfile();
       onClose();
       navigate('/dashboard');
     } catch (error: any) {
@@ -165,20 +195,39 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
   };
 
-  const handleGoogleAuth = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get('/auth/google');
-      window.location.href = response.data.url;
-    } catch (error: any) {
+  const handleGoogleAuth = useGoogleLogin({
+    flow: 'auth-code',
+    onSuccess: async (response) => {
+      setIsLoading(true);
+      try {
+        const { data } = await axios.post('/auth/google', {
+          code: response.code,
+          path: isSignup ? "signup": "login",
+        });
+        const { accessToken, refreshToken } = data.data;
+        setTokens(accessToken, refreshToken);
+        await fetchUserProfile();
+        setAuth(true);
+        onClose();
+        navigate('/dashboard');
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to authenticate with Google"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to initiate Google authentication",
+        description: "Google authentication failed"
       });
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
   const toggleMode = () => {
     setIsSignup(!isSignup);
@@ -249,7 +298,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   <Button
                     type="submit"
                     className="w-full bg-green-600 hover:bg-green-700 text-white h-12"
-                    disabled={isLoading}
+                    disabled={isLoading || otpValues.some(v => !v)}
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -297,7 +346,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 >
                   <Button
                     type="button"
-                    onClick={handleGoogleAuth}
+                    onClick={() => handleGoogleAuth()}
                     variant="outline"
                     className="w-full h-10"
                     disabled={isLoading}
