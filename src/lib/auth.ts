@@ -32,13 +32,13 @@ export const isAuthenticated = () => {
   }
 };
 
-export const getUserInfo = () => {
-  const token = getAccessToken();
-  if (!token) return null;
+// export const getUserInfo = () => {
+//   const token = getAccessToken();
+//   if (!token) return null;
 
-  try {
-    return jwtDecode<DecodedToken>(token);
-  } catch {
-    return null;
-  }
-};
+//   try {
+//     return jwtDecode<DecodedToken>(token);
+//   } catch {
+//     return null;
+//   }
+// };

@@ -15,6 +15,8 @@ module.exports = {
         "gray-500": "var(--gray-500)",
         "gray-700": "var(--gray-700)",
         "green-600": "var(--green-600)",
+        "dash-dark": "var(--dash-dark)",
+        "select-dark": "var(--select-dark)",
         whitewhite: "var(--whitewhite)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -40,6 +40,8 @@
   --gray-500: rgba(113, 118, 128, 1);
   --gray-700: rgba(65, 70, 81, 1);
   --green-600: rgba(26, 170, 101, 1);
+  --dash-dark: #031B10;
+  --select-dark:#04311A;
   --labels-sm-font-family: "Inter", Helvetica;
   --labels-sm-font-size: 12px;
   --labels-sm-font-style: normal;

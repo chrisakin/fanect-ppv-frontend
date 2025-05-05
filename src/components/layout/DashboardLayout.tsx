@@ -1,39 +1,25 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import {
-  Home,
-  Ticket,
-  Settings,
-  Bell,
-  HelpCircle,
-  LogOut,
-  Menu,
-  X,
-  User,
-  MoonIcon,
-  SunIcon,
-} from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../ui/button';
-import { useTheme } from './ThemeProvider';
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { clearTokens } from '../../lib/auth';
+import { Header } from './Header';
+
 
 const sidebarItems = [
-  { icon: <Home className="h-6 w-6" />, label: 'Home', path: '/dashboard' },
-  { icon: <Ticket className="h-6 w-6" />, label: 'Tickets', path: '/dashboard/tickets' },
-  { icon: <Ticket className="h-6 w-6" />, label: 'Organise Events', path: '/dashboard/organise' },
-  { icon: <Settings className="h-6 w-6" />, label: 'Settings', path: '/dashboard/settings' },
-  { icon: <Bell className="h-6 w-6" />, label: 'Notifications', path: '/dashboard/notifications' },
-  { icon: <HelpCircle className="h-6 w-6" />, label: 'Help', path: '/dashboard/help' },
+  { icon: <img src='/icons/home.svg' className="h-6 w-6" />, label: 'Home', path: '/dashboard' },
+  { icon: <img src='/icons/card-pos.svg' className="h-6 w-6" />, label: 'Streampass', path: '/dashboard/tickets' },
+  { icon: <img src='/icons/music.svg' className="h-6 w-6" />, label: 'Organise Events', path: '/dashboard/organise' },
+  { icon: <img src='/icons/setting.svg' className="h-6 w-6" />, label: 'Settings', path: '/dashboard/settings' },
+  { icon: <img src='/icons/notification-bing.svg' className="h-6 w-6" />, label: 'Notifications', path: '/dashboard/notifications' },
+  { icon: <img src='/icons/message-question.svg' className="h-6 w-6" />, label: 'Help', path: '/dashboard/help' },
 ];
 
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
 
   const handleLogout = () => {
     clearTokens();
@@ -49,26 +35,29 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       <aside
         className={`fixed top-0 left-0 z-40 h-screen transition-transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 w-[242px] bg-gray-100 dark:bg-gray-800`}
+        } md:translate-x-0 w-[242px] bg-[#F5F5F5] dark:bg-dash-dark`}
       >
         <div className="h-full flex flex-col">
           <div className="flex h-[70px] items-center justify-between px-4 py-2.5">
             <Link to="/dashboard" className="font-display-xs-semibold text-green-600 text-[length:var(--display-xs-semibold-font-size)] tracking-[var(--display-xs-semibold-letter-spacing)] leading-[var(--display-xs-semibold-line-height)]">
               FaNect
             </Link>
+            <div className='h-6 w-6 cursor-pointer md:hidden' onClick={() => setIsSidebarOpen(false)}>
+              <img src="/icons/sidebar-left.svg" alt="side-icon" />
+            </div>
           </div>
 
-          <nav className="flex flex-col gap-0 px-2.5 mt-8">
+          <nav className="flex flex-col gap-0 px-2.5 mt-4">
             {sidebarItems.map((item, index) => (
               <Link key={index} to={item.path}>
                 <Button
                   variant="ghost"
                   className={`flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 rounded ${
-                    isActive(item.path) ? 'bg-green-600 text-gray-50' : 'text-gray-400 dark:text-gray-300'
+                    isActive(item.path) ? 'bg-[#1AAA65] text-[#FAFAFA] dark:bg-select-dark' : 'text-[#A4A7AE] dark:text-[#AAAAAA]'
                   }`}
                 >
                   {item.icon}
-                  <span className="font-medium text-base tracking-[-0.32px] leading-6">
+                  <span className="font-small text-base tracking-[-0.32px] leading-6">
                     {item.label}
                   </span>
                 </Button>
@@ -82,7 +71,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               onClick={handleLogout}
               className="flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 text-gray-400 dark:text-gray-300 rounded"
             >
-              <LogOut className="h-6 w-6" />
+              <img src='/icons/logout.svg' className="h-6 w-6" />
               <span className="font-medium text-base tracking-[-0.32px] leading-6">
                 Log Out
               </span>
@@ -94,7 +83,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       {/* Main content */}
       <div className="md:ml-[242px]">
         {/* Header */}
-        <header className="h-16 border-b border-gray-200 dark:border-gray-700 bg-background">
+        {/* <header className="h-16 border-b border-gray-200 dark:border-gray-700 bg-background">
           <div className="h-full px-4 flex items-center justify-between">
             <Button
               variant="ghost"
@@ -139,7 +128,8 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               </Button>
             </div>
           </div>
-        </header>
+        </header> */}
+        <Header />
 
         {/* Page content */}
         <main className="p-6">{children}</main>

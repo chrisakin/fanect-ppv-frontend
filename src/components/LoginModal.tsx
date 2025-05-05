@@ -79,37 +79,45 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     mode: "onChange",
   });
 
-  // Handle OTP paste
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       e.preventDefault();
-      const pastedData = e.clipboardData?.getData('text');
+      const pastedData = e.clipboardData?.getData('text').trim();
       if (pastedData && /^\d{6}$/.test(pastedData)) {
         const digits = pastedData.split('');
-        setOtpValues(digits);
-        // Focus the last input after paste
+        const newOtpValues = [...otpValues];
+        digits.forEach((digit, index) => {
+          if (index < 6) {
+            newOtpValues[index] = digit;
+            if (otpInputs.current[index]) {
+              otpInputs.current[index]!.value = digit;
+            }
+          }
+        });
+        setOtpValues(newOtpValues);
         otpInputs.current[5]?.focus();
       }
     };
 
-    // Add paste event listener to each OTP input
-    otpInputs.current.forEach(input => {
-      input?.addEventListener('paste', handlePaste);
-    });
+    const firstInput = otpInputs.current[0];
+    if (firstInput) {
+      firstInput.addEventListener('paste', handlePaste);
+    }
 
     return () => {
-      otpInputs.current.forEach(input => {
-        input?.removeEventListener('paste', handlePaste);
-      });
+      if (firstInput) {
+        firstInput.removeEventListener('paste', handlePaste);
+      }
     };
   }, []);
 
   const handleOtpChange = (index: number, value: string) => {
-    if (value.length <= 1 && /^[0-9]*$/.test(value)) {
+    if (/^[0-9]*$/.test(value)) {
       const newOtpValues = [...otpValues];
-      newOtpValues[index] = value;
+      newOtpValues[index] = value.slice(0, 1);
       setOtpValues(newOtpValues);
 
+      // Move to next input if value is entered
       if (value && index < 5) {
         otpInputs.current[index + 1]?.focus();
       }
@@ -117,8 +125,16 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-      otpInputs.current[index - 1]?.focus();
+    if (e.key === "Backspace") {
+      if (!otpValues[index] && index > 0) {
+        // Move to previous input on backspace if current input is empty
+        otpInputs.current[index - 1]?.focus();
+      } else {
+        // Clear current input on backspace
+        const newOtpValues = [...otpValues];
+        newOtpValues[index] = "";
+        setOtpValues(newOtpValues);
+      }
     }
   };
 
@@ -175,9 +191,18 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   };
 
   const onVerify = async () => {
+    const code = otpValues.join("");
+    if (code.length !== 6) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a complete 6-digit code",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const code = otpValues.join("");
       const { accessToken, refreshToken } = (await axios.post('/auth/verify', { code, email: userEmail })).data?.data;
       setTokens(accessToken, refreshToken);
       await fetchUserProfile();
@@ -278,7 +303,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   </div>
                 </div>
 
-                <form onSubmit={handleVerificationSubmit(onVerify)} className="w-full space-y-8">
+                <form onSubmit={(e) => { e.preventDefault(); onVerify(); }} className="w-full space-y-8">
                   <div className="grid grid-cols-6 gap-3">
                     {otpValues.map((value, index) => (
                       <Input
@@ -291,6 +316,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                         className="w-full h-12 text-center text-lg bg-transparent border-2 rounded-lg"
                         maxLength={1}
                         disabled={isLoading}
+                        inputMode="numeric"
                       />
                     ))}
                   </div>

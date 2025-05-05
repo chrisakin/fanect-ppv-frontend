@@ -133,17 +133,19 @@ export const Header = (): JSX.Element => {
         </div>
 
         {/* Desktop/Tablet Header */}
-        <div className="hidden md:flex items-center justify-between px-4 lg:px-16 py-3 gap-3">
+        <div className="hidden md:flex items-center justify-between px-4 lg:px-16 py-4 my-4 mx-5 gap-3 rounded-lg bg-[#F5F5F5] dark:bg-dash-dark">
+        {!isAuthenticated && (
           <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
             FaNect
           </Link>
+        )}
 
-          <div className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] w-[300px]">
-            <SearchIcon className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] dark:border-[#2E483A] w-[300px]">
+            <SearchIcon className="w-6 h-6 text-gray-400" />
             <input
               type="text"
               placeholder="Search events"
-              className="bg-transparent border-none outline-none w-full text-sm text-gray-400 placeholder-gray-400"
+              className="bg-transparent border-none outline-none w-full text-sm text-gray-400 dark:text-[#828B86] placeholder-gray-400"
             />
           </div>
 
@@ -152,50 +154,53 @@ export const Header = (): JSX.Element => {
               type="single"
               value={theme}
               onValueChange={(value) => value && setTheme(value as Theme)}
-              className="h-8 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
+              className="h-10 bg-gray-100 dark:bg-[#2E483A] rounded-full p-1"
             >
               <ToggleGroupItem
                 value="dark"
-                className="w-6 h-6 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600"
+                className="w-8 h-8 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-[#1AAA65]"
               >
                 <MoonIcon className="w-4 h-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="light"
-                className="w-6 h-6 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600"
+                className="w-8 h-8 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-[#1AAA65]"
               >
-                <SunIcon className="w-4 h-4" />
+                <SunIcon className="w-6 h-6" />
               </ToggleGroupItem>
             </ToggleGroup>
 
-            <Button
+            {!isAuthenticated && (
+              <Button
               variant="outline"
-              size="sm"
-              className="hidden lg:block text-sm text-gray-500 rounded-lg border-[#717680]"
+              size="lg"
+              className="hidden lg:block text-md text-gray-500 rounded-lg border-[#717680] dark:border-[#2E483A] bg-[#F5F5F5] dark:bg-dash-dark"
             >
               Discover Events
             </Button>
+            )}
 
             <Button
               variant="outline"
-              size="sm"
-              className="text-sm text-gray-500 rounded-lg border-[#717680]"
+              size="lg"
+              className="text-md text-gray-500 rounded-lg border-[#717680] dark:border-[#2E483A] bg-[#F5F5F5] dark:bg-dash-dark"
             >
-              Create Events
+              Create an Event
             </Button>
 
             {isAuthenticated ? (
               <Button
                 variant="outline"
-                className="h-auto border-[#717680] text-[#717680] dark:text-gray-300 rounded-[10px] flex items-center gap-2.5"
+                size="lg"
+                className="border-[#717680] dark:border-[#2E483A] text-[#717680] dark:text-gray-300 rounded-[10px] flex items-center gap-2.5 bg-[#F5F5F5] dark:bg-dash-dark"
               >
-                <User className="w-6 h-6" />
-                <span className="font-text-lg-medium">{user?.name}</span>
+                <User className="w-8 h-8" />
+                <span className="font-text-lg-medium">{user?.firstName}</span>
               </Button>
             ) : (
               <Button 
-                size="sm"
-                className="bg-green-600 text-white text-sm rounded-lg"
+                size="lg"
+                className="bg-green-600 text-white text-md rounded-lg"
                 onClick={() => setIsLoginModalOpen(true)}
               >
                 Log in
