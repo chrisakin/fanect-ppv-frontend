@@ -1,10 +1,14 @@
 import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../ui/button";
 
 interface EmptyStateProps {
    primaryText: string;
-   secondaryText: string 
+   secondaryText: string;
+   hasButton?: boolean;
+   buttonText?: string;
+   onClickButton?: (open: boolean) => void;
 }
-export const EmptyState = ({ primaryText, secondaryText }: EmptyStateProps) => {
+export const EmptyState = ({ primaryText, secondaryText, hasButton, buttonText, onClickButton}: EmptyStateProps) => {
     return (
        <div>
         <Card className="border-none shadow-none">
@@ -25,6 +29,13 @@ export const EmptyState = ({ primaryText, secondaryText }: EmptyStateProps) => {
                   <p className="font-text-sm-regular font-[number:var(--text-sm-regular-font-weight)] text-gray-500 text-[length:var(--text-sm-regular-font-size)] tracking-[var(--text-sm-regular-letter-spacing)] leading-[var(--text-sm-regular-line-height)] whitespace-nowrap [font-style:var(--text-sm-regular-font-style)]">
                     {secondaryText}
                   </p>
+                 {(hasButton && <div className="mt-4">
+                  <Button onClick={() => {onClickButton && onClickButton(true)}} className="items-center justify-center gap-2.5 py-2.5 px-9 self-stretch w-full h-auto bg-green-600 rounded-[10px] hover:bg-green-600/90">
+                  <span className="font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] text-white text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)] whitespace-nowrap [font-style:var(--text-lg-medium-font-style)]">
+                   {buttonText}
+                   </span>
+                  </Button>
+                  </div> )}
                 </div>
               </div>
             </CardContent>

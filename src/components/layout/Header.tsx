@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { useTheme, Theme } from "./ThemeProvider";
 import { useState } from "react";
-import { LoginModal } from "../LoginModal";
+import { LoginModal } from "../modals/LoginModal";
 import { useAuthStore } from "../../store/authStore";
 import { clearTokens } from "../../lib/auth";
 

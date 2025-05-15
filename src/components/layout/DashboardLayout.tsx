@@ -7,12 +7,12 @@ import { Header } from './Header';
 
 
 const sidebarItems = [
-  { icon: <img src='/icons/home.svg' className="h-6 w-6" />, label: 'Home', path: '/dashboard' },
-  { icon: <img src='/icons/card-pos.svg' className="h-6 w-6" />, label: 'Streampass', path: '/dashboard/tickets' },
-  { icon: <img src='/icons/music.svg' className="h-6 w-6" />, label: 'Organise Events', path: '/dashboard/organise' },
-  { icon: <img src='/icons/setting.svg' className="h-6 w-6" />, label: 'Settings', path: '/dashboard/settings' },
-  { icon: <img src='/icons/notification-bing.svg' className="h-6 w-6" />, label: 'Notifications', path: '/dashboard/notifications' },
-  { icon: <img src='/icons/message-question.svg' className="h-6 w-6" />, label: 'Help', path: '/dashboard/help' },
+  { icon: <img src='/icons/home.svg' className="h-6 w-6" />, label: 'Home', path: '/dashboard/home', slug:'home' },
+  { icon: <img src='/icons/card-pos.svg' className="h-6 w-6" />, label: 'Streampass', path: '/dashboard/tickets', slug:'tickets' },
+  { icon: <img src='/icons/music.svg' className="h-6 w-6" />, label: 'Organise Events', path: '/dashboard/organise', slug:'organise' },
+  { icon: <img src='/icons/setting.svg' className="h-6 w-6" />, label: 'Settings', path: '/dashboard/settings', slug:'settings' },
+  { icon: <img src='/icons/notification-bing.svg' className="h-6 w-6" />, label: 'Notifications', path: '/dashboard/notifications', slug: 'notifications' },
+  { icon: <img src='/icons/message-question.svg' className="h-6 w-6" />, label: 'Help', path: '/dashboard/help', slug: 'help' },
 ];
 
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -27,7 +27,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     navigate('/');
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location.pathname.includes(path);
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,7 +53,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                 <Button
                   variant="ghost"
                   className={`flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 rounded ${
-                    isActive(item.path) ? 'bg-[#1AAA65] text-[#FAFAFA] dark:bg-select-dark' : 'text-[#A4A7AE] dark:text-[#AAAAAA]'
+                    isActive(item.slug) ? 'bg-[#1AAA65] text-[#FAFAFA] dark:bg-select-dark' : 'text-[#A4A7AE] dark:text-[#AAAAAA]'
                   }`}
                 >
                   {item.icon}
@@ -83,52 +83,6 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       {/* Main content */}
       <div className="md:ml-[242px]">
         {/* Header */}
-        {/* <header className="h-16 border-b border-gray-200 dark:border-gray-700 bg-background">
-          <div className="h-full px-4 flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
-              {isSidebarOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
-
-            <div className="flex items-center gap-4 ml-auto">
-              <ToggleGroup
-                type="single"
-                value={theme}
-                onValueChange={(value) => value && setTheme(value as "light" | "dark")}
-                className="h-8 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
-              >
-                <ToggleGroupItem
-                  value="dark"
-                  className="w-6 h-6 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600"
-                >
-                  <MoonIcon className="w-4 h-4" />
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="light"
-                  className="w-6 h-6 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600"
-                >
-                  <SunIcon className="w-4 h-4" />
-                </ToggleGroupItem>
-              </ToggleGroup>
-
-              <Button
-                variant="outline"
-                className="h-auto border-[#717680] text-[#717680] dark:text-gray-300 rounded-[10px] flex items-center gap-2.5"
-              >
-                <User className="w-6 h-6" />
-                <span className="font-text-lg-medium">{user?.name}</span>
-              </Button>
-            </div>
-          </div>
-        </header> */}
         <Header />
 
         {/* Page content */}

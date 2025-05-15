@@ -1,0 +1,117 @@
+import { StreampassPurchaseCard } from "@/components/layout/StreampassPurchase";
+import { Avatar, AvatarImage } from "../../components/ui/avatar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+} from "../../components/ui/breadcrumb";
+import { GiftFriend } from "@/components/layout/GiftFriendForm";
+import { RegisteredCard } from "@/components/layout/RegisteredCard";
+
+export const DashboardSingleEvent = (): JSX.Element => {
+  // Event details data
+  const eventDetails = [
+    "Fido Live in Atlanta! Experience the Afrobeats Sensation!",
+    "Get ready for an unforgettable night of electrifying music and pure vibes as Nigeria's very own Fido brings his chart-topping hits to Atlanta!",
+    "Time: 24th December, 2025 | 8PM",
+    "Fido has taken the Nigerian music scene by storm with his unique blend of Afrobeats, catchy melodies, and energetic performances. This is your chance to witness his incredible talent.",
+    "What to Expect:",
+    "A high-energy performance featuring Fido's biggest hits.",
+    "An immersive Afrobeats experience with vibrant sounds and rhythms.",
+    "A night of dancing, celebration, and pure entertainment.",
+  ];
+
+  // Attendee avatars
+  const attendees = [
+    { src: "/image-1.png", alt: "Attendee 1" },
+    { src: "/image-2.png", alt: "Attendee 2" },
+    { src: "/image-3.png", alt: "Attendee 3" },
+  ];
+
+  return (
+    <div className="flex flex-col w-full items-start gap-[30px]">
+      {/* Breadcrumb navigation */}
+      <Breadcrumb className="flex items-center">
+        <BreadcrumbItem>
+          <BreadcrumbLink className="font-text-lg-medium text-gray-400">
+            Home
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator>
+         /
+        </BreadcrumbSeparator>
+        <BreadcrumbItem>
+          <BreadcrumbLink className="font-text-lg-semibold text-gray-800">
+            Event Details
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
+
+      <div className="flex flex-col items-start gap-[50px] w-full">
+        {/* Event banner image */}
+        <img
+          className="w-full h-[400px] object-cover"
+          alt="Event banner"
+          src="/image.png"
+        />
+
+        <div className="flex items-start justify-between w-full gap-8">
+          {/* Left column - Event details */}
+          <div className="flex flex-col items-start gap-[30px] flex-1">
+            {/* Event title and price */}
+            <div className="flex flex-col items-start gap-2 max-w-[534px] w-full">
+              <h1 className="font-display-lg-semibold text-gray-900 w-full">
+                Fido in Lagos
+              </h1>
+              <h2 className="font-display-sm-medium text-[#414651] w-full">
+                NGN 45,000.00
+              </h2>
+            </div>
+
+            {/* Attendee avatars */}
+            <div className="flex items-center gap-0.5">
+              <div className="relative w-[67px] h-[30px]">
+                {attendees.map((attendee, index) => (
+                  <Avatar
+                    key={index}
+                    className="absolute w-[30px] h-[30px]"
+                    style={{ left: `${index * 15}px` }}
+                  >
+                    <AvatarImage
+                      src={attendee.src}
+                      alt={attendee.alt}
+                      className="object-cover"
+                    />
+                  </Avatar>
+                ))}
+              </div>
+            </div>
+
+            {/* About this event section */}
+            <div className="flex flex-col max-w-[534px] w-full items-start gap-2.5">
+              <h3 className="font-display-xs-semibold text-black w-full">
+                About this event
+              </h3>
+              <div className="flex flex-col items-start gap-[18px] w-full">
+                {eventDetails.map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="font-text-lg-regular text-black w-full"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right column - Purchase card */}
+          <StreampassPurchaseCard />
+          <GiftFriend />
+          <RegisteredCard />
+        </div>
+      </div>
+    </div>
+  );
+};
