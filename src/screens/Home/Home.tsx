@@ -1,4 +1,3 @@
-
 import { Footer } from "../../components/layout/Footer";
 import { Header } from "../../components/layout/Header";
 import { PaginationIndex } from "@/components/utils/Pagination";
@@ -53,7 +52,7 @@ export const Home = (): JSX.Element => {
         <Header />
 
         {/* Main Content */}
-        <div className="flex flex-col items-center mt-16 mx-3 md:mx-4">
+        <div className="flex flex-col items-center mt-[160px] mx-3 md:mx-4">
           {/* Hero Banner */}
           <HeroSection />
 

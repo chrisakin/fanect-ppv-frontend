@@ -30,7 +30,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
   const isActive = (path: string) => location.pathname.includes(path);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background ">
       {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-40 h-screen transition-transform ${
@@ -83,10 +83,12 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       {/* Main content */}
       <div className="md:ml-[242px]">
         {/* Header */}
-        <Header />
+       <div className='w-[80%]'>
+       <Header />
+       </div>
 
         {/* Page content */}
-        <main className="p-6">{children}</main>
+        <main className="p-6 mt-[100px] ">{children}</main>
       </div>
 
       {/* Mobile sidebar backdrop */}
