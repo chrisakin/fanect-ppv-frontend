@@ -83,8 +83,8 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       {/* Main content */}
       <div className="md:ml-[242px]">
         {/* Header */}
-       <div className='w-[80%]'>
-       <Header />
+       <div className=''>
+       <Header withSidebar/>
        </div>
 
         {/* Page content */}

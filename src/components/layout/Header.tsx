@@ -15,7 +15,11 @@ import { LoginModal } from "../modals/LoginModal";
 import { useAuthStore } from "../../store/authStore";
 import { clearTokens } from "../../lib/auth";
 
-export const Header = (): JSX.Element => {
+interface HeaderProps {
+  withSidebar?: boolean;
+}
+
+export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -40,7 +44,7 @@ export const Header = (): JSX.Element => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)} />
       )}
 
-      <header className="fixed top-0 left-0 right-0 bg-background z-50">
+      <header className={withSidebar ? "fixed left-0 top-0 z-50 w-full md:ml-sidebar-desktop md:w-header-desktop bg-background" : "fixed top-0 left-0 right-0 bg-background z-50" }>
         {/* Mobile Header */}
         <div className="flex md:hidden items-center justify-between px-3 py-2">
           <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">

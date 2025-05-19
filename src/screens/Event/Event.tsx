@@ -42,11 +42,11 @@ export const Event = (): JSX.Element => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isAuthenticated } = useAuthStore();
 
-  const handleActionClick = () => {
+  const handleActionClick = (type: string) => {
     if (!isAuthenticated) {
       setIsLoginModalOpen(true);
     } else {
-      navigate(`/dashboard/tickets/event/${id}`);
+      navigate(`/dashboard/tickets/event/${type}/${id}`);
     }
   };
 
@@ -85,7 +85,7 @@ export const Event = (): JSX.Element => {
               <div className="lg:w-[80%] w-full flex flex-col sm:flex-row items-start justify-between gap-4">
                 <Button 
                   className="w-full sm:flex-1 md:w-[400px] h-[45px] md:h-[50px] bg-green-600 hover:bg-green-700 rounded-[10px] text-white"
-                  onClick={handleActionClick}
+                  onClick={() => handleActionClick('streampass')}
                 >
                   <span className="text-sm md:text-base font-semibold">
                     Buy Streampass
@@ -95,7 +95,7 @@ export const Event = (): JSX.Element => {
                 <Button
                   variant="outline"
                   className="w-full sm:flex-1 md:w-[400px] h-[45px] md:h-[50px] rounded-[10px] border border-solid border-green-600 text-green-600 hover:bg-green-600/10"
-                  onClick={handleActionClick}
+                  onClick={() => handleActionClick('gift')}
                 >
                   <GiftIcon className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                   <span className="text-sm md:text-base font-semibold">

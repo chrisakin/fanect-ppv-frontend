@@ -1,7 +1,13 @@
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
 export const GiftFriend = (): JSX.Element => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+    function giftPass() {
+      navigate(`/dashboard/tickets/event/paid/${id}`)
+    }
   // Form field data for mapping
   const formFields = [
     {
@@ -70,7 +76,7 @@ export const GiftFriend = (): JSX.Element => {
           </div>
 
           <div className="flex flex-col items-center gap-5 self-stretch w-full">
-            <Button className="items-center justify-center gap-2.5 p-2.5 self-stretch w-full h-auto bg-green-600 rounded-[10px] hover:bg-green-600/90">
+            <Button onClick={giftPass} className="items-center justify-center gap-2.5 p-2.5 self-stretch w-full h-auto bg-green-600 rounded-[10px] hover:bg-green-600/90">
               <span className="font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] text-whitewhite text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)] whitespace-nowrap [font-style:var(--text-lg-medium-font-style)]">
                 Pay Now
               </span>

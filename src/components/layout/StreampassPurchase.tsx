@@ -1,7 +1,13 @@
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 
 export const StreampassPurchaseCard = (): JSX.Element => {
+const navigate = useNavigate();
+const { id } = useParams();
+  function buyStreamPass() {
+    navigate(`/dashboard/tickets/event/paid/${id}`)
+  }
   return (
     <Card className="w-[571px] bg-gray-100 dark:bg-[#092D1B] rounded-[10px] border-[0.5px] border-solid border-[#a4a7ae] dark:border-[#1AAA65]">
     <CardContent className="p-0">
@@ -38,7 +44,7 @@ export const StreampassPurchaseCard = (): JSX.Element => {
 
           {/* Payment button and terms */}
           <div className="flex flex-col items-center gap-5 w-full">
-            <Button className="w-full bg-green-600 rounded-[10px] p-2.5 font-text-lg-medium text-whitewhite">
+            <Button onClick={buyStreamPass} className="w-full bg-green-600 rounded-[10px] p-2.5 font-text-lg-medium text-whitewhite">
               Pay Now
             </Button>
             <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-[#717680] text-sm tracking-[-0.28px] leading-5">

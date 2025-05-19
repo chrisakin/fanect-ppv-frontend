@@ -8,8 +8,11 @@ import {
 } from "../../components/ui/breadcrumb";
 import { GiftFriend } from "@/components/layout/GiftFriendForm";
 import { RegisteredCard } from "@/components/layout/RegisteredCard";
+import { useParams } from "react-router-dom";
 
 export const DashboardSingleEvent = (): JSX.Element => {
+
+  const { type } = useParams<{ type: string }>();
   // Event details data
   const eventDetails = [
     "Fido Live in Atlanta! Experience the Afrobeats Sensation!",
@@ -24,9 +27,9 @@ export const DashboardSingleEvent = (): JSX.Element => {
 
   // Attendee avatars
   const attendees = [
-    { src: "/image-1.png", alt: "Attendee 1" },
-    { src: "/image-2.png", alt: "Attendee 2" },
-    { src: "/image-3.png", alt: "Attendee 3" },
+    { src: "/image-6.png", alt: "Attendee 1" },
+    { src: "/image-6.png", alt: "Attendee 2" },
+    { src: "/image-6.png", alt: "Attendee 3" },
   ];
 
   return (
@@ -86,11 +89,14 @@ export const DashboardSingleEvent = (): JSX.Element => {
                   </Avatar>
                 ))}
               </div>
+              <div>
+                +60
+              </div>
             </div>
 
             {/* About this event section */}
             <div className="flex flex-col max-w-[534px] w-full items-start gap-2.5">
-              <h3 className="font-display-xs-semibold text-black w-full">
+              <h3 className="font-display-md-bold text-[30px] text-black w-full">
                 About this event
               </h3>
               <div className="flex flex-col items-start gap-[18px] w-full">
@@ -107,9 +113,9 @@ export const DashboardSingleEvent = (): JSX.Element => {
           </div>
 
           {/* Right column - Purchase card */}
-          <StreampassPurchaseCard />
-          <GiftFriend />
-          <RegisteredCard />
+         {type == 'streampass' && ( <StreampassPurchaseCard />)}
+         {type == 'gift' && ( <GiftFriend />)}
+          {type == 'paid' && ( <RegisteredCard />)}
         </div>
       </div>
     </div>

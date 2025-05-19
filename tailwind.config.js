@@ -6,6 +6,12 @@ module.exports = {
   ],
   theme: {
     extend: {
+       width: {
+        'header-desktop': 'calc(100% - 242px)',
+      },
+      margin: {
+        'sidebar-desktop': '242px',
+      },
       colors: {
         "gray-100": "var(--gray-100)",
         "gray-200": "var(--gray-200)",
