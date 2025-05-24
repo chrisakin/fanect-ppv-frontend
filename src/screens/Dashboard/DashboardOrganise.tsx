@@ -1,6 +1,7 @@
 import { CreatedEventList } from "@/components/layout/CreatedEventList";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { EventModal } from "@/components/modals/EventModal";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 
@@ -23,10 +24,18 @@ export const DashboardOrganise = () => {
 
   return (
     <div>
-    <div className="space-y-2">
-      <h1 className="text-2xl font-semibold">Organise Events</h1>
-      <p className="text-gray-500 dark:text-gray-400">Create and manage your events</p>
-    </div>
+    <div className="flex items-center justify-between mb-8">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold">Organise Events</h1>
+          <p className="text-gray-500 dark:text-gray-400">Create and manage your events</p>
+        </div>
+        <Button 
+          onClick={() => setOpen(true)}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          Create Event
+        </Button>
+      </div>
     <div>
       <div className="mt-5">
             {events.length > 0 ? (
@@ -36,11 +45,11 @@ export const DashboardOrganise = () => {
             ): (
               <div>
             <EmptyState primaryText={'No Event yet'} secondaryText={'When you create an event ticket, it will show up here'} hasButton={true} buttonText={'Organize Event'} onClickButton={() => {setOpen(true)}} />
-            <EventModal open={open} onOpenChange={setOpen} />
           </div>
             )}
           </div>
     </div>
+    <EventModal open={open} onOpenChange={setOpen} />
     </div>
   );
 };

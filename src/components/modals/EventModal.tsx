@@ -1,11 +1,12 @@
-import { Dialog, DialogClose, DialogDescription, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "../ui/dialog";
 import { CalendarIcon, X } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
-import { DialogContent } from "@radix-ui/react-dialog";
+import { useToast } from "../ui/use-toast";
+import axios from "../../lib/axios";
 
 interface EventModalProps {
   open: boolean;
@@ -39,45 +40,59 @@ export const EventModal = ({ open, onOpenChange }: EventModalProps): JSX.Element
     eventBanner: null,
     eventWatermark: null,
   });
-
+  const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string }>({});
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
+      const key = toCamelCase(id) as keyof FormData;
     setFormData((prev) => ({
       ...prev,
-      [id.replace("event-", "event")]: value,
+      [key]: value,
     }));
-    // Clear error when user starts typing
     if (errors[id as keyof FormErrors]) {
       setErrors((prev) => ({
         ...prev,
-        [id.replace("event-", "event")]: undefined,
+        [key]: undefined,
       }));
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormData) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        setFormData((prev) => ({
+  function toCamelCase(str: string) {
+  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase()).replace(/^event/, "event");
+}
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormData) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    if (file.type.startsWith('image/')) {
+      setFormData((prev) => ({
+        ...prev,
+        [fieldName]: file,
+      }));
+      setErrors((prev) => ({
+        ...prev,
+        [fieldName]: undefined,
+      }));
+      // Generate preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews((prev) => ({
           ...prev,
-          [fieldName]: file,
+          [fieldName]: reader.result as string,
         }));
-        setErrors((prev) => ({
-          ...prev,
-          [fieldName]: undefined,
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          [fieldName]: "Please upload an image file",
-        }));
-      }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        [fieldName]: "Please upload an image file",
+      }));
     }
-  };
+  }
+};
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -116,10 +131,30 @@ export const EventModal = ({ open, onOpenChange }: EventModalProps): JSX.Element
 
     if (validateForm()) {
       try {
-        // Here you would typically send the data to your backend
-        console.log("Form submitted:", formData);
+        const formDataToSend = new FormData();
+        formDataToSend.append('name', formData.eventName);
+        formDataToSend.append('date', formData.eventDate);
+        formDataToSend.append('time', formData.eventTime);
+        formDataToSend.append('description', formData.eventDescription);
+        if (formData.eventBanner) {
+          formDataToSend.append('banner', formData.eventBanner);
+        }
+        if (formData.eventWatermark) {
+          formDataToSend.append('watermark', formData.eventWatermark);
+        }
+
+        await axios.post('/events', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        toast({
+          title: "Success",
+          description: "Event created successfully",
+        });
+
         onOpenChange(false);
-        // Reset form
         setFormData({
           eventName: "",
           eventDate: "",
@@ -128,15 +163,19 @@ export const EventModal = ({ open, onOpenChange }: EventModalProps): JSX.Element
           eventBanner: null,
           eventWatermark: null,
         });
-      } catch (error) {
-        console.error("Error submitting form:", error);
+        setImagePreviews({})
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.response?.data?.message || "Failed to create event",
+        });
       }
     }
 
     setIsSubmitting(false);
   };
 
-  // Form field data for mapping
   const formFields = [
     {
       id: "event-name",
@@ -187,137 +226,141 @@ export const EventModal = ({ open, onOpenChange }: EventModalProps): JSX.Element
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] max-h-[90vh] overflow-y-auto rounded-lg">
-          <form onSubmit={handleSubmit}>
-            <Card className="w-[750px] bg-white dark:bg-[#02150c] rounded-[10px] border border-solid border-[#E4E4E7] dark:border-[#2e483a]">
-              <CardContent className="flex flex-col items-center gap-[60px] py-[51px] px-[75px] relative">
-                <DialogClose className="absolute right-4 top-4">
-                  <Button type="button" variant="ghost" size="icon">
-                    <X className="h-4 w-4 text-[#71767C] dark:text-white" />
-                  </Button>
-                </DialogClose>
+      <DialogContent className="w-full md:w-[850px] h-[90vh] p-0 bg-background overflow-y-auto">
+        <form onSubmit={handleSubmit}>
+          <Card className="border-none">
+            <CardContent className="flex flex-col items-center gap-[60px] py-[35px] px-[45px] relative">
+              <DialogClose className="absolute right-4 top-4">
+              </DialogClose>
 
-                <div className="flex flex-col w-[489px] items-center gap-[30px]">
-                  <div className="relative w-[156px] h-[38.56px] [font-family:'Sofia_Pro-SemiBold',Helvetica] font-semibold text-[#1AAA65] text-[42.1px] tracking-[-0.84px] leading-[56.1px] whitespace-nowrap">
-                    FaNect
-                  </div>
-
-                  <div className="flex flex-col items-center w-full">
-                    <DialogTitle className="font-display-lg-semibold font-[number:var(--display-lg-semibold-font-weight)] text-[#333333] dark:text-[#dddddd] text-[length:var(--display-lg-semibold-font-size)] text-center tracking-[var(--display-lg-semibold-letter-spacing)] leading-[var(--display-lg-semibold-line-height)]">
-                      Organise Event
-                    </DialogTitle>
-
-                    <DialogDescription className="font-display-xs-regular font-[number:var(--display-xs-regular-font-weight)] text-[#71767C] dark:text-[#cccccc] text-[length:var(--display-xs-regular-font-size)] text-center tracking-[var(--display-xs-regular-letter-spacing)] leading-[var(--display-xs-regular-line-height)] whitespace-nowrap">
-                      Enter your event details to create an event
-                    </DialogDescription>
-                  </div>
+              <div className="flex flex-col w-full items-center gap-[30px]">
+                <div className="relative w-[156px] h-[38.56px] text-green-600 text-[42.1px] font-semibold tracking-[-0.84px] leading-[56.1px] whitespace-nowrap">
+                  FaNect
                 </div>
 
-                <div className="flex flex-col items-center justify-center gap-6 w-full">
-                  <div className="flex flex-col items-start gap-6 w-full">
-                    {formFields.map((field) => (
-                      <div
-                        key={field.id}
-                        className="flex flex-col items-start gap-1.5 w-full"
-                      >
-                        <label
-                          htmlFor={field.id}
-                          className="font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] text-[#333333] dark:text-[#dddddd] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]"
-                        >
-                          {field.label}
-                        </label>
+                <div className="flex flex-col items-center w-full">
+                  <DialogTitle className="text-2xl font-semibold">
+                    Organise Event
+                  </DialogTitle>
 
-                        {field.type === "textarea" ? (
-                          <div className="w-full">
-                            <Textarea
+                  <DialogDescription className="text-muted-foreground text-center">
+                    Enter your event details to create an event
+                  </DialogDescription>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center gap-6 w-full">
+                <div className="flex flex-col items-start gap-6 w-full">
+                  {formFields.map((field) => (
+                    <div
+                      key={field.id}
+                      className="flex flex-col items-start gap-1.5 w-full"
+                    >
+                      <label
+                        htmlFor={field.id}
+                        className="font-medium"
+                      >
+                        {field.label}
+                      </label>
+
+                      {field.type === "textarea" ? (
+                        <div className="w-full">
+                          <Textarea
+                            id={field.id}
+                            placeholder={field.placeholder}
+                            className="h-[94px] resize-none"
+                            value={formData[toCamelCase(field.id) as keyof FormData] as string}
+                            onChange={handleInputChange}
+                          />
+                          {field.error && (
+                            <p className="mt-1 text-sm text-red-500">{field.error}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="w-full">
+                          <div className="flex items-center w-full">
+                            <Input
                               id={field.id}
+                              type={field.type}
                               placeholder={field.placeholder}
-                              className="h-[94px] bg-white dark:bg-[#132019] rounded-lg border border-solid border-[#E4E4E7] dark:border-[#2e483a] shadow-shadow-xs [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-[#71767C] dark:text-[#bbbbbb] text-base tracking-[-0.32px] leading-normal"
-                              value={formData[field.id.replace("event-", "event") as keyof FormData] as string}
+                              className="flex-1"
+                              value={formData[toCamelCase(field.id) as keyof FormData] as string}
                               onChange={handleInputChange}
                             />
-                            {field.error && (
-                              <p className="mt-1 text-sm text-red-500">{field.error}</p>
-                            )}
+                            {field.icon && <div className="ml-2">{field.icon}</div>}
                           </div>
-                        ) : (
-                          <div className="w-full">
-                            <div className="flex items-center w-full h-[60px] bg-white dark:bg-[#13201a] rounded-lg border border-solid border-[#E4E4E7] dark:border-[#2e483a] shadow-shadow-xs">
-                              <Input
-                                id={field.id}
-                                type={field.type}
-                                placeholder={field.placeholder}
-                                className="h-full border-none bg-transparent shadow-none [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-[#71767C] dark:text-[#bbbbbb] text-base tracking-[-0.32px] leading-normal"
-                                value={formData[field.id.replace("event-", "event") as keyof FormData] as string}
-                                onChange={handleInputChange}
-                              />
-                              {field.icon && <div className="pr-3.5">{field.icon}</div>}
-                            </div>
-                            {field.error && (
-                              <p className="mt-1 text-sm text-red-500">{field.error}</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                          {field.error && (
+                            <p className="mt-1 text-sm text-red-500">{field.error}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
 
-                    {uploadFields.map((field) => (
-                      <div
-                        key={field.id}
-                        className="flex flex-col items-start gap-1.5 w-full"
+                  {uploadFields.map((field) => (
+                    <div
+                      key={field.id}
+                      className="flex flex-col items-start gap-1.5 w-full"
+                    >
+                      <label
+                        htmlFor={field.id}
+                        className="font-medium"
                       >
-                        <label
-                          htmlFor={field.id}
-                          className="font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] text-[#333333] dark:text-[#dddddd] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]"
-                        >
-                          {field.label}
-                        </label>
+                        {field.label}
+                      </label>
 
-                        <label
-                          htmlFor={field.id}
-                          className="cursor-pointer w-full"
-                        >
-                          <div className="flex items-center justify-center w-full h-[133px] bg-white dark:bg-[#132019] rounded-lg border border-dashed border-[#E4E4E7] dark:border-[#2e483a] shadow-shadow-xs">
-                            <div className="flex flex-col items-center justify-center gap-2.5">
-                              <img
-                                className="w-6 h-6"
-                                alt="Upload icon"
-                                src="/icon-content-edit-document-upload.svg"
-                              />
-                              <span className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-[#1AAA65] dark:text-[#bbbbbb] text-base tracking-[-0.32px] leading-normal whitespace-nowrap">
-                                {field.uploadText}
-                              </span>
-                            </div>
-                          </div>
-                          <input
-                            id={field.id}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handleFileChange(e, field.id.replace("event-", "event") as keyof FormData)}
-                          />
-                        </label>
-                        {field.error && (
-                          <p className="mt-1 text-sm text-red-500">{field.error}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                       <label htmlFor={field.id} className="cursor-pointer w-full">
+    <div className="flex items-center justify-center w-full h-[133px] border-2 border-dashed rounded-lg hover:border-green-600 transition-colors">
+      <div className="flex flex-col items-center justify-center gap-2.5">
+        {imagePreviews[toCamelCase(field.id)] ? (
+          <img
+            src={imagePreviews[toCamelCase(field.id)]}
+            alt="Preview"
+            className="w-full h-[120px] object-contain rounded"
+          />
+        ) : (
+          <>
+            <img
+              className="w-6 h-6"
+              alt="Upload icon"
+              src="/icon-content-edit-document-upload.svg"
+            />
+            <span className="text-green-600">
+              {field.uploadText}
+            </span>
+          </>
+        )}
+      </div>
+    </div>
+    <input
+      id={field.id}
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(e) => handleFileChange(e, toCamelCase(field.id) as keyof FormData)}
+    />
+  </label>
+                      {field.error && (
+                        <p className="mt-1 text-sm text-red-500">{field.error}</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                <div className="flex flex-col items-center gap-5 w-full">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="h-[60px] w-full bg-[#96E6BE] hover:bg-[#96E6BE]/90 dark:bg-green-600 dark:hover:bg-green-600/90 rounded-[10px] font-text-lg-semibold font-[number:var(--text-lg-semibold-font-weight)] text-[#1AAA65] dark:text-white text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)]"
-                  >
-                    {isSubmitting ? "Creating Event..." : "Create Event"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </form>
-        </DialogContent>
+              <div className="flex flex-col items-center gap-5 w-full">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-[60px] bg-green-600 hover:bg-green-700"
+                >
+                  {isSubmitting ? "Creating Event..." : "Create Event"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 };
