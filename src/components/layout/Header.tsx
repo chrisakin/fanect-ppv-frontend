@@ -13,7 +13,7 @@ import { useTheme, Theme } from "./ThemeProvider";
 import { useState } from "react";
 import { LoginModal } from "../modals/LoginModal";
 import { useAuthStore } from "../../store/authStore";
-import { clearTokens } from "../../lib/auth";
+import { clearTokens, getUser } from "../../lib/auth";
 
 interface HeaderProps {
   withSidebar?: boolean;
@@ -94,46 +94,37 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
         {/* Mobile Menu */}
         <div 
           className={`md:hidden fixed right-0 top-0 bg-background transform transition-transform duration-300 ease-in-out ${
-            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           } z-50 shadow-lg rounded-bl-lg`}
         >
+          {!isAuthenticated && (
           <div className="flex flex-col p-3 gap-3">
             <div className="flex justify-end">
               <button onClick={() => setIsMenuOpen(false)} className="text-gray-500 p-1">
                 <X size={20} />
               </button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start text-sm text-gray-500"
-            >
-              Create Events
-            </Button>
-            {isAuthenticated ? (
               <>
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full justify-start text-sm text-gray-500"
-                  onClick={handleLogout}
                 >
-                  Log out
+                  Create Events
+                </Button>
+                <Button
+                  size="sm"
+                  className="w-full bg-green-600 text-white text-sm"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsLoginModalOpen(true);
+                  }}
+                >
+                  Log in
                 </Button>
               </>
-            ) : (
-              <Button
-                size="sm"
-                className="w-full bg-green-600 text-white text-sm"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  setIsLoginModalOpen(true);
-                }}
-              >
-                Log in
-              </Button>
-            )}
-          </div>
+            
+          </div>)}
         </div>
 
         {/* Desktop/Tablet Header */}
@@ -184,6 +175,7 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
             </Button>
             )}
 
+            <Link to="/dashboard/organise">
             <Button
               variant="outline"
               size="lg"
@@ -191,6 +183,7 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
             >
               Create an Event
             </Button>
+            </Link>
 
             {isAuthenticated ? (
               <Button
@@ -199,7 +192,7 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
                 className="border-[#717680] dark:border-[#2E483A] text-[#717680] dark:text-gray-300 rounded-[10px] flex items-center gap-2.5 bg-[#F5F5F5] dark:bg-dash-dark"
               >
                 <User className="w-8 h-8" />
-                <span className="font-text-lg-medium">{user?.firstName}</span>
+                <span className="font-text-lg-medium">{user?.firstName || getUser()?.firstName}</span>
               </Button>
             ) : (
               <Button 

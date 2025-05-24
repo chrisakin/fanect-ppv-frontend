@@ -4,8 +4,19 @@ import { PaginationIndex } from "@/components/utils/Pagination";
 import { HeroSection } from "@/components/layout/HeroSection";
 import { EventCardsSection } from "@/components/layout/EventCardsSection";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
+import { useEffect } from "react";
 
 export const Home = (): JSX.Element => {
+   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard/home", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
   // Event data for mapping
   const events:any = [
     {

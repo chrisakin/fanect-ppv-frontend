@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import {  isAuthenticated as checkAuth } from '../lib/auth';
+import {  isAuthenticated as checkAuth, getUser } from '../lib/auth';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -18,7 +18,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   user: null,
   setAuth: (isAuthenticated) => set({ isAuthenticated }),
-  setUser: (user) => set({ user }),
+  setUser: (user) => set({ user: user ?? getUser() }),
   logout: () => set({ isAuthenticated: false, user: null }),
   initAuth: () => {
     const isAuth = checkAuth();

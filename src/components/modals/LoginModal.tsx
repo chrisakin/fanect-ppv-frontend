@@ -12,7 +12,7 @@ import { useToast } from "../ui/use-toast";
 import axios from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { setTokens } from "@/lib/auth";
+import { setLoggedinUser, setTokens } from "@/lib/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -141,6 +141,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get('/auth/profile');
+      setLoggedinUser(response.data)
       setUser(response.data);
     } catch (error: any) {
       console.error('Error fetching user profile:', error);
