@@ -1,5 +1,4 @@
 import { StreampassPurchaseCard } from "@/components/layout/StreampassPurchase";
-import { Avatar, AvatarImage } from "../../components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,13 +22,6 @@ export const DashboardSingleEvent = (): JSX.Element => {
     "A high-energy performance featuring Fido's biggest hits.",
     "An immersive Afrobeats experience with vibrant sounds and rhythms.",
     "A night of dancing, celebration, and pure entertainment.",
-  ];
-
-  // Attendee avatars
-  const attendees = [
-    { src: "/image-6.png", alt: "Attendee 1" },
-    { src: "/image-6.png", alt: "Attendee 2" },
-    { src: "/image-6.png", alt: "Attendee 3" },
   ];
 
   return (
@@ -59,7 +51,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
           src="/image.png"
         />
 
-        <div className="flex items-start justify-between w-full gap-8">
+        <div className="flex items-start justify-between w-full gap-6">
           {/* Left column - Event details */}
           <div className="flex flex-col items-start gap-[30px] flex-1">
             {/* Event title and price */}
@@ -70,28 +62,6 @@ export const DashboardSingleEvent = (): JSX.Element => {
               <h2 className="font-display-sm-medium text-[#414651] w-full">
                 NGN 45,000.00
               </h2>
-            </div>
-
-            {/* Attendee avatars */}
-            <div className="flex items-center gap-0.5">
-              <div className="relative w-[67px] h-[30px]">
-                {attendees.map((attendee, index) => (
-                  <Avatar
-                    key={index}
-                    className="absolute w-[30px] h-[30px]"
-                    style={{ left: `${index * 15}px` }}
-                  >
-                    <AvatarImage
-                      src={attendee.src}
-                      alt={attendee.alt}
-                      className="object-cover"
-                    />
-                  </Avatar>
-                ))}
-              </div>
-              <div>
-                +60
-              </div>
             </div>
 
             {/* About this event section */}

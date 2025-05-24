@@ -106,7 +106,7 @@ export const Event = (): JSX.Element => {
             </div>
 
             {/* Attendees */}
-            <div className="flex w-full sm:w-auto items-center gap-4">
+            {/* <div className="flex w-full sm:w-auto items-center gap-4">
               <div className="text-xs md:text-sm">
                 Join
               </div>
@@ -124,7 +124,7 @@ export const Event = (): JSX.Element => {
               <div className="text-xs md:text-sm">
                 and {eventDetails.attendees} others
               </div>
-            </div>
+            </div> */}
 
             {/* Event Description */}
             <Card className="w-full border-none shadow-none">

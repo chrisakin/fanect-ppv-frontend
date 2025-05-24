@@ -27,7 +27,7 @@ export const DashboardTickets = () => {
     <div>
     <div className="space-y-2">
       <h1 className="text-2xl font-semibold">Streampass</h1>
-      <p className="text-gray-500 dark:text-gray-400">See the events you created and registered for</p>
+      <p className="text-gray-500 dark:text-gray-400">See the events you bought ticket and registered for</p>
      
     </div>
     <div>

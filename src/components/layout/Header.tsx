@@ -55,19 +55,19 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
               type="single"
               value={theme}
               onValueChange={(value) => value && setTheme(value as Theme)}
-              className="h-8 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
+              className="h-8 dark:bg-gray-700 bg-gray-300 rounded-full p-1"
             >
               <ToggleGroupItem
                 value="dark"
-                className="w-6 h-6 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600"
+                className="w-8 h-8 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-[#1AAA65]"
               >
                 <MoonIcon className="w-4 h-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="light"
-                className="w-6 h-6 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600"
+                className="w-8 h-8 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-[#1AAA65]"
               >
-                <SunIcon className="w-4 h-4" />
+                 <SunIcon className="w-10 h-10 dark:text-[#1AAA65]" />
               </ToggleGroupItem>
             </ToggleGroup>
             <button
@@ -158,7 +158,7 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
               type="single"
               value={theme}
               onValueChange={(value) => value && setTheme(value as Theme)}
-              className="h-10 bg-gray-100 dark:bg-[#2E483A] rounded-full p-1"
+              className="h-10 dark:bg-gray-700 bg-gray-300 rounded-full p-1"
             >
               <ToggleGroupItem
                 value="dark"
@@ -170,7 +170,7 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
                 value="light"
                 className="w-8 h-8 p-0 flex items-center justify-center rounded-full data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-[#1AAA65]"
               >
-                <SunIcon className="w-6 h-6" />
+                <SunIcon className="w-10 h-10 dark:text-[#1AAA65]" />
               </ToggleGroupItem>
             </ToggleGroup>
 
