@@ -30,6 +30,7 @@ interface EventState {
   pagination: PaginationData;
   selectedEvent: Event | null;
   fetchUpcomingEvents: (page?: number) => Promise<void>;
+  fetchLiveEvents: (page?: number) => Promise<void>;
   fetchMyEvents: (page?: number) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   updateEvent: (id: string, data: FormData) => Promise<void>;
@@ -48,12 +49,28 @@ export const useEventStore = create<EventState>((set) => ({
     currentPage: 1,
     nextPage: null,
     previousPage: null,
-    limit: 10
+    limit: 12
   },
   fetchUpcomingEvents: async (page = 1) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/events/upcoming?page=${page}&limit=10`);
+      const response = await axios.get(`/events/upcoming?page=${page}&limit=12`);
+      const { docs, ...paginationData } = response.data;
+      
+      set({
+        events: docs,
+        pagination: paginationData,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      set({ events: [], isLoading: false });
+    }
+  },
+  fetchLiveEvents: async (page = 1) => {
+    try {
+      set({ isLoading: true });
+      const response = await axios.get(`/events/live?page=${page}&limit=12`);
       const { docs, ...paginationData } = response.data;
       
       set({
@@ -69,7 +86,7 @@ export const useEventStore = create<EventState>((set) => ({
   fetchMyEvents: async (page = 1) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/events?page=${page}&limit=10`);
+      const response = await axios.get(`/events?page=${page}&limit=12`);
       const { docs, ...paginationData } = response.data;
       
       set({

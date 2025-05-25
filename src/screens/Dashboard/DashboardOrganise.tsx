@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { useEventStore } from "@/store/eventStore";
+import { PaginationIndex } from "@/components/utils/Pagination";
 
 export const DashboardOrganise = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -17,6 +18,7 @@ export const DashboardOrganise = () => {
     events, 
     isLoading,
     isDeleteLoading,
+    pagination,
     fetchMyEvents, 
     deleteEvent,
     selectedEvent,
@@ -37,7 +39,7 @@ export const DashboardOrganise = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description:  "Select one event",
+        description: "Select one event",
       });
       return;
     }
@@ -69,6 +71,9 @@ export const DashboardOrganise = () => {
     setSelectedEvent(null);
   };
 
+  const handlePageChange = (page: number) => {
+    fetchMyEvents(page);
+  };
 
   return (
     <div>
@@ -96,6 +101,11 @@ export const DashboardOrganise = () => {
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
               />
+              <PaginationIndex 
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+              />
             </div>
           ) : (
             <EmptyState 
@@ -109,18 +119,22 @@ export const DashboardOrganise = () => {
         </div>
       </div>
 
-      <EventModal 
-        open={isCreateModalOpen} 
-        onOpenChange={handleModalClose}
-        event={selectedEvent}
-      />
+      {isCreateModalOpen && (
+        <EventModal 
+          open={isCreateModalOpen} 
+          onOpenChange={handleModalClose}
+          event={selectedEvent}
+        />
+      )}
 
-      <DeleteEventModal 
-        open={isDeleteModalOpen}
-        onOpenChange={setIsDeleteModalOpen}
-        onConfirm={handleDelete}
-        isLoading={isDeleteLoading}
-      />
+      {isDeleteModalOpen && (
+        <DeleteEventModal 
+          open={isDeleteModalOpen}
+          onOpenChange={setIsDeleteModalOpen}
+          onConfirm={handleDelete}
+          isLoading={isDeleteLoading}
+        />
+      )}
     </div>
   );
 };

@@ -65,15 +65,15 @@ export const DashboardSingleEvent = (): JSX.Element => {
             </div>
 
             {/* About this event section */}
-            <div className="flex flex-col max-w-[534px] w-full items-start gap-2.5">
-              <h3 className="font-display-md-bold text-[30px] text-black w-full">
+            <div className="flex flex-col max-w-[534px] w-full items-start gap-2.5 ">
+              <h3 className="font-display-md-bold text-[30px] text-black dark:text-white w-full">
                 About this event
               </h3>
               <div className="flex flex-col items-start gap-[18px] w-full">
                 {eventDetails.map((paragraph, index) => (
                   <p
                     key={index}
-                    className="font-text-lg-regular text-black w-full"
+                    className="font-text-lg-regular text-black dark:text-white w-full"
                   >
                     {paragraph}
                   </p>
