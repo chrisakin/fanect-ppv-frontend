@@ -29,9 +29,12 @@ interface EventState {
   isUpdateLoading: boolean;
   pagination: PaginationData;
   selectedEvent: Event | null;
+  singleEvent: Event | null;
   fetchUpcomingEvents: (page?: number) => Promise<void>;
   fetchLiveEvents: (page?: number) => Promise<void>;
   fetchMyEvents: (page?: number) => Promise<void>;
+  fetchStreampassEvents: (eventType: string, page?: number) => Promise<void>;
+  fetchSingleEvent: (id: string) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   updateEvent: (id: string, data: FormData) => Promise<void>;
   setSelectedEvent: (event: Event | null) => void;
@@ -43,6 +46,7 @@ export const useEventStore = create<EventState>((set) => ({
   isDeleteLoading: false,
   isUpdateLoading: false,
   selectedEvent: null,
+  singleEvent: null,
   pagination: {
     totalDocs: 0,
     totalPages: 1,
@@ -97,6 +101,39 @@ export const useEventStore = create<EventState>((set) => ({
     } catch (error) {
       console.error('Error fetching events:', error);
       set({ events: [], isLoading: false });
+    }
+  },
+  fetchStreampassEvents: async (eventType: string, page = 1) => {
+        try {
+          set({ isLoading: true });
+          const endpoint = eventType === 'upcoming' ? 
+            `/streampass/upcoming?page=${page}&limit=12` : 
+            eventType === 'live' ? 
+            `/streampass/live?page=${page}&limit=12` :
+            `/streampass/past?page=${page}&limit=12`;
+          
+          const response = await axios.get(endpoint);
+          const { docs, ...paginationData } = response.data;
+          set({
+          events: docs,
+          pagination: paginationData,
+          isLoading: false
+        });
+        } catch (error) {
+          console.error('Error fetching events:', error);
+          set({ events: [], isLoading: false });
+        } finally {
+          set({ isLoading: false });
+        }
+  },
+  fetchSingleEvent: async (id: string) => {
+    try {
+      set({ isLoading: true });
+      const response = await axios.get(`/events/${id}`);
+      set({ singleEvent: response.data.event, isLoading: false });
+    } catch (error) {
+      console.error('Error fetching single event:', error);
+      set({ singleEvent: null, isLoading: false });
     }
   },
   deleteEvent: async (id: string) => {

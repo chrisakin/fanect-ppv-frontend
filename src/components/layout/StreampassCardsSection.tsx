@@ -1,69 +1,109 @@
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../ui/button";
+import { Link } from "react-router-dom";
+import { Event } from "@/store/eventStore";
 
-interface Event {
-    id: string;
-    title: string;
-    date: string;
-    image: string;
-    countdown: string;
-  }
-  
-  interface EventCardsSectionProps {
-    events: Event[];
-  }
+interface EventCardsSectionProps {
+  events: Event[];
+  type: 'upcoming' | 'live' | 'past';
+}
 
-export const StreampassCardsSection = ( { events }: EventCardsSectionProps ) => {
-    return (
-        <div>
-            {/* Event Cards */}
-          <div className="grid grid-cols-2 w-full items-start gap-8 flex-wrap">
-            {events.map((event) => (
-              <Card
-                key={event.id}
-                className="w-full h-[272px] bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] relative flex"
-              >
-                <img
-                  className="w-[246px] h-[270px] object-cover"
-                  alt="Event Image"
-                  src={event.image}
-                />
-                <CardContent className="flex flex-col h-full justify-between py-[35px] pl-6 pr-0 flex-1">
-                  <div className="flex flex-col w-[250px] items-start">
-                    <h3 className="self-stretch font-display-sm-medium font-[number:var(--display-sm-medium-font-weight)] text-[#828b86] text-[length:var(--display-sm-medium-font-size)] tracking-[var(--display-sm-medium-letter-spacing)] leading-[var(--display-sm-medium-line-height)] [font-style:var(--display-sm-medium-font-style)]">
-                      {event.title}
-                    </h3>
-                    <p className="self-stretch -mt-0.5 font-text-lg-regular font-[number:var(--text-lg-regular-font-weight)] text-[#828b86] text-[length:var(--text-lg-regular-font-size)] tracking-[var(--text-lg-regular-letter-spacing)] leading-[var(--text-lg-regular-line-height)] [font-style:var(--text-lg-regular-font-style)]">
-                      {event.date}
-                    </p>
-                  </div>
-                  <div className="flex w-[250px] h-[54px] items-center justify-center px-2.5 py-0 bg-[#0b331f]">
-                    <div className="flex-1 font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] text-[#baebd3] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)] [font-style:var(--text-lg-medium-font-style)]">
-                      {event.countdown}
+export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps) => {
+  const calculateTimeStatus = (dateString: string) => {
+    const eventDate = new Date(dateString);
+    const now = new Date();
+    
+    if (type === 'upcoming') {
+      const diff = eventDate.getTime() - now.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      return `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
+    } else {
+      const diff = now.getTime() - eventDate.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      return `${days} days ago`;
+    }
+  };
+
+  const isReplayAvailable = (dateString: string) => {
+    const eventDate = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - eventDate.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return days <= 30;
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {events.map((event) => (
+        <Card
+          key={event._id}
+          className="w-full bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] relative"
+        >
+          <div className="flex flex-col md:flex-row">
+            <img
+              className="w-full md:w-[246px] h-[200px] md:h-[270px] object-cover"
+              alt="Event Image"
+              src={event.bannerUrl}
+            />
+            <CardContent className="flex flex-col h-full justify-between py-[35px] px-4 md:pl-6 md:pr-0 flex-1">
+              <div className="flex flex-col w-full md:w-[250px] items-start">
+                <h3 className="text-xl md:text-2xl font-medium text-[#828b86] mb-2">
+                  {event.name}
+                </h3>
+                <p className="text-base md:text-lg text-[#828b86]">
+                  {new Date(event.eventDateTime).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-4 mt-4">
+                {type === 'upcoming' ? (
+                  <div className="flex w-full h-[54px] items-center justify-center px-2.5 py-0 bg-[#0b331f]">
+                    <div className="flex-1 font-medium text-[#baebd3]">
+                      {calculateTimeStatus(event.eventDateTime)}
                     </div>
                   </div>
-                   {/* Time Indicator */}
-                   <p className="font-text-lg-medium text-red-600 text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
-                    16 days ago
+                ) : (
+                  <>
+                    <p className="font-medium text-red-600">
+                      {calculateTimeStatus(event.eventDateTime)}
                     </p>
-                    <Button
-                        variant="outline"
-                        className="w-[167px] h-10 rounded-[10px] border border-solid border-[#1aaa65] bg-transparent p-2.5"
-                         >
-                        <span className="font-text-lg-medium text-green-600 text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
+                    {isReplayAvailable(event.eventDateTime) ? (
+                      <Link to={`/dashboard/tickets/watch-event/${event._id}`}>
+                        <Button
+                          variant="outline"
+                          className="w-full md:w-[167px] h-10 rounded-[10px] border border-solid border-[#1aaa65] bg-transparent p-2.5"
+                        >
+                          <span className="font-medium text-green-600">
                             Watch Replay
-                        </span>
-                    </Button>
+                          </span>
+                        </Button>
+                      </Link>
+                    ) : (
+                      <p className="text-red-600">Replay no longer available</p>
+                    )}
                     <div className="flex items-center gap-2">
-                    <InfoIcon className="w-5 h-5 text-[#828b86]" />
-                    <span className="font-normal text-[#828b86] text-xs tracking-[-0.24px]">
+                      <InfoIcon className="w-5 h-5 text-[#828b86]" />
+                      <span className="font-normal text-[#828b86] text-xs tracking-[-0.24px]">
                         Replay becomes unavailable after 30 days
-                    </span>
-            </div>
-                </CardContent>
-              </Card>
-            ))}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </CardContent>
           </div>
-        </div>
-    )}
+        </Card>
+      ))}
+    </div>
+  );
+};

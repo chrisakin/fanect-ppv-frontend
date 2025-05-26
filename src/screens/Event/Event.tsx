@@ -4,43 +4,24 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Header } from "../../components/layout/Header";
 import { Footer } from "../../components/layout/Footer";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LoginModal } from "../../components/modals/LoginModal";
 import { useAuthStore } from "../../store/authStore";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
-
-// This would typically come from an API or database
-const eventData = {
-  id: "1",
-  title: "Fido Live in Atlanta",
-  price: "$29.99",
-  date: "Saturday, 26th December, 2025",
-  attendees: 156,
-  description: {
-    headline: "Experience the Magic of Fido Live",
-    intro: "Join us for an unforgettable evening of music and entertainment as Fido takes the stage in Atlanta.",
-    time: "Doors open at 7:00 PM EST | Show starts at 8:00 PM EST",
-    about: "Fido, the chart-topping artist known for their electrifying performances, brings their spectacular show to Atlanta. This is more than just a concert - it's an immersive experience that will leave you breathless.",
-    expectations: [
-      "• High-quality live stream with multiple camera angles",
-      "• Interactive chat with other fans",
-      "• Exclusive behind-the-scenes content",
-      "• Virtual meet and greet opportunities",
-      "• Digital merchandise options"
-    ]
-  },
-  images: {
-    banner: "/image.png",
-    attendees: ["/image.png", "/image-6.png", "/image.png"]
-  }
-};
+import { useEventStore } from "@/store/eventStore";
 
 export const Event = (): JSX.Element => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const eventDetails = eventData;
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isAuthenticated } = useAuthStore();
+  const { singleEvent, isLoading, fetchSingleEvent } = useEventStore();
+
+  useEffect(() => {
+    if (id) {
+      fetchSingleEvent(id);
+    }
+  }, [id, fetchSingleEvent]);
 
   const handleActionClick = (type: string) => {
     if (!isAuthenticated) {
@@ -50,6 +31,14 @@ export const Event = (): JSX.Element => {
     }
   };
 
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!singleEvent) {
+    return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
+  }
+
   const EventContent = () => (
     <>
       {/* Banner Section */}
@@ -57,15 +46,8 @@ export const Event = (): JSX.Element => {
         <img
           className="w-full h-[200px] sm:h-[250px] md:h-[350px] object-cover rounded-lg"
           alt="Event banner"
-          src={eventDetails.images.banner}
+          src={singleEvent.bannerUrl}
         />
-
-        {/* Pagination Dots */}
-        <div className="flex w-[72px] items-center justify-between">
-          <div className="bg-green-600 w-4 h-4 rounded-lg" />
-          <div className="bg-gray-300 dark:bg-gray-700 w-4 h-4 rounded-lg" />
-          <div className="bg-gray-300 dark:bg-gray-700 w-4 h-4 rounded-lg" />
-        </div>
       </section>
 
       {/* Event Details Section */}
@@ -75,10 +57,10 @@ export const Event = (): JSX.Element => {
             {/* Event Title and Price */}
             <div className="w-full flex flex-col items-start gap-3">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                {eventDetails.title}
+                {singleEvent.name}
               </h1>
               <h2 className="text-lg sm:text-xl md:text-2xl font-medium">
-                {eventDetails.price}
+                NGN {Number(singleEvent.price).toLocaleString()}
               </h2>
 
               {/* Action Buttons */}
@@ -105,61 +87,16 @@ export const Event = (): JSX.Element => {
               </div>
             </div>
 
-            {/* Attendees */}
-            {/* <div className="flex w-full sm:w-auto items-center gap-4">
-              <div className="text-xs md:text-sm">
-                Join
-              </div>
-              <div className="relative w-[67px] h-[30px]">
-                {eventDetails.images.attendees.map((img, index) => (
-                  <img
-                    key={index}
-                    className="absolute w-[30px] h-[30px] top-0 object-cover rounded-full"
-                    style={{ left: `${index * 15}px` }}
-                    alt={`Attendee ${index + 1}`}
-                    src={img}
-                  />
-                ))}
-              </div>
-              <div className="text-xs md:text-sm">
-                and {eventDetails.attendees} others
-              </div>
-            </div> */}
-
             {/* Event Description */}
             <Card className="w-full border-none shadow-none">
               <CardContent className="p-0 flex flex-col gap-2">
                 <div className="flex flex-col gap-3 md:gap-4">
                   <h3 className="text-lg md:text-xl font-medium">
-                    {eventDetails.description.headline}
+                    About this event
                   </h3>
-
-                  <p className="text-sm md:text-base">
-                    {eventDetails.description.intro}
-                  </p>
-
-                  <p className="text-sm md:text-base">
-                    {eventDetails.description.time}
-                  </p>
-
-                  <p className="text-sm md:text-base">
-                    {eventDetails.description.about}
-                  </p>
-
-                  <p className="text-sm md:text-base font-medium">
-                    What to Expect:
-                  </p>
-
-                  {eventDetails.description.expectations.map(
-                    (expectation, index) => (
-                      <p
-                        key={index}
-                        className="text-sm md:text-base"
-                      >
-                        {expectation}
-                      </p>
-                    )
-                  )}
+                  <div className="whitespace-pre-wrap text-sm md:text-base">
+                    {singleEvent.description}
+                  </div>
                 </div>
               </CardContent>
             </Card>

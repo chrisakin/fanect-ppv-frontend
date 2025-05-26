@@ -1,68 +1,60 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import { StreampassPaymentButton } from "../utils/StreampassPayment";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe("YOUR_STRIPE_PUBLISHABLE_KEY");
 
 export const StreampassPurchaseCard = (): JSX.Element => {
-const navigate = useNavigate();
-const { id } = useParams();
-  function buyStreamPass() {
-    navigate(`/dashboard/tickets/event/paid/${id}`)
-  }
+  const navigate = useNavigate();
+  const { id } = useParams();
+
   return (
-    <Card className="w-[571px] bg-gray-100 dark:bg-[#092D1B] rounded-[10px] border-[0.5px] border-solid border-[#a4a7ae] dark:border-[#1AAA65]">
-    <CardContent className="p-0">
-      <div className="flex flex-col w-full items-start gap-[31px] p-[35px] pt-[47px]">
-        <h2 className="font-display-sm-semibold text-gray-800 dark:text-[#CCCCCC] w-full">
-          Purchase my Streampass
-        </h2>
-
-        <div className="flex flex-col items-start gap-14 w-full">
-          {/* Email and price information */}
-          <div className="flex flex-col items-start gap-6 w-full">
-            <div className="flex flex-col items-start gap-1.5 w-full">
-              <div className="flex flex-col items-start gap-1.5 w-full">
-                <div className="flex w-full h-4 items-center gap-2">
-                  <div className="flex-1 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-500 dark:text-[#CCCCCC] text-base tracking-[-0.32px]">
-                    Streampass will be sent to
-                  </div>
-                </div>
-                <div className="font-text-xl-medium text-gray-800 dark:text-[#CCCCCC]">
+    <Card className="w-full md:w-[571px] bg-gray-100 dark:bg-[#092D1B] rounded-[10px] border-[0.5px] border-solid border-[#a4a7ae] dark:border-[#1AAA65]">
+      <CardContent className="p-6 md:p-8">
+        <div className="flex flex-col gap-8">
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-[#CCCCCC]">
+            Purchase my Streampass
+          </h2>
+          <div className="flex flex-col gap-6">
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <p className="text-gray-500 dark:text-[#CCCCCC]">
+                  Streampass will be sent to
+                </p>
+                <p className="text-lg font-medium text-gray-800 dark:text-[#CCCCCC]">
                   wunmi@gmail.com
-                </div>
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Price</p>
+                <p className="text-xl font-medium text-gray-800 dark:text-[#CCCCCC]">
+                  NGN 45,000.00
+                </p>
               </div>
             </div>
-
-            <div className="flex flex-col items-start gap-2 w-full">
-              <div className="font-text-sm-medium text-gray-700">
-                Price
-              </div>
-              <div className="font-display-sm-medium text-gray-800 dark:text-[#CCCCCC] w-full">
-                NGN 45,000.00
-              </div>
+            <div className="space-y-4">
+              <Elements stripe={stripePromise}>
+                <StreampassPaymentButton />
+              </Elements>
+              <p className="text-sm text-center text-[#717680]">
+                By clicking 'Pay Now', you agree with FaNect's terms and condition
+              </p>
             </div>
-          </div>
-
-          {/* Payment button and terms */}
-          <div className="flex flex-col items-center gap-5 w-full">
-            <Button onClick={buyStreamPass} className="w-full bg-green-600 rounded-[10px] p-2.5 font-text-lg-medium text-whitewhite">
-              Pay Now
-            </Button>
-            <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-[#717680] text-sm tracking-[-0.28px] leading-5">
-              By clicking &apos;Pay Now&apos;, you agree with
-              FaNect&apos;s terms and condition
-            </div>
-          </div>
-
-          {/* Gift option */}
-          <div className="flex flex-col items-center gap-5 w-full">
-            <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-green-600 text-lg leading-[18px]">
-              <span className="font-text-lg-regular underline">
+            <div className="text-center">
+              <Button
+                variant="link"
+                className="text-green-600 hover:text-green-700"
+                onClick={() => navigate(`/dashboard/tickets/event/gift/${id}`)}
+              >
                 Gift Streampass to a friend
-              </span>
+              </Button>
             </div>
           </div>
         </div>
-      </div>
-    </CardContent>
-  </Card>
-  )}
+      </CardContent>
+    </Card>
+  );
+};
