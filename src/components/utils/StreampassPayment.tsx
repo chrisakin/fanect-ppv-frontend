@@ -5,8 +5,7 @@ import { useToast } from "../ui/use-toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import intaxios from "../../lib/axios"
-
-export const StreampassPaymentButton = () => {
+export function StreampassPaymentButton(): JSX.Element | null {
   const { id } = useParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -99,4 +98,6 @@ export const StreampassPaymentButton = () => {
     </Button>
   );
 }
+
+return null;
 };

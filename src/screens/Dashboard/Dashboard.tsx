@@ -10,6 +10,7 @@ import { DashboardSingleEvent } from './DashboardSingleEvent';
 import { DashboardWatchEvent } from './DashboardWatchEvent';
 import { DashboardEventAnalytics } from './DashboardEventAnalytics';
 
+
 export const Dashboard = () => {
   return (
     <DashboardLayout>

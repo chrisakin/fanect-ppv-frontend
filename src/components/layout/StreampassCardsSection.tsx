@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../ui/button";
@@ -10,18 +11,41 @@ interface EventCardsSectionProps {
 }
 
 export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps) => {
+  // Store countdowns for each event
+  const [countdowns, setCountdowns] = useState<{ [id: string]: string }>({});
+
+  // Helper to calculate countdown string
+  const getCountdown = (dateString: string) => {
+    const eventDate = new Date(dateString);
+    const now = new Date();
+    const diff = eventDate.getTime() - now.getTime();
+    if (diff <= 0) return "Event started";
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
+  };
+
+  // Update countdowns every second for upcoming events
+  useEffect(() => {
+    if (type !== "upcoming") return;
+    const interval = setInterval(() => {
+      const newCountdowns: { [id: string]: string } = {};
+      events.forEach(event => {
+        newCountdowns[event._id] = getCountdown(event.eventDateTime);
+      });
+      setCountdowns(newCountdowns);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [events, type]);
+
+  // For past/live events, show how long ago
   const calculateTimeStatus = (dateString: string) => {
     const eventDate = new Date(dateString);
     const now = new Date();
-    
     if (type === 'upcoming') {
-      const diff = eventDate.getTime() - now.getTime();
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      
-      return `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
+      return countdowns[dateString] || getCountdown(dateString);
     } else {
       const diff = now.getTime() - eventDate.getTime();
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -42,9 +66,9 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
       {events.map((event) => (
         <Card
           key={event._id}
-          className="w-full bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] relative"
+          className="w-full bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] relative flex flex-col"
         >
-          <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col md:flex-row flex-1">
             <img
               className="w-full md:w-[246px] h-[200px] md:h-[270px] object-cover"
               alt="Event Image"
@@ -66,13 +90,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
               </div>
 
               <div className="flex flex-col gap-4 mt-4">
-                {type === 'upcoming' ? (
-                  <div className="flex w-full h-[54px] items-center justify-center px-2.5 py-0 bg-[#0b331f]">
-                    <div className="flex-1 font-medium text-[#baebd3]">
-                      {calculateTimeStatus(event.eventDateTime)}
-                    </div>
-                  </div>
-                ) : (
+                {type !== 'upcoming' && (
                   <>
                     <p className="font-medium text-red-600">
                       {calculateTimeStatus(event.eventDateTime)}
@@ -100,6 +118,13 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                   </>
                 )}
               </div>
+              {type === "upcoming" && (
+            <div className="flex w-full h-[54px] items-center justify-center px-2.5 py-0 bg-[#0b331f] mt-auto">
+              <div className="flex-1 font-medium text-[#baebd3]">
+                {countdowns[event._id] || getCountdown(event.eventDateTime)}
+              </div>
+            </div>
+          )}
             </CardContent>
           </div>
         </Card>

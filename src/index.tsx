@@ -12,6 +12,8 @@ import { ThemeProvider } from "./components/layout/ThemeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Toaster } from "./components/ui/toaster";
 import { useAuthStore } from "./store/authStore";
+import { PaymentSuccess } from "./screens/PaymentSuccess/PaymentSuccess";
+import { NotFound } from "./screens/NotFound";
 
 // Initialize auth state before rendering
 useAuthStore.getState().initAuth();
@@ -36,6 +38,7 @@ createRoot(document.getElementById("app") as HTMLElement).render(
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/event/:id" element={<Event />} />
+            <Route path="/:method/payment-success" element={<PaymentSuccess />} />
             <Route
               path="/dashboard/*"
               element={
@@ -44,6 +47,7 @@ createRoot(document.getElementById("app") as HTMLElement).render(
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
         <Toaster />
