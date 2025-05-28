@@ -21,8 +21,13 @@ app.use((req, res, next) => {
 });
 
 // Catch-all route to serve index.html for any unmatched routes (supports client-side routing)
-app.get(/.*/, function (req, res) {
-    res.sendFile(join(__dirname, '/dist/index.html'));
+app.get('*', function (req, res) {
+    // Only serve index.html for requests that do NOT contain a dot (.)
+    if (!req.path.includes('.')) {
+        res.sendFile(join(__dirname, '/dist/index.html'));
+    } else {
+        res.status(404).end();
+    }
 });
 
 // Start the server on the specified port (or 8080 by default)
