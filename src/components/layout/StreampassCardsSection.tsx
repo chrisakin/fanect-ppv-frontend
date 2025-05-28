@@ -90,13 +90,13 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
               </div>
 
               <div className="flex flex-col gap-4 mt-4">
-                {type !== 'upcoming' && (
+                {type == 'past' && (
                   <>
                     <p className="font-medium text-red-600">
                       {calculateTimeStatus(event.eventDateTime)}
                     </p>
                     {isReplayAvailable(event.eventDateTime) ? (
-                      <Link to={`/dashboard/tickets/watch-event/${event._id}`}>
+                      <Link to={`/dashboard/tickets/watch-event/past/${event._id}`}>
                         <Button
                           variant="outline"
                           className="w-full md:w-[167px] h-10 rounded-[10px] border border-solid border-[#1aaa65] bg-transparent p-2.5"
@@ -118,6 +118,20 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                   </>
                 )}
               </div>
+              {type == 'live' && (
+                  <>
+                    <Link to={`/dashboard/tickets/watch-event/live/${event._id}`}>
+                        <Button
+                          variant="outline"
+                          className="w-full md:w-[167px] h-10 rounded-[10px] border border-solid border-[#1aaa65] bg-transparent p-2.5"
+                        >
+                          <span className="font-medium text-green-600">
+                            Watch Live Event
+                          </span>
+                        </Button>
+                      </Link>
+                  </>
+                )}
               {type === "upcoming" && (
             <div className="flex w-full h-[54px] items-center justify-center px-2.5 py-0 dark:bg-[#0b331f] bg-[#D5D7DA] mt-auto">
               <div className="flex-1 font-medium dark:text-[#baebd3] text-dark">

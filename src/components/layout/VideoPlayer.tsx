@@ -5,9 +5,21 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { ScrollArea, ScrollBar } from "../../components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
+import { useAgoraViewerService } from "../utils/Agora";
 
 export const VideoPlayer = (): JSX.Element => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // Agora integration
+  const {
+    remoteUsers,
+    videoContainerRef,
+    client,
+  } = useAgoraViewerService({
+    appId: "YOUR_AGORA_APP_ID", // <-- Replace with your Agora App ID
+    channel: "YOUR_CHANNEL_NAME", // <-- Replace with your channel name
+    token: "YOUR_TOKEN", // <-- Replace with your token or null
+    uid: undefined,
+  });
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -45,34 +57,20 @@ export const VideoPlayer = (): JSX.Element => {
     { top: "104", left: "842", rotate: "-38.08deg" },
   ];
 
-  // Video control icons
+  // Video control icons (these will not control Agora streams, but you can adapt as needed)
   const videoControls = [
     {
       src: "/ico-play.svg",
       alt: isPlaying ? "Pause" : "Play",
       className:
         "relative w-[15.91px] h-[19.58px] mt-[-1.79px] mb-[-1.79px] ml-[-1.00px] cursor-pointer",
-      onClick: () => {
-        if (videoRef.current) {
-          if (isPlaying) {
-            videoRef.current.pause();
-          } else {
-            videoRef.current.play();
-          }
-          setIsPlaying(!isPlaying);
-        }
-      },
+      onClick: () => {},
     },
     {
       src: "/ico-sound.svg",
       alt: isMuted ? "Unmute" : "Mute",
       className: "relative w-[15.25px] h-[20.83px] mt-[-2.41px] mb-[-2.41px] cursor-pointer",
-      onClick: () => {
-        if (videoRef.current) {
-          videoRef.current.muted = !isMuted;
-          setIsMuted(!isMuted);
-        }
-      },
+      onClick: () => {},
     },
   ];
 
@@ -106,44 +104,14 @@ export const VideoPlayer = (): JSX.Element => {
       src: "/ico-fullscreen.svg",
       alt: "Ico fullscreen",
       className: "relative w-[18px] h-[18px] mr-[-1.00px] cursor-pointer",
-      onClick: () => {
-        if (videoRef.current) {
-          if (document.fullscreenElement) {
-            document.exitFullscreen();
-          } else {
-            videoRef.current.requestFullscreen();
-          }
-        }
-      },
+      onClick: () => {},
     },
   ];
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
-    }
-  };
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const progressBar = e.currentTarget;
-    const rect = progressBar.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / rect.width;
-    if (videoRef.current) {
-      videoRef.current.currentTime = percentage * duration;
-    }
   };
 
   const MessageList = () => (
@@ -178,113 +146,12 @@ export const VideoPlayer = (): JSX.Element => {
       <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
         <CardContent className="p-0">
           <div className="relative w-full h-full">
-            <video
-              ref={videoRef}
+            {/* Agora video container */}
+            <div
+              ref={videoContainerRef}
               className="w-full h-full object-cover"
-              poster="/image.png"
-              onTimeUpdate={handleTimeUpdate}
-              onLoadedMetadata={handleLoadedMetadata}
-            >
-              <source src="/video.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-
-            {/* Watermark overlay */}
-            <div className="absolute w-full h-full top-0 left-0 opacity-30 hidden lg:block">
-              {backgroundWatermarks.map((watermark, index) => (
-                <div
-                  key={index}
-                  className={`absolute rotate-[${watermark.rotate}] [-webkit-text-stroke:1px_#cccccc] font-text-lg-regular font-[number:var(--text-lg-regular-font-weight)] text-transparent text-[length:var(--text-lg-regular-font-size)] tracking-[var(--text-lg-regular-letter-spacing)] leading-[var(--text-lg-regular-line-height)] whitespace-nowrap [font-style:var(--text-lg-regular-font-style)]`}
-                  style={{
-                    top: `${watermark.top}px`,
-                    left: `${watermark.left}px`,
-                  }}
-                >
-                  Fido live in lagos
-                </div>
-              ))}
-            </div>
-
-            {/* Center watermarks */}
-            <div className="absolute w-[281px] h-[247px] top-[25px] left-[381px] hidden lg:block">
-              {watermarkTexts.map((watermark, index) => (
-                <div
-                  key={index}
-                  className={`absolute rotate-[${watermark.rotate}] [-webkit-text-stroke:1px_#cccccc] opacity-${watermark.opacity} font-text-lg-regular font-[number:var(--text-lg-regular-font-weight)] text-transparent text-[length:var(--text-lg-regular-font-size)] tracking-[var(--text-lg-regular-letter-spacing)] leading-[var(--text-lg-regular-line-height)] whitespace-nowrap [font-style:var(--text-lg-regular-font-style)]`}
-                  style={{
-                    top: `${watermark.top}px`,
-                    left: `${watermark.left}px`,
-                  }}
-                >
-                  Fido live in lagos
-                </div>
-              ))}
-            </div>
-
-            {/* Video controls */}
-            <div className="flex flex-col w-full items-center justify-center gap-1 absolute bottom-4 left-0 px-4">
-              {/* Progress bar */}
-              <div 
-                className="relative w-full h-[3px] cursor-pointer"
-                onClick={handleProgressClick}
-              >
-                <div className="absolute w-full h-[3px] top-0 left-0 bg-[#eaeaea33]" />
-                <div 
-                  className="absolute h-[3px] top-0 left-0 bg-[#eaeaea80]"
-                  style={{ width: `${(currentTime / duration) * 100}%` }}
-                />
-                <div 
-                  className="absolute h-[3px] top-0 left-0 bg-[#fc0d1c]"
-                  style={{ width: `${(currentTime / duration) * 100}%` }}
-                />
-              </div>
-
-              {/* Control buttons */}
-              <div className="flex items-center justify-between relative w-full">
-                <div className="inline-flex items-center gap-4 sm:gap-6 relative">
-                  {videoControls.map((control, index) => (
-                    <img
-                      key={index}
-                      className={control.className}
-                      alt={control.alt}
-                      src={control.src}
-                      onClick={control.onClick}
-                    />
-                  ))}
-                  <div className="relative w-fit [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-white text-xs tracking-[-0.24px] leading-[normal] whitespace-nowrap">
-                    {formatTime(currentTime)} / {formatTime(duration)}
-                  </div>
-                </div>
-
-                <div className="inline-flex items-center gap-2 sm:gap-4 relative">
-                  {videoSettings.map((setting, index) => (
-                    <img
-                      key={index}
-                      className={`${setting.className} hidden sm:block`}
-                      alt={setting.alt}
-                      src={setting.src}
-                      onClick={setting.onClick}
-                    />
-                  ))}
-                  {/* Special HD icon with background */}
-                  <div className="relative w-5 h-4 hidden sm:block cursor-pointer" onClick={() => console.log("Quality settings clicked")}>
-                    <div className="relative w-[21px] h-[18px] -top-px -left-px">
-                      <img
-                        className="absolute w-[17px] h-[18px] top-0 left-0"
-                        alt="Ico gear"
-                        src="/ico-gear.svg"
-                      />
-                      <div className="absolute w-[13px] h-[9px] top-px left-2 bg-[#ee1a26] rounded-[1px]" />
-                      <img
-                        className="absolute w-[9px] h-1.5 top-[3px] left-2.5"
-                        alt="Hd"
-                        src="/hd.svg"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              style={{ width: "100%", height: "100%" }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -328,7 +195,7 @@ export const VideoPlayer = (): JSX.Element => {
         </div>
 
         {/* Desktop Chat */}
-        <Card className="relative h-[455px] bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block">
+        <Card className="relative h-[455px] bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block pb-4">
           <CardContent className="p-0">
             <div className="flex flex-col w-full h-full p-4">
               <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] mb-[18px] [font-family:'Sofia_Pro-Medium',Helvetica]">
@@ -341,7 +208,7 @@ export const VideoPlayer = (): JSX.Element => {
               </ScrollArea>
 
               {/* Message input */}
-              <div className="flex h-[42px] items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
+              <div className="flex h-[42px] mb-4 items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
                 <Input
                   className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
                   placeholder="Write here"

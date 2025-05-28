@@ -23,7 +23,7 @@ export const Dashboard = () => {
         <Route path="notifications" element={<DashboardNotifications />} />
         <Route path="help" element={<DashboardHelp />} />
         <Route path="tickets/event/:type/:id" element={<DashboardSingleEvent />} />
-        <Route path="tickets/watch-event/:id" element={<DashboardWatchEvent />} />
+        <Route path="tickets/watch-event/:type/:id" element={<DashboardWatchEvent />} />
         <Route path="organise/analytics/:id" element={<DashboardEventAnalytics />} />
       </Routes>
     </DashboardLayout>

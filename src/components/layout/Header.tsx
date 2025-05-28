@@ -179,7 +179,7 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
             <Button
               variant="outline"
               size="lg"
-              className="text-md text-gray-500 rounded-lg border-[#717680] dark:border-[#2E483A] bg-[#F5F5F5] dark:bg-dash-dark"
+              className="cursor-pointer text-md text-gray-500 rounded-lg border-[#717680] dark:border-[#2E483A] bg-[#F5F5F5] dark:bg-dash-dark"
             >
               Create an Event
             </Button>

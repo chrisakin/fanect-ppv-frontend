@@ -1,24 +1,30 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Event } from "@/store/eventStore";
 
-export const GiftFriend = (): JSX.Element => {
+type GiftFriendProps = {
+  event: Event;
+};
+
+export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
   const navigate = useNavigate();
   const { id } = useParams();
-    function giftPass() {
-      navigate(`/dashboard/tickets/event/paid/${id}`)
-    }
-  // Form field data for mapping
+
+  function giftPass() {
+    navigate(`/dashboard/tickets/event/paid/${id}`);
+  }
+
   const formFields = [
     {
       id: "firstName",
       label: "Friend's First Name",
-      defaultValue: "wunmi@gmail.com",
+      defaultValue: "Wunmi",
     },
     {
       id: "lastName",
       label: "Friend's Last Name",
-      defaultValue: "wunmi@gmail.com",
+      defaultValue: "Adeola",
     },
     {
       id: "email",
@@ -28,73 +34,63 @@ export const GiftFriend = (): JSX.Element => {
   ];
 
   return (
-    <div className="relative w-[570px] h-[790px] bg-gray-50 dark:bg-[#092D1B] rounded-[10px] overflow-hidden border border-dashed border-[#a4a7ae] dark:border-[#1AAA65]">
-      <div className="flex flex-col w-[500px] items-start gap-[31px] absolute top-[38px] left-[35px]">
-        <h1 className="self-stretch mt-[-1.00px] font-display-sm-semibold font-[number:var(--display-sm-semibold-font-weight)] text-gray-800 dark:text-[#CCCCCC] text-[length:var(--display-sm-semibold-font-size)] tracking-[var(--display-sm-semibold-letter-spacing)] leading-[var(--display-sm-semibold-line-height)] [font-style:var(--display-sm-semibold-font-style)]">
-          Gift Streampass to a Friend
-        </h1>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 dark:bg-[#092D1B] border border-dashed border-[#a4a7ae] dark:border-[#1AAA65] rounded-[10px] p-6 sm:p-8 md:p-10">
+      <h1 className="text-2xl font-semibold text-gray-800 dark:text-[#CCCCCC] mb-8">
+        Gift Streampass to a Friend
+      </h1>
 
-        <div className="flex flex-col items-start gap-11 self-stretch w-full">
-          <div className="flex flex-col items-start gap-6 self-stretch w-full">
-            <div className="flex flex-col items-start gap-6 self-stretch w-full">
-              {formFields.map((field) => (
-                <div
-                  key={field.id}
-                  className="flex flex-col items-start gap-1.5 self-stretch w-full"
-                >
-                  <div className="flex flex-col items-start gap-1.5 self-stretch w-full">
-                    <label
-                      htmlFor={field.id}
-                      className="w-fit mt-[-1.00px] font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)] whitespace-nowrap [font-style:var(--text-lg-medium-font-style)]"
-                    >
-                      {field.label}
-                    </label>
-
-                    <div className="flex h-[62px] items-center gap-2 px-3.5 py-2.5 self-stretch w-full mb-[-1.00px] ml-[-1.00px] mr-[-1.00px] bg-gray-50 rounded-lg overflow-hidden border border-solid border-[#d5d7da]">
-                      <Input
-                        id={field.id}
-                        className="border-none shadow-none bg-transparent h-full p-0 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 text-base tracking-[-0.32px]"
-                        defaultValue={field.defaultValue}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+      <div className="space-y-8">
+        {/* Form Fields */}
+        {formFields.map((field) => (
+          <div key={field.id} className="space-y-2">
+            <label
+              htmlFor={field.id}
+              className="block text-gray-800 dark:text-[#CCCCCC] text-lg font-medium"
+            >
+              {field.label}
+            </label>
+            <Input
+              id={field.id}
+              defaultValue={field.defaultValue}
+              className="h-14 w-full px-4 text-gray-700 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
           </div>
+        ))}
 
-          <div className="flex flex-col items-start gap-6 self-stretch w-full">
-            <div className="flex flex-col items-start gap-2 self-stretch w-full">
-              <div className="w-fit mt-[-1.00px] font-text-sm-medium font-[number:var(--text-sm-medium-font-weight)] text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-sm-medium-font-size)] tracking-[var(--text-sm-medium-letter-spacing)] leading-[var(--text-sm-medium-line-height)] whitespace-nowrap [font-style:var(--text-sm-medium-font-style)]">
-                Price
-              </div>
-
-              <div className="self-stretch font-display-sm-medium font-[number:var(--display-sm-medium-font-weight)] text-gray-800 dark:text-[#CCCCCC] text-[length:var(--display-sm-medium-font-size)] tracking-[var(--display-sm-medium-letter-spacing)] leading-[var(--display-sm-medium-line-height)] [font-style:var(--display-sm-medium-font-style)]">
-                NGN 45,000.00
-              </div>
-            </div>
+        {/* Price */}
+        <div className="space-y-1">
+          <div className="text-sm text-gray-800 dark:text-[#CCCCCC] font-medium">
+            Price
           </div>
-
-          <div className="flex flex-col items-center gap-5 self-stretch w-full">
-            <Button onClick={giftPass} className="items-center justify-center gap-2.5 p-2.5 self-stretch w-full h-auto bg-green-600 rounded-[10px] hover:bg-green-600/90">
-              <span className="font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] text-whitewhite text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)] whitespace-nowrap [font-style:var(--text-lg-medium-font-style)]">
-                Pay Now
-              </span>
-            </Button>
-
-            <p className="w-fit [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-800 dark:text-[#CCCCCC] text-sm tracking-[-0.28px] leading-5 whitespace-nowrap">
-              By clicking &apos;Pay Now&apos;, you agree with FaNect&apos;s
-              terms and condition
-            </p>
+          <div className="text-xl text-gray-800 dark:text-[#CCCCCC] font-semibold">
+            NGN {Number(event.price).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
+        </div>
 
-          <div className="flex flex-col w-[500px] items-center gap-5">
-            <button className="w-fit mt-[-1.00px] [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-green-600 text-lg leading-[18px] bg-transparent border-none cursor-pointer">
-              <span className="tracking-[-0.06px] leading-7 underline">
-                Purchase Streampass for myself
-              </span>
-            </button>
-          </div>
+        {/* Pay Now Button */}
+        <div className="space-y-4">
+          <Button
+            onClick={giftPass}
+            className="w-full h-12 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700 transition"
+          >
+            Pay Now
+          </Button>
+
+          <p className="text-center text-sm text-gray-800 dark:text-[#CCCCCC]">
+            By clicking 'Pay Now', you agree with FaNect's terms and condition
+          </p>
+        </div>
+
+        {/* Link to Purchase for Self */}
+        <div className="text-center">
+          <button
+            onClick={() =>
+              navigate(`/dashboard/tickets/event/streampass/${id}`)
+            }
+            className="text-green-600 text-base underline hover:text-green-700 transition"
+          >
+            Purchase Streampass for myself
+          </button>
         </div>
       </div>
     </div>

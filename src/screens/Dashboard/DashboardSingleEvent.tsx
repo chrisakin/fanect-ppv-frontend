@@ -8,21 +8,36 @@ import {
 import { GiftFriend } from "@/components/layout/GiftFriendForm";
 import { RegisteredCard } from "@/components/layout/RegisteredCard";
 import { useParams } from "react-router-dom";
+import { useEventStore } from "@/store/eventStore";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { formatTime } from "@/lib/utils";
 
 export const DashboardSingleEvent = (): JSX.Element => {
+  const { type, id } = useParams<{ type: string; id: string }>();
+  const { singleEvent, isLoading, fetchSingleEvent } = useEventStore();
 
-  const { type } = useParams<{ type: string }>();
-  // Event details data
-  const eventDetails = [
-    "Fido Live in Atlanta! Experience the Afrobeats Sensation!",
-    "Get ready for an unforgettable night of electrifying music and pure vibes as Nigeria's very own Fido brings his chart-topping hits to Atlanta!",
-    "Time: 24th December, 2025 | 8PM",
-    "Fido has taken the Nigerian music scene by storm with his unique blend of Afrobeats, catchy melodies, and energetic performances. This is your chance to witness his incredible talent.",
-    "What to Expect:",
-    "A high-energy performance featuring Fido's biggest hits.",
-    "An immersive Afrobeats experience with vibrant sounds and rhythms.",
-    "A night of dancing, celebration, and pure entertainment.",
-  ];
+  useEffect(() => {
+    if (id) {
+      fetchSingleEvent(id);
+    }
+  }, [id, fetchSingleEvent]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+      </div>
+    );
+  }
+
+  if (!singleEvent) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-lg text-gray-500">Event not found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full items-start gap-[30px]">
@@ -46,46 +61,60 @@ export const DashboardSingleEvent = (): JSX.Element => {
       <div className="flex flex-col items-start gap-[50px] w-full">
         {/* Event banner image */}
         <img
-          className="w-full h-[400px] object-cover"
+          className="w-full h-[200px] sm:h-[300px] md:h-[400px] object-cover rounded-lg"
           alt="Event banner"
-          src="/image.png"
+          src={singleEvent.bannerUrl}
         />
 
-        <div className="flex items-start justify-between w-full gap-6">
+        <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-6">
           {/* Left column - Event details */}
-          <div className="flex flex-col items-start gap-[30px] flex-1">
+          <div className="flex flex-col items-start gap-[30px] flex-1 w-full lg:w-auto">
             {/* Event title and price */}
-            <div className="flex flex-col items-start gap-2 max-w-[534px] w-full">
-              <h1 className="font-display-lg-semibold text-gray-900 w-full">
-                Fido in Lagos
+            <div className="flex flex-col items-start gap-2 w-full">
+              <h1 className="font-display-lg-semibold text-gray-900 text-2xl md:text-3xl lg:text-4xl">
+                {singleEvent.name}
               </h1>
-              <h2 className="font-display-sm-medium text-[#414651] w-full">
-                NGN 45,000.00
+              <h2 className="font-display-sm-medium text-[#414651] text-xl md:text-2xl">
+                NGN {Number(singleEvent.price).toLocaleString()}
               </h2>
             </div>
 
+            <div className="md:hidden block w-full lg:w-auto">
+            {type === 'streampass' && <StreampassPurchaseCard event={singleEvent} />}
+            {type === 'gift' && <GiftFriend event={singleEvent}/>}
+            {type === 'paid' && <RegisteredCard />}
+          </div>
+
             {/* About this event section */}
-            <div className="flex flex-col max-w-[534px] w-full items-start gap-2.5 ">
-              <h3 className="font-display-md-bold text-[30px] text-black dark:text-white w-full">
+            <div className="flex flex-col w-full items-start gap-2.5">
+              <h3 className="font-display-md-bold text-2xl md:text-[30px] text-black dark:text-white">
                 About this event
               </h3>
               <div className="flex flex-col items-start gap-[18px] w-full">
-                {eventDetails.map((paragraph, index) => (
-                  <p
-                    key={index}
-                    className="font-text-lg-regular text-black dark:text-white w-full"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                <p className="font-text-lg-regular text-black dark:text-white whitespace-pre-line">
+                  {singleEvent.description}
+                </p>
+               <p className="font-text-lg-regular text-black dark:text-white">
+              Date: {new Date(singleEvent.date).toLocaleDateString('en-US', {
+               weekday: 'long',
+               year: 'numeric',
+               month: 'long',
+               day: 'numeric'
+              })}
+              </p>
+              <p className="font-text-lg-regular text-black dark:text-white">
+                Time: {formatTime(singleEvent.time)}
+              </p>
               </div>
             </div>
           </div>
 
           {/* Right column - Purchase card */}
-         {type == 'streampass' && ( <StreampassPurchaseCard />)}
-         {type == 'gift' && ( <GiftFriend />)}
-          {type == 'paid' && ( <RegisteredCard />)}
+          <div className="hidden md:block w-full lg:w-auto">
+            {type === 'streampass' && <StreampassPurchaseCard event={singleEvent}/>}
+            {type === 'gift' && <GiftFriend  event={singleEvent}/>}
+            {type === 'paid' && <RegisteredCard />}
+          </div>
         </div>
       </div>
     </div>

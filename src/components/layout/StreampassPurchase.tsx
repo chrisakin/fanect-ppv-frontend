@@ -2,8 +2,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { StreampassPaymentButton } from "../utils/StreampassPayment";
+import { Event } from "@/store/eventStore";
+import { getUser } from "@/lib/auth";
 
-export const StreampassPurchaseCard = (): JSX.Element => {
+type GiftFriendProps = {
+  event: Event;
+};
+
+export const StreampassPurchaseCard = ({ event }: GiftFriendProps): JSX.Element => {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -21,13 +27,13 @@ export const StreampassPurchaseCard = (): JSX.Element => {
                   Streampass will be sent to
                 </p>
                 <p className="text-lg font-medium text-gray-800 dark:text-[#CCCCCC]">
-                  wunmi@gmail.com
+                  {getUser().email}
                 </p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700">Price</p>
                 <p className="text-xl font-medium text-gray-800 dark:text-[#CCCCCC]">
-                  NGN 45,000.00
+                  NGN {Number(event.price).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
             </div>
