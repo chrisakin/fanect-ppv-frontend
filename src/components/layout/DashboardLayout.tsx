@@ -5,7 +5,6 @@ import { Button } from '../ui/button';
 import { clearTokens } from '../../lib/auth';
 import { Header } from './Header';
 
-
 const sidebarItems = [
   { icon: <img src='/icons/home.svg' className="h-6 w-6" />, label: 'Home', path: '/dashboard/home', slug:'home' },
   { icon: <img src='/icons/card-pos.svg' className="h-6 w-6" />, label: 'Streampass', path: '/dashboard/tickets', slug:'tickets' },
@@ -33,7 +32,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     <div className="min-h-screen bg-background mx-auto">
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen transition-transform ${
+        className={`fixed top-0 left-0 z-50 h-screen transition-transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0 w-[242px] bg-[#F5F5F5] dark:bg-dash-dark`}
       >
@@ -47,10 +46,11 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             </div>
           </div>
 
-          <nav className="flex flex-col gap-0 px-2.5 mt-4">
+          <nav className="flex flex-col gap-0 px-2.5 lg:mt-4 mt-16">
             {sidebarItems.map((item, index) => (
               <Link key={index} to={item.path}>
                 <Button
+                onClick={() => setIsSidebarOpen(false)}
                   variant="ghost"
                   className={`flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 rounded ${
                     isActive(item.slug) ? 'bg-[#1AAA65] text-[#FAFAFA] dark:bg-select-dark' : 'text-[#A4A7AE] dark:text-[#AAAAAA]'
@@ -83,17 +83,16 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       {/* Main content */}
       <div className="md:ml-[242px]">
         {/* Header */}
-       <Header withSidebar/>
-
+        <Header withSidebar onMenuClick={() => setIsSidebarOpen((prev) => !prev)} />
 
         {/* Page content */}
-        <main className="p-6 mt-[100px] ">{children}</main>
+        <main className="p-6 mt-[100px]">{children}</main>
       </div>
 
       {/* Mobile sidebar backdrop */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}

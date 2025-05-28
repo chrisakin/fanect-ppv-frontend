@@ -17,9 +17,10 @@ import { clearTokens, getUser } from "../../lib/auth";
 
 interface HeaderProps {
   withSidebar?: boolean;
+  onMenuClick?: () => void;
 }
 
-export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
+export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.Element => {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -32,6 +33,14 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
     navigate('/');
   };
 
+  const handleMenuClick = () => {
+    if (withSidebar && onMenuClick) {
+      onMenuClick();
+    } else {
+      setIsMenuOpen(!isMenuOpen);
+    }
+  };
+
   return (
     <>
       <LoginModal 
@@ -40,8 +49,8 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
       />
 
       {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)} />
+      {isMenuOpen && !withSidebar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden\" onClick={() => setIsMenuOpen(false)} />
       )}
 
       <header className={withSidebar ? "fixed left-0 top-0 z-50 w-full md:ml-sidebar-desktop md:w-header-desktop bg-background" : "fixed top-0 left-0 right-0 bg-background z-50" }>
@@ -71,10 +80,10 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
               </ToggleGroupItem>
             </ToggleGroup>
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={handleMenuClick}
               className="text-gray-500 p-1"
             >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {isMenuOpen && !withSidebar ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -92,45 +101,47 @@ export const Header = ({ withSidebar = false }: HeaderProps): JSX.Element => {
         </div>
 
         {/* Mobile Menu */}
-        <div 
-          className={`md:hidden fixed right-0 top-0 bg-background transform transition-transform duration-300 ease-in-out ${
-           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          } z-50 shadow-lg rounded-bl-lg`}
-        >
-          {!isAuthenticated && (
-          <div className="flex flex-col p-3 gap-3">
-            <div className="flex justify-end">
-              <button onClick={() => setIsMenuOpen(false)} className="text-gray-500 p-1">
-                <X size={20} />
-              </button>
-            </div>
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-sm text-gray-500"
-                >
-                  Create Events
-                </Button>
-                <Button
-                  size="sm"
-                  className="w-full bg-green-600 text-white text-sm"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    setIsLoginModalOpen(true);
-                  }}
-                >
-                  Log in
-                </Button>
-              </>
-            
-          </div>)}
-        </div>
+        {!withSidebar && (
+          <div 
+            className={`md:hidden fixed right-0 top-0 bg-background transform transition-transform duration-300 ease-in-out ${
+            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            } z-50 shadow-lg rounded-bl-lg`}
+          >
+            {!isAuthenticated && (
+            <div className="flex flex-col p-3 gap-3">
+              <div className="flex justify-end">
+                <button onClick={() => setIsMenuOpen(false)} className="text-gray-500 p-1">
+                  <X size={20} />
+                </button>
+              </div>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start text-sm text-gray-500"
+                  >
+                    Create Events
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="w-full bg-green-600 text-white text-sm"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsLoginModalOpen(true);
+                    }}
+                  >
+                    Log in
+                  </Button>
+                </>
+              
+            </div>)}
+          </div>
+        )}
 
         {/* Desktop/Tablet Header */}
         <div className="hidden md:flex items-center justify-between px-4 lg:px-16 py-4 my-4 mx-5 gap-3 rounded-lg bg-[#F5F5F5] dark:bg-dash-dark">
         {!isAuthenticated && (
-          <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
+          <Link to="/\" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
             FaNect
           </Link>
         )}
