@@ -66,7 +66,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
       {events.map((event) => (
         <Card
           key={event._id}
-          className="w-full bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] relative flex flex-col"
+          className="w-full dark:bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] border-[#D5D7DA] relative flex flex-col"
         >
           <div className="flex flex-col md:flex-row flex-1">
             <img
@@ -76,7 +76,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
             />
             <CardContent className="flex flex-col h-full justify-between py-[35px] px-4 md:pl-6 md:pr-0 flex-1">
               <div className="flex flex-col w-full md:w-[250px] items-start">
-                <h3 className="text-xl md:text-2xl font-medium text-[#828b86] mb-2">
+                <h3 className="text-xl md:text-2xl font-medium dark:text-[#828b86] mb-2">
                   {event.name}
                 </h3>
                 <p className="text-base md:text-lg text-[#828b86]">
@@ -119,8 +119,8 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                 )}
               </div>
               {type === "upcoming" && (
-            <div className="flex w-full h-[54px] items-center justify-center px-2.5 py-0 bg-[#0b331f] mt-auto">
-              <div className="flex-1 font-medium text-[#baebd3]">
+            <div className="flex w-full h-[54px] items-center justify-center px-2.5 py-0 dark:bg-[#0b331f] bg-[#D5D7DA] mt-auto">
+              <div className="flex-1 font-medium dark:text-[#baebd3] text-dark">
                 {countdowns[event._id] || getCountdown(event.eventDateTime)}
               </div>
             </div>
