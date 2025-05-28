@@ -35,6 +35,7 @@ interface EventState {
   fetchMyEvents: (page?: number) => Promise<void>;
   fetchStreampassEvents: (eventType: string, page?: number) => Promise<void>;
   fetchSingleEvent: (id: string) => Promise<void>;
+  fetchPurchasedEvent: (id: string) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   updateEvent: (id: string, data: FormData) => Promise<void>;
   setSelectedEvent: (event: Event | null) => void;
@@ -134,6 +135,17 @@ export const useEventStore = create<EventState>((set) => ({
     } catch (error) {
       console.error('Error fetching single event:', error);
       set({ singleEvent: null, isLoading: false });
+    }
+  },
+  fetchPurchasedEvent: async (id: string) => {
+    try {
+      set({ isLoading: true });
+      const response = await axios.get(`/streampass/get-one-event/${id}`);
+      set({ singleEvent: response.data.streampass.event, isLoading: false });
+    } catch (error) {
+      console.error('Error fetching purchased event:', error);
+      set({ singleEvent: null, isLoading: false });
+      throw error;
     }
   },
   deleteEvent: async (id: string) => {
