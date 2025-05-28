@@ -8,6 +8,9 @@ import { fileURLToPath } from 'url';
 export default defineConfig({
   plugins: [react()],
   base: "./",
+  build: {
+    outDir: 'dist',
+  },
   css: {
     postcss: {
       plugins: [tailwind()],
