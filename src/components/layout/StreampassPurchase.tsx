@@ -2,10 +2,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { StreampassPaymentButton } from "../utils/StreampassPayment";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-
-const stripePromise = loadStripe("YOUR_STRIPE_PUBLISHABLE_KEY");
 
 export const StreampassPurchaseCard = (): JSX.Element => {
   const navigate = useNavigate();
@@ -36,9 +32,7 @@ export const StreampassPurchaseCard = (): JSX.Element => {
               </div>
             </div>
             <div className="space-y-4">
-              <Elements stripe={stripePromise}>
                 <StreampassPaymentButton />
-              </Elements>
               <p className="text-sm text-center text-[#717680]">
                 By clicking 'Pay Now', you agree with FaNect's terms and condition
               </p>
