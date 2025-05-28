@@ -1,21 +1,37 @@
-import express from 'express'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import express from 'express';
+import serveStatic from 'serve-static';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+// Polyfill __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const app = express()
-const PORT = process.env.PORT || 3000
+const app = express();
 
-// Serve static files from Vite build output
-app.use(express.static(path.join(__dirname, 'dist')))
+// Serve static files from the dist directory
+app.use('/', serveStatic(join(__dirname, '/dist')));
 
-// React Router fallback: serve index.html for non-file routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
-})
+// Redirect www to non-www
+app.use((req, res, next) => {
+    if (req.hostname.startsWith('www.')) {
+        return res.redirect(301, `https://${req.hostname.slice(4)}${req.url}`);
+    }
+    next();
+});
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`)
-})
+// Catch-all route to serve index.html for any unmatched routes (supports client-side routing)
+app.get(/.*/, function (req, res) {
+    res.sendFile(join(__dirname, '/dist/index.html'));
+});
+
+// Start the server on the specified port (or 8080 by default)
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
+// Add basic error handling for server crashes
+app.on('error', (err) => {
+    console.error('Server error:', err);
+});
