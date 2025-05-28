@@ -25,6 +25,7 @@ export const Event = (): JSX.Element => {
 
   const handleActionClick = (type: string) => {
     if (!isAuthenticated) {
+      sessionStorage.setItem('redirectUrl', `/dashboard/tickets/event/${type}/${id}`)
       setIsLoginModalOpen(true);
     } else {
       navigate(`/dashboard/tickets/event/${type}/${id}`);

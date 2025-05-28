@@ -151,13 +151,19 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const onLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
+      const redirectUrl = sessionStorage.getItem('redirectUrl')
       const response = await axios.post('/auth/login', data);
       const { accessToken, refreshToken } = response.data?.data;
       setTokens(accessToken, refreshToken);
       await fetchUserProfile();
       setAuth(true);
       onClose();
-      navigate('/dashboard');
+      if(redirectUrl) {
+        sessionStorage.removeItem('redirectUrl')
+        navigate(redirectUrl)
+      }else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       if (error.response?.data?.message === 'User is not verified') {
         setUserEmail(data.email);
@@ -204,12 +210,18 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true);
     try {
+            const redirectUrl = sessionStorage.getItem('redirectUrl')
       const { accessToken, refreshToken } = (await axios.post('/auth/verify', { code, email: userEmail })).data?.data;
       setTokens(accessToken, refreshToken);
       await fetchUserProfile();
       setAuth(true);
       onClose();
-      navigate('/dashboard');
+     if(redirectUrl) {
+        sessionStorage.removeItem('redirectUrl')
+        navigate(redirectUrl)
+      }else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -226,6 +238,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     onSuccess: async (response) => {
       setIsLoading(true);
       try {
+        const redirectUrl = sessionStorage.getItem('redirectUrl')
         const { data } = await axios.post('/auth/google', {
           code: response.code,
           path: isSignup ? "signup": "login",
@@ -235,7 +248,12 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
         await fetchUserProfile();
         setAuth(true);
         onClose();
+        if(redirectUrl) {
+        sessionStorage.removeItem('redirectUrl')
+        navigate(redirectUrl)
+      }else {
         navigate('/dashboard');
+      }
       } catch (error: any) {
         toast({
           variant: "destructive",
