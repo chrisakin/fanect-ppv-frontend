@@ -46,7 +46,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             </div>
           </div>
 
-          <nav className="flex flex-col gap-0 px-2.5 lg:mt-4 mt-16">
+          <nav className="flex flex-col gap-0 px-2.5 lg:mt-4 md:mt-8 mt-16">
             {sidebarItems.map((item, index) => (
               <Link key={index} to={item.path}>
                 <Button
