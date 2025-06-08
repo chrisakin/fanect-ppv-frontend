@@ -1,4 +1,4 @@
-import { VideoPlayer } from "@/components/layout/VideoPlayer";
+import { StreamingProvider } from "@/components/utils/StreamingProvider";
 import { WatchEventDetails } from "@/components/layout/WatchEventDetails";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useEventStore } from "@/store/eventStore";
@@ -59,7 +59,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
       </Breadcrumb>
       <div className="flex flex-col w-full px-4 md:px-6 lg:px-8 mx-auto items-start py-6 md:py-8 lg:py-10">
         <div className="flex flex-col w-full items-start gap-8 md:gap-10 lg:gap-14">
-          <VideoPlayer />
+          <StreamingProvider />
           <WatchEventDetails event={singleEvent} />
         </div>
       </div>

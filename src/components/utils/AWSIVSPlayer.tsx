@@ -1,55 +1,88 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Avatar } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { ScrollArea, ScrollBar } from "../../components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
-import { useAgoraViewerService } from "../utils/Agora";
+import { useAWSIVSService } from "./AWSIVS";
 
-export const VideoPlayer = (): JSX.Element => {
-  // Agora integration
+export const AWSIVSPlayer = (): JSX.Element => {
   const {
-    remoteUsers,
-    videoContainerRef,
-    client,
-  } = useAgoraViewerService({
-    appId: import.meta.env.VITE_AGORA_APP_ID || "YOUR_AGORA_APP_ID",
-    channel: "YOUR_CHANNEL_NAME", // <-- Replace with your channel name
-    token: "YOUR_TOKEN", // <-- Replace with your token or null
-    uid: undefined,
+    playerRef,
+    messages,
+    isConnected,
+    sendMessage,
+    connect,
+    disconnect,
+  } = useAWSIVSService({
+    playbackUrl: "YOUR_IVS_PLAYBACK_URL", // Replace with actual playback URL
+    chatRoomArn: "YOUR_CHAT_ROOM_ARN", // Replace with actual chat room ARN
+    chatToken: "YOUR_CHAT_TOKEN", // Replace with actual chat token
+    username: "viewer", // Replace with actual username
   });
 
+  const [messageInput, setMessageInput] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
 
-  // Message data for mapping
-  const messages = Array(6).fill({
-    name: "Feyisayo Helen",
-    message: "Omg! This is so so good, yayy",
-    avatar: "/image-6.png",
-  });
+  const handleSendMessage = () => {
+    if (messageInput.trim() && isConnected) {
+      sendMessage(messageInput.trim());
+      setMessageInput("");
+    }
+  };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
 
- 
+  const togglePlayPause = () => {
+    if (playerRef.current) {
+      if (isPlaying) {
+        playerRef.current.pause();
+      } else {
+        playerRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
 
+  const toggleMute = () => {
+    if (playerRef.current) {
+      playerRef.current.setMuted(!isMuted);
+      setIsMuted(!isMuted);
+    }
+  };
 
-  // Video control icons (these will not control Agora streams, but you can adapt as needed)
+  const toggleFullscreen = () => {
+    if (playerRef.current) {
+      const videoElement = playerRef.current.getVideoElement();
+      if (videoElement) {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          videoElement.requestFullscreen();
+        }
+      }
+    }
+  };
+
+  // Video control icons
   const videoControls = [
     {
       src: "/ico-play.svg",
       alt: isPlaying ? "Pause" : "Play",
-      className:
-        "relative w-[15.91px] h-[19.58px] mt-[-1.79px] mb-[-1.79px] ml-[-1.00px] cursor-pointer",
-      onClick: () => {},
+      className: "relative w-[15.91px] h-[19.58px] mt-[-1.79px] mb-[-1.79px] ml-[-1.00px] cursor-pointer",
+      onClick: togglePlayPause,
     },
     {
       src: "/ico-sound.svg",
       alt: isMuted ? "Unmute" : "Mute",
       className: "relative w-[15.25px] h-[20.83px] mt-[-2.41px] mb-[-2.41px] cursor-pointer",
-      onClick: () => {},
+      onClick: toggleMute,
     },
   ];
 
@@ -83,35 +116,27 @@ export const VideoPlayer = (): JSX.Element => {
       src: "/ico-fullscreen.svg",
       alt: "Ico fullscreen",
       className: "relative w-[18px] h-[18px] mr-[-1.00px] cursor-pointer",
-      onClick: () => {},
+      onClick: toggleFullscreen,
     },
   ];
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   const MessageList = () => (
     <div className="flex flex-col gap-4">
       {messages.map((message, index) => (
         <div key={index} className="flex items-start gap-2">
           <Avatar className="w-[22px] h-[22px]">
-            <img
-              className="w-full h-full object-cover"
-              alt="User avatar"
-              src={message.avatar}
-            />
+            <div className="w-full h-full bg-green-600 rounded-full flex items-center justify-center text-white text-xs">
+              {message.sender.charAt(0).toUpperCase()}
+            </div>
           </Avatar>
 
           <div className="flex flex-col w-[180px] gap-1">
             <div className="text-[#111111] text-[10px] tracking-[-0.20px] [font-family:'Sofia_Pro-Regular',Helvetica]">
-              {message.name}
+              {message.sender}
             </div>
-            <div className="w-full h-8 bg-white rounded-[10px] flex items-center px-[11px]">
-              <span className="text-[#444444] text-xs tracking-[-0.24px] [font-family:'Sofia_Pro-Regular',Helvetica]">
-                {message.message}
+            <div className="w-full min-h-8 bg-white rounded-[10px] flex items-center px-[11px] py-1">
+              <span className="text-[#444444] text-xs tracking-[-0.24px] [font-family:'Sofia_Pro-Regular',Helvetica] break-words">
+                {message.content}
               </span>
             </div>
           </div>
@@ -125,12 +150,39 @@ export const VideoPlayer = (): JSX.Element => {
       <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
         <CardContent className="p-0">
           <div className="relative w-full h-full">
-            {/* Agora video container */}
+            {/* AWS IVS Player container */}
             <div
-              ref={videoContainerRef}
-              className="w-full h-full object-cover"
+              ref={playerRef}
+              className="w-full h-full"
               style={{ width: "100%", height: "100%" }}
             />
+            
+            {/* Video controls overlay */}
+            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/50 rounded-lg p-2">
+              <div className="flex items-center gap-2">
+                {videoControls.map((control, index) => (
+                  <button
+                    key={index}
+                    onClick={control.onClick}
+                    className={control.className}
+                  >
+                    <img src={control.src} alt={control.alt} className="w-full h-full" />
+                  </button>
+                ))}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {videoSettings.map((setting, index) => (
+                  <button
+                    key={index}
+                    onClick={setting.onClick}
+                    className={setting.className}
+                  >
+                    <img src={setting.src} alt={setting.alt} className="w-full h-full" />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -143,7 +195,7 @@ export const VideoPlayer = (): JSX.Element => {
             <AccordionItem value="messages" className="border-none">
               <AccordionTrigger className="py-2 px-4 bg-[#edf0f5] rounded-t-[10px]">
                 <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] [font-family:'Sofia_Pro-Medium',Helvetica]">
-                  Messages
+                  Messages {!isConnected && "(Disconnected)"}
                 </h3>
               </AccordionTrigger>
               <AccordionContent className="bg-[#edf0f5]">
@@ -157,12 +209,20 @@ export const VideoPlayer = (): JSX.Element => {
                   <div className="flex h-[42px] items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
                     <Input
                       className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
-                      placeholder="Write here"
+                      placeholder={isConnected ? "Write here" : "Connecting to chat..."}
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      disabled={!isConnected}
                     />
-                    <Button className="w-8 h-8 p-1 bg-green-700 rounded-lg">
+                    <Button 
+                      className="w-8 h-8 p-1 bg-green-700 rounded-lg disabled:opacity-50"
+                      onClick={handleSendMessage}
+                      disabled={!isConnected || !messageInput.trim()}
+                    >
                       <img
                         className="w-5 h-5"
-                        alt="Microphone icon"
+                        alt="Send message"
                         src="/icon-video-audio-image-microphone-slash.svg"
                       />
                     </Button>
@@ -178,7 +238,7 @@ export const VideoPlayer = (): JSX.Element => {
           <CardContent className="p-0">
             <div className="flex flex-col w-full h-full p-4">
               <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] mb-[18px] [font-family:'Sofia_Pro-Medium',Helvetica]">
-                Messages
+                Messages {!isConnected && "(Disconnected)"}
               </h3>
 
               <ScrollArea className="h-[350px] pr-2">
@@ -190,12 +250,20 @@ export const VideoPlayer = (): JSX.Element => {
               <div className="flex h-[42px] mb-4 items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
                 <Input
                   className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
-                  placeholder="Write here"
+                  placeholder={isConnected ? "Write here" : "Connecting to chat..."}
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={!isConnected}
                 />
-                <Button className="w-8 h-8 p-1 bg-green-700 rounded-lg">
+                <Button 
+                  className="w-8 h-8 p-1 bg-green-700 rounded-lg disabled:opacity-50"
+                  onClick={handleSendMessage}
+                  disabled={!isConnected || !messageInput.trim()}
+                >
                   <img
                     className="w-5 h-5"
-                    alt="Microphone icon"
+                    alt="Send message"
                     src="/icon-video-audio-image-microphone-slash.svg"
                   />
                 </Button>
