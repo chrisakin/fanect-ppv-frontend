@@ -14,6 +14,7 @@ import { Toaster } from "./components/ui/toaster";
 import { useAuthStore } from "./store/authStore";
 import { PaymentSuccess } from "./screens/PaymentSuccess/PaymentSuccess";
 import { NotFound } from "./screens/NotFound";
+import { useFCM } from "./hooks/useFCM";
 
 // Initialize auth state before rendering
 useAuthStore.getState().initAuth();
@@ -27,29 +28,37 @@ if (!GOOGLE_CLIENT_ID) {
   );
 }
 
+function App() {
+  useFCM();
+  
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/event/:id" element={<Event />} />
+        <Route path="/:method/payment-success" element={<PaymentSuccess />} />
+        <Route
+          path="/dashboard/*"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+}
+
 createRoot(document.getElementById("app") as HTMLElement).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ThemeProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/event/:id" element={<Event />} />
-            <Route path="/:method/payment-success" element={<PaymentSuccess />} />
-            <Route
-              path="/dashboard/*"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
+        <App />
         <Toaster />
       </ThemeProvider>
     </GoogleOAuthProvider>
