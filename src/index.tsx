@@ -20,13 +20,20 @@ import { useFCM } from "./hooks/useFCM";
 useAuthStore.getState().initAuth();
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
+const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
 if (!GOOGLE_CLIENT_ID) {
   throw new Error(
     'Missing VITE_GOOGLE_CLIENT_ID environment variable. ' +
     'Please ensure you have set up your .env file with a valid Google OAuth client ID.'
   );
 }
+
+// if(!FIREBASE_API_KEY) {
+//   throw new Error(
+//     'Missing VITE_FIREBASE_API_KEY environment variable. ' +
+//     'Please ensure you have set up your .env file with a valid Firebase API key.'
+//   );
+// }
 
 function App() {
   useFCM();
