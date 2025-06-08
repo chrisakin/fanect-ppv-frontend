@@ -70,7 +70,7 @@ export const DashboardNotifications = () => {
     return date.toLocaleDateString();
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications?.filter(n => !n.isRead).length;
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8 mb-20">
