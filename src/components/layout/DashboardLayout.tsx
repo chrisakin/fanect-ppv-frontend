@@ -4,6 +4,8 @@ import { useAuthStore } from '../../store/authStore';
 import { Button } from '../ui/button';
 import { clearTokens } from '../../lib/auth';
 import { Header } from './Header';
+import axios from '@/lib/axios';
+import { toast } from '../ui/use-toast';
 
 const sidebarItems = [
   { icon: <img src='/icons/home.svg' className="h-6 w-6" />, label: 'Home', path: '/dashboard/home', slug:'home' },
@@ -20,10 +22,23 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    clearTokens();
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint
+      await axios.post('/auth/logout');
+    } catch (error) {
+      // Even if the API call fails, we still want to log out locally
+      console.error('Logout API call failed:', error);
+    } finally {
+      // Always clear tokens and logout locally
+      clearTokens();
+      logout();
+      navigate('/');
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+    }
   };
 
   const isActive = (path: string) => location.pathname.includes(path);

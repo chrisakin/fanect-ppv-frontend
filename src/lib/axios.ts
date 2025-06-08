@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth';
 
-
 const baseURL = import.meta.env.VITE_BASE_URL;
 
 export const axiosInstance = axios.create({
@@ -34,19 +33,30 @@ axiosInstance.interceptors.response.use(
 
       try {
         const refreshToken = getRefreshToken();
+        
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
         const response = await axios.post(`${baseURL}/auth/refresh-token`, {
           refreshToken,
         });
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
         setTokens(accessToken, newRefreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest);
-      } catch (error) {
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
         clearTokens();
-        window.location.href = '/';
-        return Promise.reject(error);
+        
+        // Only redirect if we're not already on the home page
+        if (window.location.pathname !== '/') {
+          window.location.href = '/';
+        }
+        
+        return Promise.reject(refreshError);
       }
     }
 

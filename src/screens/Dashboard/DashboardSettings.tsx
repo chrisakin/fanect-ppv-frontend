@@ -4,6 +4,7 @@ import { Checkbox } from "../../components/ui/checkbox";
 import { Input } from "../../components/ui/input";
 import { useSettingsStore } from "../../store/settingsStore";
 import { PasswordResetModal } from "../../components/modals/PasswordResetModal";
+import { DeleteAccountModal } from "../../components/modals/DeleteAccountModal";
 import { useToast } from "../../components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -18,6 +19,7 @@ export const DashboardSettings = (): JSX.Element => {
     saveSettings 
   } = useSettingsStore();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,8 +47,7 @@ export const DashboardSettings = (): JSX.Element => {
   };
 
   const handleDeleteAccount = () => {
-    // Handle account deletion logic here
-    console.log("Deleting account");
+    setIsDeleteAccountModalOpen(true);
   };
 
   if (isLoading) {
@@ -311,6 +312,12 @@ export const DashboardSettings = (): JSX.Element => {
       <PasswordResetModal 
         isOpen={isPasswordModalOpen} 
         onClose={() => setIsPasswordModalOpen(false)} 
+      />
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal 
+        isOpen={isDeleteAccountModalOpen} 
+        onClose={() => setIsDeleteAccountModalOpen(false)} 
       />
     </div>
   );
