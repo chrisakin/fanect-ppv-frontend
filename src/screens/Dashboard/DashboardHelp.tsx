@@ -16,7 +16,7 @@ export const DashboardHelp = (): JSX.Element => {
     "General": [
       {
         question: "What is FaNect?",
-        answer: "FaNect is a live music streaming platform that brings concerts, festivals, DJ sets, and music events directly to your screen in high quality and real-time. Whether you're across the street or across the globe, you can experience live music performances as they happen."
+        answer: "FaNect is a live streaming platform that brings exclusive concerts, festivals, DJ sets, and music events directly to your screen in high quality and real-time. Whether you're across the street or across the globe, you can experience live performances as they happen."
       },
       {
         question: "How do I create an account?",
