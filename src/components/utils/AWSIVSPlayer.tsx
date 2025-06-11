@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Avatar } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -6,30 +6,54 @@ import { Input } from "../../components/ui/input";
 import { ScrollArea, ScrollBar } from "../../components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { useAWSIVSService } from "./AWSIVS";
+import { Loader2, AlertCircle } from "lucide-react";
 
-export const AWSIVSPlayer = (): JSX.Element => {
+interface AWSIVSPlayerProps {
+  playbackUrl?: string;
+  chatApiEndpoint?: string;
+  chatRoomArn?: string;
+  chatToken?: string;
+  username?: string;
+}
+
+export const AWSIVSPlayer = ({
+  playbackUrl = "https://fcc3ddae59ed.us-west-2.playback.live-video.net/api/video/v1/us-west-2.893648527354.channel.DmumNckWFTqz.m3u8", // Demo stream
+  chatApiEndpoint,
+  chatRoomArn,
+  chatToken,
+  username = "viewer"
+}: AWSIVSPlayerProps): JSX.Element => {
   const {
-    playerRef,
+    videoContainerRef,
     messages,
     isConnected,
+    playerState,
+    playerError,
+    isPlayerLoaded,
     sendMessage,
-    connect,
-    disconnect,
+    play,
+    pause,
+    setMuted,
+    setVolume,
   } = useAWSIVSService({
-    playbackUrl: "YOUR_IVS_PLAYBACK_URL", // Replace with actual playback URL
-    chatRoomArn: "YOUR_CHAT_ROOM_ARN", // Replace with actual chat room ARN
-    chatToken: "YOUR_CHAT_TOKEN", // Replace with actual chat token
-    username: "viewer", // Replace with actual username
+    playbackUrl,
+    chatApiEndpoint,
+    chatRoomArn,
+    chatToken,
+    username,
   });
 
   const [messageInput, setMessageInput] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolumeState] = useState(1);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (messageInput.trim() && isConnected) {
-      sendMessage(messageInput.trim());
-      setMessageInput("");
+      const success = await sendMessage(messageInput.trim());
+      if (success) {
+        setMessageInput("");
+      }
     }
   };
 
@@ -40,26 +64,27 @@ export const AWSIVSPlayer = (): JSX.Element => {
   };
 
   const togglePlayPause = () => {
-    if (playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.pause();
-      } else {
-        playerRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+    if (isPlaying) {
+      pause();
+    } else {
+      play();
     }
+    setIsPlaying(!isPlaying);
   };
 
   const toggleMute = () => {
-    if (playerRef.current) {
-      playerRef.current.setMuted(!isMuted);
-      setIsMuted(!isMuted);
-    }
+    setMuted(!isMuted);
+    setIsMuted(!isMuted);
+  };
+
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    setVolumeState(newVolume);
   };
 
   const toggleFullscreen = () => {
-    if (playerRef.current) {
-      const videoElement = playerRef.current.getVideoElement();
+    if (videoContainerRef.current) {
+      const videoElement = videoContainerRef.current.querySelector('video');
       if (videoElement) {
         if (document.fullscreenElement) {
           document.exitFullscreen();
@@ -149,40 +174,81 @@ export const AWSIVSPlayer = (): JSX.Element => {
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
       <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
         <CardContent className="p-0">
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full bg-black">
+            {/* Loading state */}
+            {!isPlayerLoaded && !playerError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="flex flex-col items-center gap-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                  <p className="text-white text-sm">Loading player...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Error state */}
+            {playerError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="flex flex-col items-center gap-4 text-center p-4">
+                  <AlertCircle className="h-8 w-8 text-red-500" />
+                  <p className="text-white text-sm">{playerError}</p>
+                  <p className="text-gray-400 text-xs">Please try refreshing the page</p>
+                </div>
+              </div>
+            )}
+
             {/* AWS IVS Player container */}
             <div
-              ref={playerRef}
+              ref={videoContainerRef}
               className="w-full h-full"
               style={{ width: "100%", height: "100%" }}
             />
             
             {/* Video controls overlay */}
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/50 rounded-lg p-2">
-              <div className="flex items-center gap-2">
-                {videoControls.map((control, index) => (
-                  <button
-                    key={index}
-                    onClick={control.onClick}
-                    className={control.className}
-                  >
-                    <img src={control.src} alt={control.alt} className="w-full h-full" />
-                  </button>
-                ))}
+            {isPlayerLoaded && !playerError && (
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/50 rounded-lg p-2">
+                <div className="flex items-center gap-2">
+                  {videoControls.map((control, index) => (
+                    <button
+                      key={index}
+                      onClick={control.onClick}
+                      className={control.className}
+                      title={control.alt}
+                    >
+                      <img src={control.src} alt={control.alt} className="w-full h-full" />
+                    </button>
+                  ))}
+                  
+                  {/* Volume control */}
+                  <div className="flex items-center gap-2 ml-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={volume}
+                      onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                      className="w-16 h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
+                    {playerState}
+                  </div>
+                  {videoSettings.map((setting, index) => (
+                    <button
+                      key={index}
+                      onClick={setting.onClick}
+                      className={setting.className}
+                      title={setting.alt}
+                    >
+                      <img src={setting.src} alt={setting.alt} className="w-full h-full" />
+                    </button>
+                  ))}
+                </div>
               </div>
-              
-              <div className="flex items-center gap-2">
-                {videoSettings.map((setting, index) => (
-                  <button
-                    key={index}
-                    onClick={setting.onClick}
-                    className={setting.className}
-                  >
-                    <img src={setting.src} alt={setting.alt} className="w-full h-full" />
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -209,7 +275,7 @@ export const AWSIVSPlayer = (): JSX.Element => {
                   <div className="flex h-[42px] items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
                     <Input
                       className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
-                      placeholder={isConnected ? "Write here" : "Connecting to chat..."}
+                      placeholder={isConnected ? "Write here" : "Chat not available"}
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -250,7 +316,7 @@ export const AWSIVSPlayer = (): JSX.Element => {
               <div className="flex h-[42px] mb-4 items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
                 <Input
                   className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
-                  placeholder={isConnected ? "Write here" : "Connecting to chat..."}
+                  placeholder={isConnected ? "Write here" : "Chat not available"}
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   onKeyPress={handleKeyPress}
