@@ -130,7 +130,7 @@ export const Event = (): JSX.Element => {
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 
       />
-      <main className="flex-1 px-4 md:px-8 lg:px-16 py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 lg:px-16 py-8">
         <Button
           variant="ghost"
           className="mb-6 hover:bg-transparent p-0 h-auto text-foreground"

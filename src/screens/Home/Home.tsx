@@ -42,8 +42,8 @@ export const Home = (): JSX.Element => {
   }));
 
   return (
-    <main className="bg-background text-foreground max-w-[1440px] mx-auto">
-      <div className="relative">
+    <main className="bg-background text-foreground">
+      <div className="relative max-w-7xl mx-auto" >
         <Header />
 
         {/* Main Content */}

@@ -101,7 +101,11 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
         <Header withSidebar onMenuClick={() => setIsSidebarOpen((prev) => !prev)} />
 
         {/* Page content */}
-        <main className="p-6 mt-[100px]">{children}</main>
+        <main className="mt-[100px]">
+          <div className="max-w-7xl mx-auto p-6">
+            {children}
+          </div>
+        </main>
       </div>
 
       {/* Mobile sidebar backdrop */}
