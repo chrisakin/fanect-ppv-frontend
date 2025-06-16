@@ -39,7 +39,7 @@ export class FCMService {
 
   private async sendTokenToServer(token: string): Promise<void> {
     try {
-      await axios.post('/auth/fcm-token', { fcmToken: token });
+      await axios.post('/notifications/token', { fcmToken: token });
       console.log('FCM token sent to server successfully');
     } catch (error) {
       console.error('Error sending FCM token to server:', error);
