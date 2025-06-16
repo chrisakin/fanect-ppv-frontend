@@ -75,7 +75,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
                 {singleEvent.name}
               </h1>
               <h2 className="font-display-sm-medium text-[#414651] text-xl md:text-2xl">
-                NGN {Number(singleEvent.price).toLocaleString()}
+               {singleEvent.price?.currency} {Number(singleEvent.price?.amount).toLocaleString()}
               </h2>
             </div>
 

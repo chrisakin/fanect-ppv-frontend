@@ -6,6 +6,9 @@ interface UserSettings {
   firstName: string;
   lastName: string;
   bankName: string;
+  bankType: string;
+  bankRoutingNumber: string;
+  address: string;
   accountNumber: string;
   accountName: string;
   notifications: {
@@ -32,6 +35,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     firstName: '',
     lastName: '',
     bankName: '',
+    bankRoutingNumber: '',
+    bankType: '',
+    address: '',
     accountNumber: '',
     accountName: '',
     notifications: {
@@ -58,6 +64,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
           bankName: profile.bankName || '',
           accountNumber: profile.accountNumber || '',
           accountName: profile.accountName || '',
+          bankRoutingNumber: profile.bankRoutingNumber || '',
+          bankType:profile.bankType || '',
+          address: profile.addess || '',
           notifications: {
             appNotifLiveStreamBegins: profile.appNotifLiveStreamBegins || false,
             appNotifLiveStreamEnds: profile.appNotifLiveStreamEnds || false,

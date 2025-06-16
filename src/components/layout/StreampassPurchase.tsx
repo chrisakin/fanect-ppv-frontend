@@ -33,7 +33,7 @@ export const StreampassPurchaseCard = ({ event }: GiftFriendProps): JSX.Element 
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700">Price</p>
                 <p className="text-xl font-medium text-gray-800 dark:text-[#CCCCCC]">
-                  NGN {Number(event.price).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {event.price?.currency} {Number(event.price?.amount).toLocaleString()}
                 </p>
               </div>
             </div>

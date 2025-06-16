@@ -61,7 +61,7 @@ export const Event = (): JSX.Element => {
                 {singleEvent.name}
               </h1>
               <h2 className="text-lg sm:text-xl md:text-2xl font-medium">
-                NGN {Number(singleEvent.price).toLocaleString()}
+                {singleEvent.price?.currency} {Number(singleEvent.price?.amount).toLocaleString()}
               </h2>
 
               {/* Action Buttons */}

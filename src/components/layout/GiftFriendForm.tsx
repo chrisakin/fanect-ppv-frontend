@@ -150,7 +150,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
   };
 
   const totalFriends = friends.length + (currentFriend.firstName.trim() && currentFriend.email.trim() ? 1 : 0);
-  const totalPrice = Number(event.price) * Math.max(friends.length, 1);
+  const totalPrice = Number(event.price.amount) * Math.max(friends.length, 1);
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-gray-50 dark:bg-[#092D1B] border border-dashed border-[#a4a7ae] dark:border-[#1AAA65] rounded-[10px] p-6 sm:p-8 md:p-10">
@@ -173,7 +173,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
                 Price per friend
               </label>
               <p className="text-2xl sm:text-3xl font-semibold text-gray-800 dark:text-[#CCCCCC]">
-                NGN {Number(event.price).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+               {event.price?.currency} {Number(event.price?.amount).toLocaleString()}
               </p>
             </div>
           </div>
@@ -274,7 +274,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
                   Processing...
                 </>
               ) : (
-                `Pay Now (NGN ${totalPrice.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`
+                `Pay Now (${event.price.currency} ${totalPrice.toLocaleString()})`
               )}
             </Button>
             <p className="text-center text-sm text-gray-800 dark:text-[#CCCCCC]">

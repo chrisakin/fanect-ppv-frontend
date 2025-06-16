@@ -66,7 +66,7 @@ export const DashboardSettings = (): JSX.Element => {
         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Manage your account settings</p>
       </div>
 
-      <div className="w-full space-y-12 lg:space-y-16">
+      <div className="w-[70%] space-y-12 lg:space-y-16">
         {/* Account Settings Section */}
         <section className="flex flex-col gap-6 lg:gap-8">
           <div className="p-2.5 rounded-[20px]">
@@ -82,7 +82,7 @@ export const DashboardSettings = (): JSX.Element => {
                 Email Address
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[62px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.email}
                 disabled
                 readOnly
@@ -95,7 +95,7 @@ export const DashboardSettings = (): JSX.Element => {
                 First Name
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[62px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.firstName}
                 onChange={(e) => updateField('firstName', e.target.value)}
               />
@@ -107,7 +107,7 @@ export const DashboardSettings = (): JSX.Element => {
                 Last Name
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[62px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.lastName}
                 onChange={(e) => updateField('lastName', e.target.value)}
               />
@@ -120,14 +120,14 @@ export const DashboardSettings = (): JSX.Element => {
               </label>
               <div className="flex flex-col sm:flex-row w-full items-stretch sm:items-center gap-3 sm:gap-4">
                 <Input
-                  className="w-full sm:flex-1 h-12 sm:h-14 lg:h-[62px] dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="w-full sm:flex-1 h-12 sm:h-14 lg:h-[48px] dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   type="password"
                   value="**************"
                   disabled
                   readOnly
                 />
                 <Button
-                  className="w-full sm:w-auto sm:flex-shrink-0 h-12 sm:h-14 lg:h-[62px] bg-green-600 text-white rounded-[10px] hover:bg-green-700 text-sm sm:text-base px-4 sm:px-6"
+                  className="w-full sm:w-auto sm:flex-shrink-0 h-12 sm:h-14 lg:h-[48px] bg-green-600 text-white rounded-[10px] hover:bg-green-700 text-sm sm:text-base px-4 sm:px-6"
                   onClick={handleResetPassword}
                 >
                   Reset Password
@@ -152,9 +152,20 @@ export const DashboardSettings = (): JSX.Element => {
                 Bank Name
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[62px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.bankName}
                 onChange={(e) => updateField('bankName', e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                Bank Type
+              </label>
+              <Input
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                value={settings.bankType}
+                onChange={(e) => updateField('bankType', e.target.value)}
               />
             </div>
 
@@ -164,7 +175,7 @@ export const DashboardSettings = (): JSX.Element => {
                 Bank Account Number
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[62px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.accountNumber}
                 onChange={(e) => updateField('accountNumber', e.target.value)}
               />
@@ -176,8 +187,30 @@ export const DashboardSettings = (): JSX.Element => {
                 Name on Account
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[62px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.accountName}
+                onChange={(e) => updateField('accountName', e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                Bank Routing Number
+              </label>
+              <Input
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                value={settings.bankRoutingNumber}
+                onChange={(e) => updateField('accountName', e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                Address
+              </label>
+              <Input
+                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                value={settings.address}
                 onChange={(e) => updateField('accountName', e.target.value)}
               />
             </div>

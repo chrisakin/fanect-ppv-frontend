@@ -9,7 +9,7 @@ export interface Event {
   description: string;
   bannerUrl: string;
   watermarkUrl: string;
-  price: string;
+  price: {currency: string, amount: string};
   eventDateTime: string;
   adminStatus: string;
 }

@@ -3,6 +3,7 @@ import { LocationPermissionModal } from './modals/LocationPermissionModal';
 import { VPNDetectedModal } from './modals/VPNDetectedModal';
 import { useLocation } from '../hooks/useLocation';
 import { LocationData } from '../services/locationService';
+import { locationService } from '../services/locationService';
 
 interface LocationContextType {
   location: LocationData | null;
@@ -31,9 +32,18 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
   const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
-    // Show permission modal on first visit if no location is available
+    // Only show permission modal if:
+    // 1. Not initialized yet
+    // 2. No location available
+    // 3. User hasn't already granted or denied permission
     if (!hasInitialized && !location) {
-      setShowPermissionModal(true);
+      const hasPermission = locationService.hasLocationPermission();
+      const hasPermissionDenied = locationService.hasLocationPermissionDenied();
+      
+      // Only show modal if user hasn't made a decision yet
+      if (!hasPermission && !hasPermissionDenied) {
+        setShowPermissionModal(true);
+      }
       setHasInitialized(true);
     }
   }, [hasInitialized, location]);

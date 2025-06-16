@@ -24,14 +24,55 @@ class LocationService {
   private static instance: LocationService;
   private currentLocation: LocationData | null = null;
   private locationPermissionStatus: PermissionState | null = null;
+  private readonly LOCATION_STORAGE_KEY = 'fanect_location_data';
+  private readonly PERMISSION_STORAGE_KEY = 'fanect_location_permission';
 
-  private constructor() {}
+  private constructor() {
+    // Load cached data on initialization
+    this.loadCachedData();
+  }
 
   public static getInstance(): LocationService {
     if (!LocationService.instance) {
       LocationService.instance = new LocationService();
     }
     return LocationService.instance;
+  }
+
+  // Load cached location and permission data
+  private loadCachedData(): void {
+    try {
+      const cachedLocation = localStorage.getItem(this.LOCATION_STORAGE_KEY);
+      const cachedPermission = localStorage.getItem(this.PERMISSION_STORAGE_KEY);
+      
+      if (cachedLocation) {
+        this.currentLocation = JSON.parse(cachedLocation);
+      }
+      
+      if (cachedPermission) {
+        this.locationPermissionStatus = cachedPermission as PermissionState;
+      }
+    } catch (error) {
+      console.warn('Failed to load cached location data:', error);
+    }
+  }
+
+  // Save location data to localStorage
+  private saveLocationData(location: LocationData): void {
+    try {
+      localStorage.setItem(this.LOCATION_STORAGE_KEY, JSON.stringify(location));
+    } catch (error) {
+      console.warn('Failed to save location data:', error);
+    }
+  }
+
+  // Save permission status to localStorage
+  private savePermissionStatus(status: PermissionState): void {
+    try {
+      localStorage.setItem(this.PERMISSION_STORAGE_KEY, status);
+    } catch (error) {
+      console.warn('Failed to save permission status:', error);
+    }
   }
 
   // Check if VPN is detected based on various indicators
@@ -58,11 +99,6 @@ class LocationService {
     const orgIndicatesVPN = vpnIndicators.some(pattern => 
       pattern.test(ipData.org || '')
     );
-
-    // Additional checks can be added here:
-    // - Check if ASN is known VPN provider
-    // - Check if IP is in known VPN ranges
-    // - Use specialized VPN detection APIs
 
     return orgIndicatesVPN;
   }
@@ -108,6 +144,7 @@ class LocationService {
           switch (error.code) {
             case error.PERMISSION_DENIED:
               errorMessage = 'Location access denied by user';
+              this.savePermissionStatus('denied');
               break;
             case error.POSITION_UNAVAILABLE:
               errorMessage = 'Location information is unavailable';
@@ -186,12 +223,13 @@ class LocationService {
       if ('permissions' in navigator) {
         const permission = await navigator.permissions.query({ name: 'geolocation' });
         this.locationPermissionStatus = permission.state;
+        this.savePermissionStatus(permission.state);
         return permission.state;
       }
-      return 'prompt';
+      return this.locationPermissionStatus || 'prompt';
     } catch (error) {
       console.warn('Permission API not supported');
-      return 'prompt';
+      return this.locationPermissionStatus || 'prompt';
     }
   }
 
@@ -205,11 +243,23 @@ class LocationService {
       });
       
       this.locationPermissionStatus = 'granted';
+      this.savePermissionStatus('granted');
       return true;
     } catch (error) {
       this.locationPermissionStatus = 'denied';
+      this.savePermissionStatus('denied');
       return false;
     }
+  }
+
+  // Check if user has already granted permission
+  public hasLocationPermission(): boolean {
+    return this.locationPermissionStatus === 'granted';
+  }
+
+  // Check if user has denied permission
+  public hasLocationPermissionDenied(): boolean {
+    return this.locationPermissionStatus === 'denied';
   }
 
   // Main method to get user location
@@ -227,6 +277,8 @@ class LocationService {
         try {
           const gpsLocation = await this.getGPSLocation();
           this.currentLocation = gpsLocation;
+          this.saveLocationData(gpsLocation);
+          this.savePermissionStatus('granted');
           return gpsLocation;
         } catch (gpsError) {
           console.warn('GPS location failed, falling back to IP location:', gpsError);
@@ -236,6 +288,7 @@ class LocationService {
       // Fallback to IP-based location
       const ipLocation = await this.getIPLocation();
       this.currentLocation = ipLocation;
+      this.saveLocationData(ipLocation);
       return ipLocation;
 
     } catch (error) {
@@ -251,10 +304,12 @@ class LocationService {
     return this.currentLocation;
   }
 
-  // Clear cached location
+  // Clear cached location and permission data
   public clearLocation(): void {
     this.currentLocation = null;
     this.locationPermissionStatus = null;
+    localStorage.removeItem(this.LOCATION_STORAGE_KEY);
+    localStorage.removeItem(this.PERMISSION_STORAGE_KEY);
   }
 }
 
