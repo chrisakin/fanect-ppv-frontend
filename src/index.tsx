@@ -8,6 +8,7 @@ import { PrivacyPolicy } from "./screens/PrivacyPolicy";
 import { Terms } from "./screens/Terms";
 import { Event } from "./screens/Event";
 import { Dashboard } from "./screens/Dashboard";
+import { Search } from "./screens/Search";
 import { ThemeProvider } from "./components/layout/ThemeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Toaster } from "./components/ui/toaster";
@@ -15,6 +16,7 @@ import { useAuthStore } from "./store/authStore";
 import { PaymentSuccess } from "./screens/PaymentSuccess/PaymentSuccess";
 import { NotFound } from "./screens/NotFound";
 import { useFCM } from "./hooks/useFCM";
+import { LocationProvider } from "./components/LocationProvider";
 
 // Initialize auth state before rendering
 useAuthStore.getState().initAuth();
@@ -39,6 +41,7 @@ function App() {
   useFCM();
   
   return (
+    // <LocationProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -46,6 +49,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/event/:id" element={<Event />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/:method/payment-success" element={<PaymentSuccess />} />
         <Route
           path="/dashboard/*"
@@ -58,6 +62,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
+    // </LocationProvider>
   );
 }
 

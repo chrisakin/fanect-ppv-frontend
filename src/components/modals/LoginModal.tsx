@@ -1,4 +1,4 @@
-import { EyeOffIcon, EyeIcon, Loader2 } from "lucide-react";
+import { EyeOffIcon, EyeIcon, Loader2, ArrowLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +30,10 @@ const verificationSchema = z.object({
   code: z.string().length(6, "Verification code must be 6 digits"),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,11 +42,13 @@ interface LoginModalProps {
 type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 type VerificationFormData = z.infer<typeof verificationSchema>;
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [otpValues, setOtpValues] = useState(Array(6).fill(""));
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +82,16 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     reset: resetVerification,
   } = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
+    mode: "onChange",
+  });
+
+  const {
+    register: registerForgotPassword,
+    handleSubmit: handleForgotPasswordSubmit,
+    formState: { errors: forgotPasswordErrors, isValid: isForgotPasswordValid },
+    reset: resetForgotPassword,
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
     mode: "onChange",
   });
 
@@ -233,6 +249,26 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
   };
 
+  const onForgotPassword = async (data: ForgotPasswordFormData) => {
+    setIsLoading(true);
+    try {
+      await axios.post('/auth/forgot-password', data);
+      toast({
+        title: "Success",
+        description: "Password reset link has been sent to your email",
+      });
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data?.message || "An error occurred while sending reset email",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGoogleAuth = useGoogleLogin({
     flow: 'auth-code',
     onSuccess: async (response) => {
@@ -277,9 +313,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     setIsSignup(!isSignup);
     setShowPassword(false);
     setShowVerification(false);
+    setShowForgotPassword(false);
     resetLogin();
     resetSignup();
     resetVerification();
+    resetForgotPassword();
   };
 
   const resendOTP = async () => {
@@ -301,15 +339,76 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
   };
 
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+    setShowVerification(false);
+    resetForgotPassword();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] p-0">
         <DialogTitle className="sr-only">
-          {showVerification ? "Verify Email" : isSignup ? "Create Account" : "Login to FaNect"}
+          {showForgotPassword ? "Forgot Password" : showVerification ? "Verify Email" : isSignup ? "Create Account" : "Login to FaNect"}
         </DialogTitle>
         <Card className="border-none">
           <CardContent className="flex flex-col items-center space-y-8 p-8">
-            {showVerification ? (
+            {showForgotPassword ? (
+              <div className="flex flex-col items-center space-y-10 w-full">
+                <div className="flex flex-col items-center space-y-6">
+                  <h1 className="text-2xl font-semibold tracking-tight text-green-600">FaNect</h1>
+                  <div className="space-y-3 text-center">
+                    <h2 className="text-2xl font-semibold tracking-tight">Forgot Password</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Enter your email address and we'll send you a link to reset your password
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleForgotPasswordSubmit(onForgotPassword)} className="w-full space-y-6">
+                  <div>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Email address"
+                      {...registerForgotPassword("email")}
+                      className="h-10"
+                      disabled={isLoading}
+                    />
+                    {forgotPasswordErrors.email && (
+                      <span className="text-xs text-red-500 mt-1">
+                        {forgotPasswordErrors.email.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white h-12"
+                    disabled={!isForgotPasswordValid || isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Send Reset Link"
+                    )}
+                  </Button>
+
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={handleBackToLogin}
+                      className="p-0 h-auto text-green-600 hover:text-green-700 flex items-center gap-2"
+                      disabled={isLoading}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to Login
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            ) : showVerification ? (
               <div className="flex flex-col items-center space-y-10 w-full">
                 <div className="flex flex-col items-center space-y-6">
                   <h1 className="text-2xl font-semibold tracking-tight text-green-600">FaNect</h1>
@@ -516,6 +615,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           type="button"
                           variant="link"
                           className="px-0 h-auto text-xs"
+                          onClick={() => setShowForgotPassword(true)}
                           disabled={isLoading}
                         >
                           Forgot Password?

@@ -24,6 +24,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -41,6 +42,29 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
     }
   };
 
+    const handleCreateEvent = () => {
+    if (isAuthenticated) {
+      navigate("/dashboard/organise");
+    } else {
+      // open your login modal here
+      setIsLoginModalOpen(true); // replace with your modal logic
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
+
+  const handleSearchInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+    }
+  };
+
   return (
     <>
       <LoginModal 
@@ -50,7 +74,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && !withSidebar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden\" onClick={() => setIsMenuOpen(false)} />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)} />
       )}
 
       <header className={withSidebar ? "fixed left-0 top-0 z-50 w-full md:ml-sidebar-desktop md:w-header-desktop bg-background" : "fixed top-0 left-0 right-0 bg-background z-50" }>
@@ -90,14 +114,17 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
 
         {/* Mobile Search Bar */}
         <div className="md:hidden px-3 py-2">
-          <div className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] w-full bg-background">
+          <form onSubmit={handleSearch} className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] w-full bg-background">
             <SearchIcon className="w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search events"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchInputKeyDown}
               className="bg-transparent border-none outline-none w-full text-sm text-gray-400 placeholder-gray-400"
             />
-          </div>
+          </form>
         </div>
 
         {/* Mobile Menu */}
@@ -141,19 +168,22 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
         {/* Desktop/Tablet Header */}
         <div className="hidden md:flex items-center justify-between px-4 lg:px-16 py-4 my-4 mx-5 gap-3 rounded-lg bg-[#F5F5F5] dark:bg-dash-dark">
         {!isAuthenticated && (
-          <Link to="/\" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
+          <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
             FaNect
           </Link>
         )}
 
-          <div className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] dark:border-[#2E483A] w-[300px]">
-            <SearchIcon className="w-6 h-6 text-gray-400" />
+          <form onSubmit={handleSearch} className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] dark:border-[#2E483A] w-[300px]">
+            <SearchIcon className="w-6 h-6 text-gray-400 cursor-pointer" onClick={handleSearch} />
             <input
               type="text"
               placeholder="Search events"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchInputKeyDown}
               className="bg-transparent border-none outline-none w-full text-sm text-gray-400 dark:text-[#828B86] placeholder-gray-400"
             />
-          </div>
+          </form>
 
           <div className="flex items-center gap-2">
             <ToggleGroup
@@ -176,7 +206,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
               </ToggleGroupItem>
             </ToggleGroup>
 
-            {!isAuthenticated && (
+            {/* {!isAuthenticated && (
               <Button
               variant="outline"
               size="lg"
@@ -184,9 +214,9 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
             >
               Discover Events
             </Button>
-            )}
+            )} */}
 
-            <Link to="/dashboard/organise">
+            {/* <Link to="/dashboard/organise">
             <Button
               variant="outline"
               size="lg"
@@ -194,7 +224,16 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
             >
               Create an Event
             </Button>
-            </Link>
+            </Link> */}
+
+            <Button
+              variant="outline"
+              size="lg"
+              className="cursor-pointer text-md text-gray-500 rounded-lg border-[#717680] dark:border-[#2E483A] bg-[#F5F5F5] dark:bg-dash-dark"
+              onClick={handleCreateEvent}
+            >
+              Create an Event
+            </Button>
 
             {isAuthenticated ? (
               <Button

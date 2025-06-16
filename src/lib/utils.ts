@@ -16,3 +16,17 @@ export function formatTime(timeStr: string) {
     hour12: true,
   });
 }
+
+ export function formatInputDate(date: Date){
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+export function formatCurrency(amount: number) {
+  return amount
+    .toFixed(2)                // always two decimals
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ","); // add commas
+}

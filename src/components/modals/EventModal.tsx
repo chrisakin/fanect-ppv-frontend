@@ -1,5 +1,5 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "../ui/dialog";
-import { CalendarIcon, ClockIcon, X, EyeIcon, UploadIcon } from "lucide-react";
+import { CalendarIcon, ClockIcon, X, EyeIcon, UploadIcon, PlusIcon, TrashIcon } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -9,6 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useToast } from "../ui/use-toast";
 import axios from "../../lib/axios";
 import { useEventStore } from "@/store/eventStore";
+import { CustomDatePicker } from "../ui/custom-date-picker";
+import { CustomTimePicker } from "../ui/custom-time-picker";
+import { Currency, IPrice } from "../../types/event";
+import { formatCurrency } from "@/lib/utils";
 
 interface EventModalProps {
   open: boolean;
@@ -17,49 +21,46 @@ interface EventModalProps {
 }
 
 interface FormData {
-  eventName: string;
-  eventDate: string;
-  eventTime: string;
-  eventDescription: string;
-  currency: string;
-  price: string;
-  hasBroadcastRoom: string;
+  name: string;
+  date: Date | null;
+  time: string;
+  description: string;
+  prices: IPrice[];
+  haveBroadcastRoom: string;
   broadcastSoftware: string;
-  testStreamDate: string;
-  eventBanner: File | null;
-  eventWatermark: File | null;
+  scheduledTestDate: Date | null;
+  bannerUrl: File | null;
+  watermarkUrl: File | null;
   eventTrailer: File | null;
 }
 
 interface FormErrors {
-  eventName?: string;
-  eventDate?: string;
-  eventTime?: string;
-  eventDescription?: string;
-  currency?: string;
-  price?: string;
-  hasBroadcastRoom?: string;
+  name?: string;
+  date?: string;
+  time?: string;
+  description?: string;
+  prices?: string;
+  haveBroadcastRoom?: string;
   broadcastSoftware?: string;
-  testStreamDate?: string;
-  eventBanner?: string;
-  eventWatermark?: string;
+  scheduledTestDate?: string;
+  bannerUrl?: string;
+  watermarkUrl?: string;
   eventTrailer?: string;
 }
 
 export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.Element => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
-    eventName: "",
-    eventDate: "",
-    eventTime: "",
-    eventDescription: "",
-    currency: "NGN",
-    price: "",
-    hasBroadcastRoom: "",
+    name: "",
+    date: null,
+    time: "",
+    description: "",
+    prices: [{ currency: Currency.NONE, amount: 0 }],
+    haveBroadcastRoom: "",
     broadcastSoftware: "",
-    testStreamDate: "",
-    eventBanner: null,
-    eventWatermark: null,
+    scheduledTestDate: null,
+    bannerUrl: null,
+    watermarkUrl: null,
     eventTrailer: null,
   });
   const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string }>({});
@@ -69,76 +70,45 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
   const { updateEvent } = useEventStore();
 
   // Currency options
-  const currencies = [
-    { code: "NGN", label: "NGN" },
-    { code: "USD", label: "USD" },
-    { code: "EUR", label: "EUR" },
-    { code: "GBP", label: "GBP" },
-    { code: "CAD", label: "CAD" },
-  ];
+  const currencies = Object.values(Currency);
 
   useEffect(() => {
     if (event) {
       try {
-        const eventDate = event.eventDateTime ? new Date(event.eventDateTime) : new Date();
-        // Check if the date is valid
-        if (isNaN(eventDate.getTime())) {
-          throw new Error('Invalid date');
-        }
-        
+        const eventDate = event.date ? new Date(event.date) : null;
+        const scheduledDate = event.scheduledTestDate ? new Date(event.scheduledTestDate) : null;
         setFormData({
-          eventName: event.name || "",
-          eventDate: eventDate.toISOString().split('T')[0],
-          eventTime: eventDate.toTimeString().slice(0, 5),
-          eventDescription: event.description || "",
-          currency: event.currency || "NGN",
-          price: event.price || "",
-          hasBroadcastRoom: event.hasBroadcastRoom || "",
+          name: event.name || "",
+          date: eventDate,
+          time: event.time || "",
+          description: event.description || "",
+          prices: event.prices || [{ currency: Currency.NONE, amount: Number(event.price) || 0 }],
+          haveBroadcastRoom: event.haveBroadcastRoom == true ? "yes" : "no" ,
           broadcastSoftware: event.broadcastSoftware || "",
-          testStreamDate: event.testStreamDate || "",
-          eventBanner: null,
-          eventWatermark: null,
+          scheduledTestDate: scheduledDate,
+          bannerUrl: null,
+          watermarkUrl: null,
           eventTrailer: null,
         });
         setImagePreviews({
-          eventBanner: event.bannerUrl || "",
-          eventWatermark: event.watermarkUrl || "",
+          bannerUrl: event.bannerUrl || "",
+          watermarkUrl: event.watermarkUrl || "",
           eventTrailer: event.trailerUrl || "",
         });
       } catch (error) {
-        // If date is invalid, set default values
-        const currentDate = new Date();
-        setFormData({
-          eventName: event.name || "",
-          eventDate: currentDate.toISOString().split('T')[0],
-          eventTime: currentDate.toTimeString().slice(0, 5),
-          eventDescription: event.description || "",
-          currency: event.currency || "NGN",
-          price: event.price || "",
-          hasBroadcastRoom: event.hasBroadcastRoom || "",
-          broadcastSoftware: event.broadcastSoftware || "",
-          testStreamDate: event.testStreamDate || "",
-          eventBanner: null,
-          eventWatermark: null,
-          eventTrailer: null,
-        });
-        setImagePreviews({
-          eventBanner: event.bannerUrl || "",
-          eventWatermark: event.watermarkUrl || "",
-          eventTrailer: event.trailerUrl || "",
-        });
+        console.error('Error setting form data:', error);
       }
     }
   }, [event]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
-    const key = toCamelCase(id) as keyof FormData;
+    const key = id.replace('event-', '') as keyof FormData;
     setFormData((prev) => ({
       ...prev,
       [key]: value,
     }));
-    if (errors[id as keyof FormErrors]) {
+    if (errors[key as keyof FormErrors]) {
       setErrors((prev) => ({
         ...prev,
         [key]: undefined,
@@ -159,9 +129,65 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
     }
   };
 
-  function toCamelCase(str: string) {
-    return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase()).replace(/^event/, "event");
-  }
+
+  const handleDateChange = (field: 'date' | 'scheduledTestDate', date: string | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: date,
+    }));
+    if (errors[field]) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: undefined,
+      }));
+    }
+  };
+
+  const handleTimeChange = (time: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      time,
+    }));
+    if (errors.time) {
+      setErrors((prev) => ({
+        ...prev,
+        time: undefined,
+      }));
+    }
+  };
+
+  const handlePriceChange = (index: number, field: 'currency' | 'amount', value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      prices: prev.prices.map((price, i) => 
+        i === index 
+          ? { ...price, [field]: field === 'amount' ? Number(value) : value }
+          : price
+      )
+    }));
+    if (errors.prices) {
+      setErrors((prev) => ({
+        ...prev,
+        prices: undefined,
+      }));
+    }
+  };
+
+  const addPrice = () => {
+    setFormData((prev) => ({
+      ...prev,
+      prices: [...prev.prices, { currency: Currency.NONE, amount: 0 }]
+    }));
+  };
+
+  const removePrice = (index: number) => {
+    if (formData.prices.length > 1) {
+      setFormData((prev) => ({
+        ...prev,
+        prices: prev.prices.filter((_, i) => i !== index)
+      }));
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormData) => {
     const file = e.target.files?.[0];
@@ -208,20 +234,20 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
   const validateStep1 = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.eventName.trim()) {
-      newErrors.eventName = "Event name is required";
+    if (!formData.name.trim()) {
+      newErrors.name = "Event name is required";
     }
 
-    if (!formData.eventDate) {
-      newErrors.eventDate = "Event date is required";
+    if (!formData.date) {
+      newErrors.date = "Event date is required";
     }
 
-    if (!formData.eventTime) {
-      newErrors.eventTime = "Event time is required";
+    if (!formData.time) {
+      newErrors.time = "Event time is required";
     }
 
-    if (!formData.eventDescription.trim()) {
-      newErrors.eventDescription = "Event description is required";
+    if (!formData.description.trim()) {
+      newErrors.description = "Event description is required";
     }
 
     setErrors(newErrors);
@@ -231,32 +257,28 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
   const validateStep2 = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.currency) {
-      newErrors.currency = "Currency is required";
+    if (formData.prices.length === 0 || formData.prices.some(p => p.amount <= 0)) {
+      newErrors.prices = "At least one valid price is required";
     }
 
-    if (!formData.price.trim()) {
-      newErrors.price = "Price is required";
-    }
-
-    if (!formData.hasBroadcastRoom) {
-      newErrors.hasBroadcastRoom = "Please select if you have a broadcast room";
+    if (!formData.haveBroadcastRoom) {
+      newErrors.haveBroadcastRoom = "Please select if you have a broadcast room";
     }
 
     if (!formData.broadcastSoftware.trim()) {
       newErrors.broadcastSoftware = "Broadcast software information is required";
     }
 
-    if (!formData.testStreamDate) {
-      newErrors.testStreamDate = "Test stream date is required";
+    if (!formData.scheduledTestDate) {
+      newErrors.scheduledTestDate = "Test stream date is required";
     }
 
-    if (!event && !formData.eventBanner) {
-      newErrors.eventBanner = "Event banner is required";
+    if (!event && !formData.bannerUrl) {
+      newErrors.bannerUrl = "Event banner is required";
     }
 
-    if (!event && !formData.eventWatermark) {
-      newErrors.eventWatermark = "Event watermark is required";
+    if (!event && !formData.watermarkUrl) {
+      newErrors.watermarkUrl = "Event watermark is required";
     }
 
     setErrors(newErrors);
@@ -280,21 +302,27 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
     if (validateStep2()) {
       try {
         const formDataToSend = new FormData();
-        formDataToSend.append('name', formData.eventName);
-        formDataToSend.append('date', formData.eventDate);
-        formDataToSend.append('time', formData.eventTime);
-        formDataToSend.append('description', formData.eventDescription);
-        formDataToSend.append('currency', formData.currency);
-        formDataToSend.append('price', formData.price);
-        formDataToSend.append('hasBroadcastRoom', formData.hasBroadcastRoom);
-        formDataToSend.append('broadcastSoftware', formData.broadcastSoftware);
-        formDataToSend.append('testStreamDate', formData.testStreamDate);
+        formDataToSend.append('name', formData.name);
         
-        if (formData.eventBanner) {
-          formDataToSend.append('banner', formData.eventBanner);
+        if (formData.date) {
+          formDataToSend.append('date', formData.date as unknown as string);
         }
-        if (formData.eventWatermark) {
-          formDataToSend.append('watermark', formData.eventWatermark);
+        
+        formDataToSend.append('time', formData.time);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('prices', JSON.stringify(formData.prices));
+        formDataToSend.append('haveBroadcastRoom', formData.haveBroadcastRoom);
+        formDataToSend.append('broadcastSoftware', formData.broadcastSoftware);
+        
+        if (formData.scheduledTestDate) {
+          formDataToSend.append('scheduledTestDate', formData.scheduledTestDate as unknown as string);
+        }
+        
+        if (formData.bannerUrl) {
+          formDataToSend.append('banner', formData.bannerUrl);
+        }
+        if (formData.watermarkUrl) {
+          formDataToSend.append('watermark', formData.watermarkUrl);
         }
         if (formData.eventTrailer) {
           formDataToSend.append('trailer', formData.eventTrailer);
@@ -321,17 +349,16 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
         onOpenChange(false);
         setCurrentStep(1);
         setFormData({
-          eventName: "",
-          eventDate: "",
-          eventTime: "",
-          eventDescription: "",
-          currency: "NGN",
-          price: "",
-          hasBroadcastRoom: "",
+          name: "",
+          date: null,
+          time: "",
+          description: "",
+          prices: [{ currency: Currency.NONE, amount: 0 }],
+          haveBroadcastRoom: "",
           broadcastSoftware: "",
-          testStreamDate: "",
-          eventBanner: null,
-          eventWatermark: null,
+          scheduledTestDate: null,
+          bannerUrl: null,
+          watermarkUrl: null,
           eventTrailer: null,
         });
         setImagePreviews({});
@@ -351,17 +378,16 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
     onOpenChange(false);
     setCurrentStep(1);
     setFormData({
-      eventName: "",
-      eventDate: "",
-      eventTime: "",
-      eventDescription: "",
-      currency: "NGN",
-      price: "",
-      hasBroadcastRoom: "",
+      name: "",
+      date: null,
+      time: "",
+      description: "",
+      prices: [{ currency: Currency.NONE, amount: 0 }],
+      haveBroadcastRoom: "",
       broadcastSoftware: "",
-      testStreamDate: "",
-      eventBanner: null,
-      eventWatermark: null,
+      scheduledTestDate: null,
+      bannerUrl: null,
+      watermarkUrl: null,
       eventTrailer: null,
     });
     setImagePreviews({});
@@ -370,7 +396,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-[800px] h-[90vh] p-0 bg-background overflow-y-auto">
+      <DialogContent className="w-full max-w-[680px] h-[90vh] p-0 bg-background overflow-y-auto">
         <form onSubmit={currentStep === 2 ? handleSubmit : (e) => e.preventDefault()}>
           <Card className="w-full bg-gray-50 dark:bg-[#092D1B] rounded-[10px] border border-solid border-[#d5d7da] dark:border-[#1AAA65]">
             <CardContent className="flex flex-col items-center p-0">
@@ -378,11 +404,11 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                 <X className="h-4 w-4" />
               </DialogClose>
 
-              <div className="flex flex-col w-full max-w-[600px] items-center gap-[60px] py-[75px] px-6">
+              <div className="flex flex-col w-full max-w-[600px] items-center gap-[60px] py-[45px] px-6">
                 {/* Header Section */}
-                <div className="flex flex-col w-full max-w-[489px] items-center gap-[30px]">
+                <div className="flex flex-col w-full max-w-[489px] items-center gap-[20px]">
                   <div className="flex flex-col items-center w-full">
-                    <DialogTitle className="font-display-lg-semibold text-gray-800 dark:text-[#CCCCCC] text-[length:var(--display-lg-semibold-font-size)] text-center tracking-[var(--display-lg-semibold-letter-spacing)] leading-[var(--display-lg-semibold-line-height)]">
+                    <DialogTitle className="text-[48px] text-gray-800 dark:text-[#CCCCCC] text-center tracking-[var(--display-lg-semibold-letter-spacing)] leading-[var(--display-lg-semibold-line-height)]">
                       {event ? 'Edit Event' : 'Organize Event'}
                     </DialogTitle>
 
@@ -407,16 +433,16 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </label>
                         <div className="relative w-full">
                           <Input
-                            id="event-name"
+                            id="name"
                             className="h-[60px] px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
                             placeholder="Enter event name"
-                            value={formData.eventName}
+                            value={formData.name}
                             onChange={handleInputChange}
                             disabled={isSubmitting}
                           />
                         </div>
-                        {errors.eventName && (
-                          <span className="text-xs text-red-500">{errors.eventName}</span>
+                        {errors.name && (
+                          <span className="text-xs text-red-500">{errors.name}</span>
                         )}
                       </div>
 
@@ -425,19 +451,15 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         <label className="font-text-lg-medium text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
                           Event Date
                         </label>
-                        <div className="relative w-full">
-                          <Input
-                            id="event-date"
-                            type="date"
-                            className="h-[60px] px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
-                            value={formData.eventDate}
-                            onChange={handleInputChange}
-                            disabled={isSubmitting}
-                          />
-                          <CalendarIcon className="absolute right-3.5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
-                        </div>
-                        {errors.eventDate && (
-                          <span className="text-xs text-red-500">{errors.eventDate}</span>
+                        <CustomDatePicker
+                          value={formData.date}
+                          onChange={(date) => handleDateChange('date', date as unknown as string)}
+                          placeholder="Select event date"
+                          disabled={isSubmitting}
+                          className="h-[60px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                        />
+                        {errors.date && (
+                          <span className="text-xs text-red-500">{errors.date}</span>
                         )}
                       </div>
 
@@ -446,32 +468,28 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         <label className="font-text-lg-medium text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
                           Event Time
                         </label>
-                        <div className="relative w-full">
-                          <Input
-                            id="event-time"
-                            type="time"
-                            className="h-[60px] px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
-                            value={formData.eventTime}
-                            onChange={handleInputChange}
-                            disabled={isSubmitting}
-                          />
-                          <ClockIcon className="absolute right-3.5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
-                        </div>
-                        {errors.eventTime && (
-                          <span className="text-xs text-red-500">{errors.eventTime}</span>
+                        <CustomTimePicker
+                          value={formData.time}
+                          onChange={handleTimeChange}
+                          placeholder="Select event time"
+                          disabled={isSubmitting}
+                          className="h-[60px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                        />
+                        {errors.time && (
+                          <span className="text-xs text-red-500">{errors.time}</span>
                         )}
                       </div>
 
-                      {/* Event Description Field with Rich Text */}
+                      {/* Event Description Field */}
                       <div className="flex flex-col items-start gap-1.5 w-full">
                         <label className="font-text-lg-medium text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
                           Event Description
                         </label>
                         <Textarea
-                          id="event-description"
-                          className="h-[94px] px-3.5 pt-5 pb-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px] resize-none"
+                          id="description"
+                          className="h-[174px] px-3.5 pt-5 pb-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px] resize-none"
                           placeholder="Enter event description. You can use line breaks for paragraphs and format your text as needed."
-                          value={formData.eventDescription}
+                          value={formData.description}
                           onChange={handleInputChange}
                           disabled={isSubmitting}
                           style={{ whiteSpace: 'pre-wrap' }}
@@ -479,8 +497,8 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           Tip: Use line breaks to create paragraphs. Your formatting will be preserved.
                         </p>
-                        {errors.eventDescription && (
-                          <span className="text-xs text-red-500">{errors.eventDescription}</span>
+                        {errors.description && (
+                          <span className="text-xs text-red-500">{errors.description}</span>
                         )}
                       </div>
                     </div>
@@ -490,7 +508,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                       <Button 
                         type="button"
                         onClick={handleContinue}
-                        className="h-[60px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-whitewhite text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
+                        className="h-[60px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-white text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
                         disabled={isSubmitting}
                       >
                         Continue
@@ -505,46 +523,83 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                     {/* Form Fields */}
                     <div className="flex flex-col items-start gap-6 w-full">
                       {/* Event Pricing */}
-                      <div className="flex flex-col items-start gap-1.5 w-full">
-                        <h3 className="font-text-lg-medium text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
-                          Event Pricing
-                        </h3>
+                      <div className="flex flex-col items-start gap-4 w-full">
+                        <div className="flex items-center justify-between w-full">
+                          <h3 className="font-text-lg-medium text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
+                            Event Pricing
+                          </h3>
+                          <Button
+                            type="button"
+                            onClick={addPrice}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            <PlusIcon className="w-4 h-4" />
+                            Add Currency
+                          </Button>
+                        </div>
                         
-                        <div className="flex items-start gap-1.5 w-full">
-                          <div className="w-[93px] h-[60px] flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600">
-                            <Select value={formData.currency} onValueChange={(value) => handleSelectChange('currency', value)}>
-                              <SelectTrigger className="w-full h-full border-0 bg-transparent">
+                        {formData.prices.map((price, index) => (
+                          <div key={index} className="flex items-start gap-2 w-full">
+                            <div className="w-[120px] h-[60px] flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600">
+                              {/* <Input
+                                value={price.currency}
+                                disabled
+                                className="w-full h-full border-0 bg-transparent text-center font-medium"
+                              /> */}
+                              <Select value={price.currency} onValueChange={(value) => handlePriceChange(index, "currency", value)}>
+                              <SelectTrigger className="w-full h-full border-0 bg-transparent cursor-pointer">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {currencies.map((currency) => (
-                                  <SelectItem key={currency.code} value={currency.code}>
-                                    {currency.label}
-                                  </SelectItem>
-                                ))}
+                                {currencies.map((currency) => {
+                                  const isSelected = formData.prices.some(
+                                    (p, i) => p.currency === currency && i !== index
+                                  );
+                                  return (
+                                    <SelectItem
+                                      key={currency}
+                                      value={currency}
+                                      disabled={isSelected}
+                                    >
+                                      {currency}
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
-                          </div>
-
-                          <div className="flex-1 h-[60px] bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600">
-                            <div className="flex items-center justify-between px-3.5 py-2.5 h-full">
-                              <Input
-                                id="price"
-                                type="number"
-                                className="border-0 bg-transparent text-gray-700 dark:text-gray-200 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-base tracking-[-0.32px] shadow-none focus-visible:ring-0 p-0 h-full"
-                                placeholder="Enter amount"
-                                value={formData.price}
-                                onChange={handleInputChange}
-                                disabled={isSubmitting}
-                              />
-                              <EyeIcon className="w-6 h-6 text-gray-400" />
                             </div>
+
+                            <div className="flex-1 h-[60px] bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600">
+                              <div className="flex items-center justify-between px-3.5 py-2.5 h-full">
+                                <Input
+                                  type="number"
+                                  className="border-0 bg-transparent text-gray-700 dark:text-gray-200 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-base tracking-[-0.32px] shadow-none focus-visible:ring-0 p-0 h-full"
+                                  placeholder="Enter amount"
+                                  value={price.amount|| ''}
+                                  onChange={(e) => handlePriceChange(index, 'amount', e.target.value)}
+                                  disabled={isSubmitting}
+                                />
+                              </div>
+                            </div>
+
+                            {formData.prices.length > 1 && (
+                              <Button
+                                type="button"
+                                onClick={() => removePrice(index)}
+                                variant="outline"
+                                size="sm"
+                                className="h-[60px] w-[60px] p-0 border-red-300 text-red-500 hover:bg-red-50"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
-                        </div>
-                        {(errors.currency || errors.price) && (
-                          <span className="text-xs text-red-500">
-                            {errors.currency || errors.price}
-                          </span>
+                        ))}
+                        
+                        {errors.prices && (
+                          <span className="text-xs text-red-500">{errors.prices}</span>
                         )}
                       </div>
 
@@ -554,8 +609,8 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           Do you have a broadcast room?
                         </h3>
 
-                        <Select value={formData.hasBroadcastRoom} onValueChange={(value) => handleSelectChange('hasBroadcastRoom', value)}>
-                          <SelectTrigger className="h-[60px] bg-gray-50 dark:bg-gray-800 border-[#d5d7da] dark:border-gray-600 w-full">
+                        <Select value={formData.haveBroadcastRoom} onValueChange={(value) => handleSelectChange('haveBroadcastRoom', value)}>
+                          <SelectTrigger className="h-[60px] bg-gray-50 dark:bg-gray-800 border-[#d5d7da] dark:border-gray-600 w-full cursor-pointer">
                             <SelectValue placeholder="Select answer" />
                           </SelectTrigger>
                           <SelectContent>
@@ -563,8 +618,8 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                             <SelectItem value="no">No</SelectItem>
                           </SelectContent>
                         </Select>
-                        {errors.hasBroadcastRoom && (
-                          <span className="text-xs text-red-500">{errors.hasBroadcastRoom}</span>
+                        {errors.haveBroadcastRoom && (
+                          <span className="text-xs text-red-500">{errors.haveBroadcastRoom}</span>
                         )}
                       </div>
 
@@ -575,7 +630,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </h3>
 
                         <Textarea
-                          id="broadcast-software"
+                          id="broadcastSoftware"
                           className="h-[94px] bg-gray-50 dark:bg-gray-800 border-[#d5d7da] dark:border-gray-600 rounded-lg pt-5 pb-2.5 px-3.5 text-gray-700 dark:text-gray-200 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-base tracking-[-0.32px] resize-none"
                           placeholder="Enter answer"
                           value={formData.broadcastSoftware}
@@ -593,19 +648,15 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           Schedule Test Stream with FaNect Support
                         </h3>
 
-                        <div className="relative w-full">
-                          <Input
-                            id="test-stream-date"
-                            type="date"
-                            className="h-[60px] px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
-                            value={formData.testStreamDate}
-                            onChange={handleInputChange}
-                            disabled={isSubmitting}
-                          />
-                          <CalendarIcon className="absolute right-3.5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
-                        </div>
-                        {errors.testStreamDate && (
-                          <span className="text-xs text-red-500">{errors.testStreamDate}</span>
+                        <CustomDatePicker
+                          value={formData.scheduledTestDate}
+                          onChange={(date) => handleDateChange('scheduledTestDate', date as unknown as string)}
+                          placeholder="Select test stream date"
+                          disabled={isSubmitting}
+                          className="h-[60px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                        />
+                        {errors.scheduledTestDate && (
+                          <span className="text-xs text-red-500">{errors.scheduledTestDate}</span>
                         )}
                       </div>
 
@@ -615,12 +666,12 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           Event Banner
                         </h3>
 
-                        <label htmlFor="event-banner" className="cursor-pointer w-full">
+                        <label htmlFor="bannerUrl" className="cursor-pointer w-full">
                           <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
                             <div className="flex flex-col w-[157px] items-center justify-center gap-2.5">
-                              {imagePreviews.eventBanner ? (
+                              {imagePreviews.bannerUrl ? (
                                 <img
-                                  src={imagePreviews.eventBanner}
+                                  src={imagePreviews.bannerUrl}
                                   alt="Banner Preview"
                                   className="w-full h-[120px] object-contain rounded"
                                 />
@@ -635,16 +686,16 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                             </div>
                           </div>
                           <input
-                            id="event-banner"
+                            id="bannerUrl"
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={(e) => handleFileChange(e, 'eventBanner')}
+                            onChange={(e) => handleFileChange(e, 'bannerUrl')}
                             disabled={isSubmitting}
                           />
                         </label>
-                        {errors.eventBanner && (
-                          <span className="text-xs text-red-500">{errors.eventBanner}</span>
+                        {errors.bannerUrl && (
+                          <span className="text-xs text-red-500">{errors.bannerUrl}</span>
                         )}
                       </div>
 
@@ -654,12 +705,12 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           Custom Watermark (this could be your logo)
                         </h3>
 
-                        <label htmlFor="event-watermark" className="cursor-pointer w-full">
+                        <label htmlFor="watermarkUrl" className="cursor-pointer w-full">
                           <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
                             <div className="flex flex-col w-[157px] items-center justify-center gap-2.5">
-                              {imagePreviews.eventWatermark ? (
+                              {imagePreviews.watermarkUrl ? (
                                 <img
-                                  src={imagePreviews.eventWatermark}
+                                  src={imagePreviews.watermarkUrl}
                                   alt="Watermark Preview"
                                   className="w-full h-[120px] object-contain rounded"
                                 />
@@ -674,16 +725,16 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                             </div>
                           </div>
                           <input
-                            id="event-watermark"
+                            id="watermarkUrl"
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={(e) => handleFileChange(e, 'eventWatermark')}
+                            onChange={(e) => handleFileChange(e, 'watermarkUrl')}
                             disabled={isSubmitting}
                           />
                         </label>
-                        {errors.eventWatermark && (
-                          <span className="text-xs text-red-500">{errors.eventWatermark}</span>
+                        {errors.watermarkUrl && (
+                          <span className="text-xs text-red-500">{errors.watermarkUrl}</span>
                         )}
                       </div>
 
@@ -693,7 +744,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           Event Trailer
                         </h3>
 
-                        <label htmlFor="event-trailer" className="cursor-pointer w-full">
+                        <label htmlFor="eventTrailer" className="cursor-pointer w-full">
                           <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
                             <div className="flex flex-col w-[157px] items-center justify-center gap-2.5">
                               {imagePreviews.eventTrailer ? (
@@ -714,7 +765,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                             </div>
                           </div>
                           <input
-                            id="event-trailer"
+                            id="eventTrailer"
                             type="file"
                             accept="video/*"
                             className="hidden"
@@ -733,7 +784,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="h-[60px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-whitewhite text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
+                        className="h-[60px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-white text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
                       >
                         {isSubmitting ? 
                           (event ? "Updating Event..." : "Creating Event...") : 

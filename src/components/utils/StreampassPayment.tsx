@@ -5,7 +5,11 @@ import { useToast } from "../ui/use-toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import intaxios from "../../lib/axios"
-export function StreampassPaymentButton(): JSX.Element | null {
+type StreampassPaymentButtonProps = {
+  friends?: any[];
+};
+
+export function StreampassPaymentButton({ friends = [] }: StreampassPaymentButtonProps): JSX.Element | null {
   const { id } = useParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +32,7 @@ export function StreampassPaymentButton(): JSX.Element | null {
   const handleFlutterwavePayment = async () => {
   setIsLoading(true);
   try {
-    const { data } = await intaxios.post('streampass/payments/flutterwave/initialize', { eventId: id, currency: 'NGN' });
+    const { data } = await intaxios.post('streampass/payments/flutterwave/initialize', { eventId: id, currency: 'NGN', friends });
     window.location.href = data.link;
   } catch (error: any) {
     toast({
@@ -46,7 +50,7 @@ export function StreampassPaymentButton(): JSX.Element | null {
   const handleStripePayment = async () => {
     setIsLoading(true);
     try {
-      const { data } = await intaxios.post("streampass/payments/stripe/create-checkout-session", { eventId: id, currency: 'usd' });
+      const { data } = await intaxios.post("streampass/payments/stripe/create-checkout-session", { eventId: id, currency: 'usd', friends });
       window.location.href = data.url;
     } catch (error: any) {
       toast({
@@ -93,7 +97,7 @@ export function StreampassPaymentButton(): JSX.Element | null {
       {isLoading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
-        <span className="font-medium text-white">Pay with Stripe</span>
+        <span className="font-medium text-white">Pay with Stripe  </span>
       )}
     </Button>
   );

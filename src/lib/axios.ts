@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth';
+import { locationService } from '../services/locationService';
 
 const baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -16,6 +17,13 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Add country header from location data
+    const location = locationService.getCurrentLocation();
+    if (location?.country) {
+      config.headers['X-User-Country'] = location.country;
+    }
+
     return config;
   },
   (error) => {

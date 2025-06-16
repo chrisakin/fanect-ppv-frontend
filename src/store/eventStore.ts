@@ -11,6 +11,7 @@ export interface Event {
   watermarkUrl: string;
   price: string;
   eventDateTime: string;
+  adminStatus: string;
 }
 
 interface PaginationData {
@@ -36,6 +37,7 @@ interface EventState {
   fetchStreampassEvents: (eventType: string, page?: number) => Promise<void>;
   fetchSingleEvent: (id: string) => Promise<void>;
   fetchPurchasedEvent: (id: string) => Promise<void>;
+  searchEvents: (query: string, page?: number) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   updateEvent: (id: string, data: FormData) => Promise<void>;
   setSelectedEvent: (event: Event | null) => void;
@@ -146,6 +148,22 @@ export const useEventStore = create<EventState>((set) => ({
       console.error('Error fetching purchased event:', error);
       set({ singleEvent: null, isLoading: false });
       throw error;
+    }
+  },
+  searchEvents: async (query: string, page = 1) => {
+    try {
+      set({ isLoading: true });
+      const response = await axios.get(`/events/upcoming?page=${page}&limit=12&search=${encodeURIComponent(query)}`);
+      const { docs, ...paginationData } = response.data;
+      
+      set({
+        events: docs,
+        pagination: paginationData,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Error searching events:', error);
+      set({ events: [], isLoading: false });
     }
   },
   deleteEvent: async (id: string) => {
