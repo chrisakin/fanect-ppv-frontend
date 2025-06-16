@@ -20,7 +20,6 @@ axiosInstance.interceptors.request.use(
 
     // Add country header from location data
     const location = locationService.getCurrentLocation();
-    console.log(location)
     if (location?.country) {
       config.headers['X-User-Country'] = location.country;
     }

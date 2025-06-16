@@ -22,7 +22,7 @@ import { LocationProvider } from "./components/LocationProvider";
 useAuthStore.getState().initAuth();
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
+
 if (!GOOGLE_CLIENT_ID) {
   throw new Error(
     'Missing VITE_GOOGLE_CLIENT_ID environment variable. ' +
@@ -30,15 +30,14 @@ if (!GOOGLE_CLIENT_ID) {
   );
 }
 
-// if(!FIREBASE_API_KEY) {
-//   throw new Error(
-//     'Missing VITE_FIREBASE_API_KEY environment variable. ' +
-//     'Please ensure you have set up your .env file with a valid Firebase API key.'
-//   );
-// }
-
 function App() {
-  useFCM();
+  // Only initialize FCM if Firebase is properly configured
+  const hasFirebaseConfig = import.meta.env.VITE_FIREBASE_API_KEY && 
+                           import.meta.env.VITE_FIREBASE_PROJECT_ID;
+  
+  if (hasFirebaseConfig) {
+    useFCM();
+  }
   
   return (
     // <LocationProvider>

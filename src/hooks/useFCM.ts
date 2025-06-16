@@ -8,20 +8,28 @@ export const useFCM = () => {
   const { fetchNotifications } = useNotificationStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      // Initialize FCM when user is authenticated
-      fcmService.initializeFCM();
+    // Only initialize FCM if user is authenticated and we're in browser environment
+    if (isAuthenticated && typeof window !== 'undefined') {
+      // Add a small delay to ensure everything is loaded
+      const timer = setTimeout(() => {
+        fcmService.initializeFCM().catch(error => {
+          console.warn('FCM initialization failed:', error);
+        });
+      }, 1000);
 
       // Listen for FCM messages
       const handleFCMMessage = (event: CustomEvent) => {
         console.log('FCM message received:', event.detail);
         // Refresh notifications when a new message is received
-        fetchNotifications();
+        fetchNotifications().catch(error => {
+          console.error('Failed to fetch notifications:', error);
+        });
       };
 
       window.addEventListener('fcm-message', handleFCMMessage as EventListener);
 
       return () => {
+        clearTimeout(timer);
         window.removeEventListener('fcm-message', handleFCMMessage as EventListener);
       };
     }
