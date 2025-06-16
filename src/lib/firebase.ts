@@ -87,7 +87,6 @@ export const getFCMToken = async (): Promise<string | null> => {
 
     // Wait for service worker to be ready
     await navigator.serviceWorker.ready;
-    console.log(await navigator.serviceWorker.ready, import.meta.env.VITE_FIREBASE_VAPID_KEY)
 
 const token = await getToken(messaging, {
   vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,

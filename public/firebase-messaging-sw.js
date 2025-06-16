@@ -41,8 +41,7 @@ if (isConfigValid) {
 
     // Handle notification click events
     self.addEventListener('notificationclick', function(event) {
-      console.log('Notification clicked:', event);
-      
+
       event.notification.close();
       
       // Focus or open the app when notification is clicked
