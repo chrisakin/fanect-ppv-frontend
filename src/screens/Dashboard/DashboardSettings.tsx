@@ -11,12 +11,18 @@ import { Loader2 } from "lucide-react";
 export const DashboardSettings = (): JSX.Element => {
   const { 
     settings, 
+    withdrawalDetails,
     isLoading, 
-    isSaving, 
+    isSaving,
+    isWithdrawalLoading,
+    isWithdrawalSaving,
     fetchProfile, 
+    fetchWithdrawalDetails,
     updateField, 
+    updateWithdrawalField,
     updateNotification, 
-    saveSettings 
+    saveSettings,
+    saveWithdrawalDetails
   } = useSettingsStore();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
@@ -24,7 +30,8 @@ export const DashboardSettings = (): JSX.Element => {
 
   useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+    fetchWithdrawalDetails();
+  }, [fetchProfile, fetchWithdrawalDetails]);
 
   const handleSaveChanges = async () => {
     try {
@@ -38,6 +45,22 @@ export const DashboardSettings = (): JSX.Element => {
         variant: "destructive",
         title: "Error",
         description: error.response?.data?.message || "Failed to save settings",
+      });
+    }
+  };
+
+  const handleSaveWithdrawalDetails = async () => {
+    try {
+      await saveWithdrawalDetails();
+      toast({
+        title: "Success",
+        description: "Withdrawal details saved successfully",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data?.message || "Failed to save withdrawal details",
       });
     }
   };
@@ -82,7 +105,7 @@ export const DashboardSettings = (): JSX.Element => {
                 Email Address
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.email}
                 disabled
                 readOnly
@@ -95,7 +118,7 @@ export const DashboardSettings = (): JSX.Element => {
                 First Name
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.firstName}
                 onChange={(e) => updateField('firstName', e.target.value)}
               />
@@ -107,7 +130,7 @@ export const DashboardSettings = (): JSX.Element => {
                 Last Name
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.lastName}
                 onChange={(e) => updateField('lastName', e.target.value)}
               />
@@ -120,103 +143,23 @@ export const DashboardSettings = (): JSX.Element => {
               </label>
               <div className="flex flex-col sm:flex-row w-full items-stretch sm:items-center gap-3 sm:gap-4">
                 <Input
-                  className="w-full sm:flex-1 h-12 sm:h-14 lg:h-[48px] dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="w-full sm:flex-1 h-12 sm:h-14 lg:h-[42px] dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   type="password"
                   value="**************"
                   disabled
                   readOnly
                 />
                 <Button
-                  className="w-full sm:w-auto sm:flex-shrink-0 h-12 sm:h-14 lg:h-[48px] bg-green-600 text-white rounded-[10px] hover:bg-green-700 text-sm sm:text-base px-4 sm:px-6"
+                  className="w-full sm:w-auto sm:flex-shrink-0 h-12 sm:h-14 lg:h-[42px] bg-green-600 text-white rounded-[10px] hover:bg-green-700 text-sm sm:text-base px-4 sm:px-6"
                   onClick={handleResetPassword}
                 >
                   Reset Password
                 </Button>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Withdrawal Details Section */}
-        <section className="flex flex-col gap-6 lg:gap-8">
-          <div className="px-2.5 rounded-[20px]">
-            <h2 className="font-display-xs-semibold dark:text-[#a4a7ae] text-gray-700 text-lg sm:text-xl lg:text-2xl">
-              Withdrawal Details
-            </h2>
-          </div>
-
-          <div className="flex flex-col gap-6 lg:gap-8 w-full">
-            {/* Bank Name */}
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
-                Bank Name
-              </label>
-              <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
-                value={settings.bankName}
-                onChange={(e) => updateField('bankName', e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
-                Bank Type
-              </label>
-              <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
-                value={settings.bankType}
-                onChange={(e) => updateField('bankType', e.target.value)}
-              />
-            </div>
-
-            {/* Bank Account Number */}
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
-                Bank Account Number
-              </label>
-              <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
-                value={settings.accountNumber}
-                onChange={(e) => updateField('accountNumber', e.target.value)}
-              />
-            </div>
-
-            {/* Name on Account */}
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
-                Name on Account
-              </label>
-              <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
-                value={settings.accountName}
-                onChange={(e) => updateField('accountName', e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
-                Bank Routing Number
-              </label>
-              <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
-                value={settings.bankRoutingNumber}
-                onChange={(e) => updateField('accountName', e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-              <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
-                Address
-              </label>
-              <Input
-                className="h-12 sm:h-14 lg:h-[48px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
-                value={settings.address}
-                onChange={(e) => updateField('accountName', e.target.value)}
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-end gap-4 sm:gap-6 w-full mt-6">
+            {/* Action Buttons for Account Settings */}
+            {/* <div className="flex flex-col sm:flex-row justify-end gap-4 sm:gap-6 w-full mt-6">
               <Button
                 variant="outline"
                 className="w-full sm:w-auto sm:min-w-[140px] h-12 sm:h-14 border-[#D5D7DA] rounded-[10px] text-sm sm:text-base"
@@ -236,8 +179,117 @@ export const DashboardSettings = (): JSX.Element => {
                   "Save Changes"
                 )}
               </Button>
-            </div>
+            </div> */}
           </div>
+        </section>
+
+        {/* Withdrawal Details Section */}
+        <section className="flex flex-col gap-6 lg:gap-8">
+          <div className="px-2.5 rounded-[20px]">
+            <h2 className="font-display-xs-semibold dark:text-[#a4a7ae] text-gray-700 text-lg sm:text-xl lg:text-2xl">
+              Withdrawal Details
+            </h2>
+          </div>
+
+          {isWithdrawalLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-green-600" />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6 lg:gap-8 w-full">
+              {/* Bank Name */}
+              <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+                <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                  Bank Name
+                </label>
+                <Input
+                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  value={withdrawalDetails.bankName}
+                  onChange={(e) => updateWithdrawalField('bankName', e.target.value)}
+                />
+              </div>
+
+              {/* Bank Account Number */}
+              <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+                <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                  Bank Account Number
+                </label>
+                <Input
+                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  value={withdrawalDetails.accountNumber}
+                  onChange={(e) => updateWithdrawalField('accountNumber', e.target.value)}
+                />
+              </div>
+
+              {/* Name on Account */}
+              <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+                <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                  Name on Account
+                </label>
+                <Input
+                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  value={withdrawalDetails.accountName}
+                  onChange={(e) => updateWithdrawalField('accountName', e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+                <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                  Bank Type
+                </label>
+                <Input
+                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  value={withdrawalDetails.bankType}
+                  onChange={(e) => updateWithdrawalField('bankType', e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+                <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                  Bank Routing Number
+                </label>
+                <Input
+                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  value={withdrawalDetails.bankRoutingNumber}
+                  onChange={(e) => updateWithdrawalField('bankRoutingNumber', e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+                <label className="w-full lg:w-48 xl:w-56 font-text-lg-medium dark:text-[#dddddd] text-gray-700 text-sm sm:text-base flex-shrink-0">
+                  Address
+                </label>
+                <Input
+                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  value={withdrawalDetails.address}
+                  onChange={(e) => updateWithdrawalField('address', e.target.value)}
+                />
+              </div>
+
+              {/* Action Buttons for Withdrawal Details */}
+              <div className="flex flex-col sm:flex-row justify-end gap-4 sm:gap-6 w-full mt-6">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto sm:min-w-[140px] h-12 sm:h-14 border-[#D5D7DA] rounded-[10px] text-sm sm:text-base"
+                  onClick={() => fetchWithdrawalDetails()}
+                  disabled={isWithdrawalSaving}
+                >
+                  Cancel Changes
+                </Button>
+                <Button
+                  className="w-full sm:w-auto sm:min-w-[120px] h-12 sm:h-14 bg-green-600 rounded-[10px] hover:bg-green-700 text-sm sm:text-base"
+                  onClick={handleSaveWithdrawalDetails}
+                  disabled={isWithdrawalSaving}
+                >
+                  {isWithdrawalSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Notification Settings Section */}

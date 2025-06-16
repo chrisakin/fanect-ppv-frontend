@@ -5,12 +5,6 @@ interface UserSettings {
   email: string;
   firstName: string;
   lastName: string;
-  bankName: string;
-  bankType: string;
-  bankRoutingNumber: string;
-  address: string;
-  accountNumber: string;
-  accountName: string;
   notifications: {
     appNotifLiveStreamBegins: boolean;
     appNotifLiveStreamEnds: boolean;
@@ -19,14 +13,29 @@ interface UserSettings {
   };
 }
 
+interface WithdrawalDetails {
+  bankName: string;
+  bankType: string;
+  bankRoutingNumber: string;
+  address: string;
+  accountNumber: string;
+  accountName: string;
+}
+
 interface SettingsStore {
   settings: UserSettings;
+  withdrawalDetails: WithdrawalDetails;
   isLoading: boolean;
   isSaving: boolean;
+  isWithdrawalLoading: boolean;
+  isWithdrawalSaving: boolean;
   fetchProfile: () => Promise<void>;
+  fetchWithdrawalDetails: () => Promise<void>;
   updateField: (field: keyof UserSettings, value: string) => void;
+  updateWithdrawalField: (field: keyof WithdrawalDetails, value: string) => void;
   updateNotification: (field: keyof UserSettings['notifications'], value: boolean) => void;
   saveSettings: () => Promise<void>;
+  saveWithdrawalDetails: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
@@ -34,12 +43,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     email: '',
     firstName: '',
     lastName: '',
-    bankName: '',
-    bankRoutingNumber: '',
-    bankType: '',
-    address: '',
-    accountNumber: '',
-    accountName: '',
     notifications: {
       appNotifLiveStreamBegins: false,
       appNotifLiveStreamEnds: false,
@@ -47,8 +50,18 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       emailNotifLiveStreamEnds: false,
     },
   },
+  withdrawalDetails: {
+    bankName: '',
+    bankType: '',
+    bankRoutingNumber: '',
+    address: '',
+    accountNumber: '',
+    accountName: '',
+  },
   isLoading: false,
   isSaving: false,
+  isWithdrawalLoading: false,
+  isWithdrawalSaving: false,
 
   fetchProfile: async () => {
     try {
@@ -61,12 +74,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
           email: profile.email || '',
           firstName: profile.firstName || '',
           lastName: profile.lastName || '',
-          bankName: profile.bankName || '',
-          accountNumber: profile.accountNumber || '',
-          accountName: profile.accountName || '',
-          bankRoutingNumber: profile.bankRoutingNumber || '',
-          bankType:profile.bankType || '',
-          address: profile.addess || '',
           notifications: {
             appNotifLiveStreamBegins: profile.appNotifLiveStreamBegins || false,
             appNotifLiveStreamEnds: profile.appNotifLiveStreamEnds || false,
@@ -82,10 +89,51 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     }
   },
 
+  fetchWithdrawalDetails: async () => {
+    try {
+      set({ isWithdrawalLoading: true });
+      const response = await axios.get('/withdrawal/details');
+      const { withdrawals } = response.data;
+      
+      set({
+        withdrawalDetails: {
+          bankName: withdrawals?.bankName || '',
+          bankType: withdrawals?.bankType || '',
+          bankRoutingNumber: withdrawals?.bankRoutingNumber || '',
+          address: withdrawals?.address || '',
+          accountNumber: withdrawals?.accountNumber || '',
+          accountName: withdrawals?.accountName || '',
+        },
+        isWithdrawalLoading: false,
+      });
+    } catch (error) {
+      console.error('Error fetching withdrawal details:', error);
+      set({ 
+        withdrawalDetails: {
+          bankName: '',
+          bankType: '',
+          bankRoutingNumber: '',
+          address: '',
+          accountNumber: '',
+          accountName: '',
+        },
+        isWithdrawalLoading: false 
+      });
+    }
+  },
+
   updateField: (field, value) =>
     set((state) => ({
       settings: {
         ...state.settings,
+        [field]: value,
+      },
+    })),
+
+  updateWithdrawalField: (field, value) =>
+    set((state) => ({
+      withdrawalDetails: {
+        ...state.withdrawalDetails,
         [field]: value,
       },
     })),
@@ -109,9 +157,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       await axios.put('/auth/profile', {
         firstName: settings.firstName,
         lastName: settings.lastName,
-        bankName: settings.bankName,
-        accountNumber: settings.accountNumber,
-        accountName: settings.accountName,
         appNotifLiveStreamBegins: settings.notifications.appNotifLiveStreamBegins,
         appNotifLiveStreamEnds: settings.notifications.appNotifLiveStreamEnds,
         emailNotifLiveStreamBegins: settings.notifications.emailNotifLiveStreamBegins,
@@ -122,6 +167,21 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       return Promise.resolve();
     } catch (error) {
       set({ isSaving: false });
+      return Promise.reject(error);
+    }
+  },
+
+  saveWithdrawalDetails: async () => {
+    try {
+      set({ isWithdrawalSaving: true });
+      const { withdrawalDetails } = get();
+      
+      await axios.post('/withdrawal/details', withdrawalDetails);
+      
+      set({ isWithdrawalSaving: false });
+      return Promise.resolve();
+    } catch (error) {
+      set({ isWithdrawalSaving: false });
       return Promise.reject(error);
     }
   },
