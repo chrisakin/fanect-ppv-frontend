@@ -17,6 +17,7 @@ import { PaymentSuccess } from "./screens/PaymentSuccess/PaymentSuccess";
 import { NotFound } from "./screens/NotFound";
 import { useFCM } from "./hooks/useFCM";
 import { LocationProvider } from "./components/LocationProvider";
+import { PasswordReset } from "./screens/PasswordReset";
 
 // Initialize auth state before rendering
 useAuthStore.getState().initAuth();
@@ -50,6 +51,7 @@ function App() {
         <Route path="/event/:id" element={<Event />} />
         <Route path="/search" element={<Search />} />
         <Route path="/:method/payment-success" element={<PaymentSuccess />} />
+        <Route path="/reset/:token" element={<PasswordReset />} />
         <Route
           path="/dashboard/*"
           element={
