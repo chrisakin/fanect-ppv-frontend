@@ -41,7 +41,7 @@ function App() {
   }
   
   return (
-    // <LocationProvider>
+    <LocationProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -63,7 +63,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
-    // </LocationProvider>
+    </LocationProvider>
   );
 }
 
