@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
@@ -14,6 +14,7 @@ export const PaymentSuccess = () => {
    const [countdown, setCountdown] = useState(30);
    const { method } = useParams();
   const navigate = useNavigate();
+  const hasRun = useRef(false);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -53,7 +54,10 @@ export const PaymentSuccess = () => {
       }
     };
 
+    if (!hasRun.current) {
     verifyPayment();
+    hasRun.current = true;
+  }
   }, []);
 
     useEffect(() => {

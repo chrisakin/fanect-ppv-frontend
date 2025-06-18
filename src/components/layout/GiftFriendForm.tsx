@@ -1,12 +1,12 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { PlusCircleIcon, XCircleIcon, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Event } from "@/store/eventStore";
 import { useToast } from "../ui/use-toast";
-import axios from "@/lib/axios";
+import { StreampassPaymentButton } from "../utils/StreampassPayment";
 
 type GiftFriendProps = {
   event: Event;
@@ -38,10 +38,9 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
 
   // Validation function
-  const validateCurrentFriend = (): boolean => {
+  const validateCurrentFriend = useCallback((): boolean => {
     const newErrors: FormErrors = {};
 
     if (!currentFriend.firstName.trim()) {
@@ -58,15 +57,15 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [currentFriend, friends]);
 
-  const addFriend = () => {
+  const addFriend = useCallback(() => {
     if (validateCurrentFriend()) {
       const newFriend = {
         ...currentFriend,
         id: Date.now().toString()
       };
-      setFriends([...friends, newFriend]);
+      setFriends(prev => [...prev, newFriend]);
       setCurrentFriend({ id: '', firstName: '', email: '' });
       setErrors({});
       
@@ -75,11 +74,11 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
         description: `${newFriend.firstName} has been added to the gift list`,
       });
     }
-  };
+  }, [currentFriend, validateCurrentFriend, toast]);
 
-  const removeFriend = (friendId: string) => {
+  const removeFriend = useCallback((friendId: string) => {
     const friendToRemove = friends.find(friend => friend.id === friendId);
-    setFriends(friends.filter(friend => friend.id !== friendId));
+    setFriends(prev => prev.filter(friend => friend.id !== friendId));
     
     if (friendToRemove) {
       toast({
@@ -87,70 +86,71 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
         description: `${friendToRemove.firstName} has been removed from the gift list`,
       });
     }
-  };
+  }, [friends, toast]);
 
-  const handleInputChange = (field: keyof Friend, value: string) => {
-    setCurrentFriend({ ...currentFriend, [field]: value });
+  const handleInputChange = useCallback((field: keyof Friend, value: string) => {
+    setCurrentFriend(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field as keyof FormErrors]) {
-      setErrors({ ...errors, [field]: undefined });
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
-  };
+  }, [errors]);
 
-  const handleGiftFriends = async () => {
-    // Validate current friend if fields are filled
-    const hasCurrentFriend = currentFriend.firstName.trim() || currentFriend.email.trim();
+  // Memoize friends data for payment to prevent recalculation on every render
+  const friendsForPayment = useMemo(() => {
     let allFriends = [...friends];
-
+    
+    // Add current friend if both fields are filled and valid
+    const hasCurrentFriend = currentFriend.firstName.trim() && currentFriend.email.trim();
     if (hasCurrentFriend) {
-      if (validateCurrentFriend()) {
+      // Create a temporary validation without setting errors
+      const tempErrors: FormErrors = {};
+      
+      if (!currentFriend.firstName.trim()) {
+        tempErrors.firstName = "First name is required";
+      }
+
+      if (!currentFriend.email.trim()) {
+        tempErrors.email = "Email is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentFriend.email)) {
+        tempErrors.email = "Please enter a valid email address";
+      } else if (friends.some(friend => friend.email.toLowerCase() === currentFriend.email.toLowerCase())) {
+        tempErrors.email = "This email has already been added";
+      }
+
+      // Only add current friend if validation passes
+      if (Object.keys(tempErrors).length === 0) {
         allFriends = [...friends, { ...currentFriend, id: Date.now().toString() }];
-      } else {
-        return; // Stop if validation fails
       }
     }
 
-    if (allFriends.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No friends added",
-        description: "Please add at least one friend to gift the streampass",
-      });
-      return;
-    }
+    // Transform friends data to match the expected format
+    return allFriends.map(friend => ({
+      firstName: friend.firstName,
+      email: friend.email
+    }));
+  }, [friends, currentFriend]);
 
-    setIsLoading(true);
-    try {
-      const giftData = {
-        eventId: id,
-        friends: allFriends.map(friend => ({
-          firstName: friend.firstName,
-          email: friend.email
-        }))
-      };
+  // Validate that we have friends for payment
+  const canProceedWithPayment = useMemo(() => {
+    return friendsForPayment.length > 0;
+  }, [friendsForPayment]);
 
-      await axios.post('/gift/gift-friend', giftData);
-      
-      toast({
-        title: "Success",
-        description: `Streampass gifted to ${allFriends.length} friend${allFriends.length > 1 ? 's' : ''}`,
-      });
-
-      // Navigate to payment success or confirmation page
-      navigate(`/dashboard/tickets/event/paid/${id}`);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.response?.data?.message || "Failed to gift streampass. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Handle payment button click with validation
+  const handlePaymentClick = useCallback(() => {
+    // if (!canProceedWithPayment) {
+    //   toast({
+    //     variant: "destructive",
+    //     title: "No friends added",
+    //     description: "Please add at least one friend to gift the streampass",
+    //   });
+    //   return null;
+    // }
+    return friendsForPayment;
+  }, [canProceedWithPayment, friendsForPayment, toast]);
 
   const totalFriends = friends.length + (currentFriend.firstName.trim() && currentFriend.email.trim() ? 1 : 0);
-  const totalPrice = Number(event.price.amount) * Math.max(friends.length, 1);
+  const totalPrice = Number(event.price.amount) * Math.max(friendsForPayment.length, 1);
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-gray-50 dark:bg-[#092D1B] border border-dashed border-[#a4a7ae] dark:border-[#1AAA65] rounded-[10px] p-6 sm:p-8 md:p-10">
@@ -219,7 +219,6 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
                       value={currentFriend.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       placeholder="Enter first name"
-                      disabled={isLoading}
                     />
                     {errors.firstName && (
                       <span className="text-xs text-red-500">{errors.firstName}</span>
@@ -237,7 +236,6 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       type="email"
                       placeholder="Enter email address"
-                      disabled={isLoading}
                     />
                     {errors.email && (
                       <span className="text-xs text-red-500">{errors.email}</span>
@@ -253,7 +251,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
             variant="ghost"
             className="flex items-center gap-2 p-0 hover:bg-transparent disabled:opacity-50"
             onClick={addFriend}
-            disabled={!currentFriend.firstName.trim() || !currentFriend.email.trim() || isLoading}
+            disabled={!currentFriend.firstName.trim() || !currentFriend.email.trim()}
           >
             <PlusCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#1aaa65]" />
             <span className="font-medium text-[#1aaa65] text-sm sm:text-base">
@@ -263,20 +261,11 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
 
           {/* Payment Section */}
           <div className="flex flex-col items-center gap-5 w-full">
-            <Button 
-              onClick={handleGiftFriends}
-              className="w-full h-12 sm:h-14 bg-green-600 hover:bg-green-700 rounded-[10px] text-white text-base sm:text-lg font-medium disabled:opacity-50"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                `Pay Now (${event.price.currency} ${totalPrice.toLocaleString()})`
-              )}
-            </Button>
+            <StreampassPaymentButton 
+              friends={handlePaymentClick()}
+              totalPrice={totalPrice}
+              currency={event.price.currency}
+            />
             <p className="text-center text-sm text-gray-800 dark:text-[#CCCCCC]">
               By clicking 'Pay Now', you agree with FaNect's terms and condition
             </p>
@@ -288,7 +277,6 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
               variant="link"
               className="text-green-600 text-base underline hover:text-green-700 transition p-0"
               onClick={() => navigate(`/dashboard/tickets/event/streampass/${id}`)}
-              disabled={isLoading}
             >
               Purchase Streampass for myself
             </Button>

@@ -5,11 +5,11 @@ import { StreampassPaymentButton } from "../utils/StreampassPayment";
 import { Event } from "@/store/eventStore";
 import { getUser } from "@/lib/auth";
 
-type GiftFriendProps = {
+type StreampassPurchaseProps = {
   event: Event;
 };
 
-export const StreampassPurchaseCard = ({ event }: GiftFriendProps): JSX.Element => {
+export const StreampassPurchaseCard = ({ event }: StreampassPurchaseProps): JSX.Element => {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -38,7 +38,9 @@ export const StreampassPurchaseCard = ({ event }: GiftFriendProps): JSX.Element 
               </div>
             </div>
             <div className="space-y-4">
-                <StreampassPaymentButton />
+              <StreampassPaymentButton 
+                currency={event.price?.currency}
+              />
               <p className="text-sm text-center text-[#717680]">
                 By clicking 'Pay Now', you agree with FaNect's terms and condition
               </p>
