@@ -1,43 +1,28 @@
 import { Card, CardContent } from "../../components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const viewersData = [
-  { time: '6pm', viewers: 100 },
-  { time: '9pm', viewers: 1500 },
-  { time: '12am', viewers: 2461 },
-  { time: '3am', viewers: 1800 },
-  { time: '6am', viewers: 1000 },
-  { time: '9am', viewers: 500 },
-  { time: '12pm', viewers: 200 },
-  { time: '3pm', viewers: 50 },
-];
+interface ViewersChartProps {
+  stats: any;
+}
 
-const chatData = [
-  { time: '6pm', messages: 50 },
-  { time: '9pm', messages: 250 },
-  { time: '12am', messages: 480 },
-  { time: '3am', messages: 350 },
-  { time: '6am', messages: 200 },
-  { time: '9am', messages: 100 },
-  { time: '12pm', messages: 50 },
-  { time: '3pm', messages: 20 },
-];
-
-export const ViewersChart = (): JSX.Element => {
+export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
   const textColor = 'dark:#828b86 #333333';
   const chartColor = 'dark:#1aaa65 #22c55e';
 
+  const viewersData = stats.viewers.concurrentViewers || [];
+  const chatData = stats.chat.chatActivity || [];
+
   return (
-    <div className="lg:flex  items-start gap-4 w-full">
+    <div className="lg:flex items-start gap-4 w-full">
       {/* Concurrent Viewers Card */}
       <div className="flex flex-col w-full lg:w-1/2 items-center justify-center gap-4">
-        <Card className={`w-full h-[495px] dark:bg-[#04311a] bg-gray-50 rounded-lg shadow-shadow-shadow-xs overflow-hidden`}>
+        <Card className="w-full h-[495px] dark:bg-[#04311a] bg-gray-50 rounded-lg shadow-shadow-shadow-xs overflow-hidden">
           <CardContent className="p-4">
-            <Card className={`w-full h-[464px] dark:bg-[#062013] bg-white rounded-lg shadow-shadow-shadow-xs overflow-hidden`}>
+            <Card className="w-full h-[464px] dark:bg-[#062013] bg-white rounded-lg shadow-shadow-shadow-xs overflow-hidden">
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-center px-5 py-2.5 w-full">
                   <div className="inline-flex items-center gap-1.5">
-                    <div className={`font-text-lg-semibold dark:text-[#828b86] text-gray-700 whitespace-nowrap`}>
+                    <div className="font-text-lg-semibold dark:text-[#828b86] text-gray-700 whitespace-nowrap">
                       Concurrent Viewers
                     </div>
                   </div>
@@ -81,10 +66,10 @@ export const ViewersChart = (): JSX.Element => {
                 </div>
 
                 <div className="flex h-16 items-end gap-4 px-5 py-0 w-full mt-4">
-                  <div className={`flex items-center justify-center gap-2.5 px-4 py-2.5 dark:bg-[#062013] border-[#828b86] bg-white border-gray-200 rounded-[100px] border border-solid`}>
+                  <div className="flex items-center justify-center gap-2.5 px-4 py-2.5 dark:bg-[#062013] border-[#828b86] bg-white border-gray-200 rounded-[100px] border border-solid">
                     <div className="w-1.5 h-1.5 bg-[#ff8642] rounded-[3px]" />
-                    <div className={`[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-xs tracking-[-0.24px] leading-4 dark:text-[#828b86] text-gray-600 whitespace-nowrap`}>
-                      Peak Concurrent Viewers: 2461 at 04:35am
+                    <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-xs tracking-[-0.24px] leading-4 dark:text-[#828b86] text-gray-600 whitespace-nowrap">
+                      Peak Concurrent Viewers: {stats.viewers.peakViewers?.count || 0} at {stats.viewers.peakViewers?.time || 'N/A'}
                     </div>
                   </div>
                 </div>
@@ -96,13 +81,13 @@ export const ViewersChart = (): JSX.Element => {
 
       {/* Chat Activity Card */}
       <div className="flex flex-col w-full lg:w-1/2 items-center justify-center gap-4">
-        <Card className={`w-full h-[495px] dark:bg-[#04311a] bg-gray-50 rounded-lg shadow-shadow-shadow-xs overflow-hidden`}>
+        <Card className="w-full h-[495px] dark:bg-[#04311a] bg-gray-50 rounded-lg shadow-shadow-shadow-xs overflow-hidden">
           <CardContent className="p-4">
-            <Card className={`w-full h-[464px] dark:bg-[#062013] bg-white rounded-lg shadow-shadow-shadow-xs overflow-hidden`}>
+            <Card className="w-full h-[464px] dark:bg-[#062013] bg-white rounded-lg shadow-shadow-shadow-xs overflow-hidden">
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-center px-5 py-2.5 w-full">
                   <div className="inline-flex items-center gap-1.5">
-                    <div className={`font-text-lg-semibold dark:text-[#828b86] text-gray-700 whitespace-nowrap`}>
+                    <div className="font-text-lg-semibold dark:text-[#828b86] text-gray-700 whitespace-nowrap">
                       Chat Activity
                     </div>
                   </div>
@@ -146,10 +131,10 @@ export const ViewersChart = (): JSX.Element => {
                 </div>
 
                 <div className="flex h-16 items-end gap-4 px-5 py-0 w-full mt-4">
-                  <div className={`flex items-center justify-center gap-2.5 px-4 py-2.5 dark:bg-[#062013] border-[#828b86] bg-white border-gray-200 rounded-[100px] border border-solid`}>
+                  <div className="flex items-center justify-center gap-2.5 px-4 py-2.5 dark:bg-[#062013] border-[#828b86] bg-white border-gray-200 rounded-[100px] border border-solid">
                     <div className="w-1.5 h-1.5 bg-[#ff8642] rounded-[3px]" />
-                    <div className={`[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-xs tracking-[-0.24px] leading-4 dark:text-[#828b86] text-gray-600 whitespace-nowrap`}>
-                      Total Messages: 480
+                    <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-xs tracking-[-0.24px] leading-4 dark:text-[#828b86] text-gray-600 whitespace-nowrap">
+                      Total Messages: {stats.chat.totalMessages || 0}
                     </div>
                   </div>
                 </div>

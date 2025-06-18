@@ -9,6 +9,7 @@ export interface Event {
   description: string;
   bannerUrl: string;
   watermarkUrl: string;
+  trailerUrl: string;
   price: {currency: string, amount: string};
   eventDateTime: string;
   adminStatus: string;

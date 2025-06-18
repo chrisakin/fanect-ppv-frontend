@@ -1,21 +1,34 @@
 import { StarIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 
-export const RatingChart = (): JSX.Element => {
-  // Viewer data for mapping
+interface RatingChartProps {
+  stats: any;
+}
+
+export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
+  // Calculate viewer progress percentages
+  const totalViewers = stats.viewers.totalViewers || 0;
+  const watchReplayViews = stats.viewers.watchReplayViews || 0;
+  
   const viewerData = [
-    { label: "Total Viewers", value: "2,341", progress: 80 },
-    { label: "Watch Replay Views", value: "879", progress: 50 },
+    { 
+      label: "Total Viewers", 
+      value: totalViewers.toLocaleString(), 
+      progress: 80 // You might want to calculate this based on expected vs actual
+    },
+    { 
+      label: "Watch Replay Views", 
+      value: watchReplayViews.toLocaleString(), 
+      progress: totalViewers > 0 ? (watchReplayViews / totalViewers) * 100 : 0
+    },
   ];
 
-  // Rating data for mapping
-  const ratingData = [
-    { stars: 5, count: "849" },
-    { stars: 4, count: "849" },
-    { stars: 3, count: "849" },
-    { stars: 2, count: "849" },
-    { stars: 1, count: "849" },
-  ];
+  // Rating data from stats
+  const ratingBreakdown = stats.ratings.ratingBreakdown || {};
+  const ratingData = [5, 4, 3, 2, 1].map(stars => ({
+    stars,
+    count: ratingBreakdown[stars] || 0
+  }));
 
   return (
     <Card className="flex items-start p-4 gap-6 dark:bg-[#04311a] rounded-[10px] shadow-shadow-shadow-xs lg:w-full">
@@ -34,7 +47,7 @@ export const RatingChart = (): JSX.Element => {
                   <div className="relative w-full h-[5px] dark:bg-[#04311a] bg-[#CFEFDF] rounded-[10px] overflow-hidden">
                     <div
                       className="absolute top-0 left-0 h-full bg-[#1aaa65]"
-                      style={{ width: `${item.progress}%` }}
+                      style={{ width: `${Math.min(item.progress, 100)}%` }}
                     />
                   </div>
 
@@ -56,7 +69,7 @@ export const RatingChart = (): JSX.Element => {
         <Card className="lg:w-[30%] dark:bg-[#062013] p-4 flex flex-col gap-6 rounded-[10px]">
           <div className="inline-flex items-center gap-1.5">
             <div className="font-text-lg-semibold text-[#828b86] text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] whitespace-nowrap [font-style:var(--text-lg-semibold-font-style)]">
-              Rating
+              Rating ({stats.ratings.averageRating?.toFixed(1) || '0.0'}/5)
             </div>
           </div>
 

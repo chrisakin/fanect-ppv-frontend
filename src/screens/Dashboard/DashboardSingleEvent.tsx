@@ -9,13 +9,15 @@ import { GiftFriend } from "@/components/layout/GiftFriendForm";
 import { RegisteredCard } from "@/components/layout/RegisteredCard";
 import { useParams } from "react-router-dom";
 import { useEventStore } from "@/store/eventStore";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, PlayCircle } from "lucide-react";
 import { formatTime } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const DashboardSingleEvent = (): JSX.Element => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const { singleEvent, isLoading, fetchSingleEvent } = useEventStore();
+  const [showTrailer, setShowTrailer] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -59,12 +61,78 @@ export const DashboardSingleEvent = (): JSX.Element => {
       </Breadcrumb>
 
       <div className="flex flex-col items-start gap-[50px] w-full">
-        {/* Event banner image */}
-        <img
-          className="w-full h-[200px] sm:h-[300px] md:h-[400px] object-cover rounded-lg"
-          alt="Event banner"
-          src={singleEvent.bannerUrl}
-        />
+        {/* Event banner image with watermark */}
+        <div className="relative w-full">
+          <img
+            className="w-full h-[200px] sm:h-[300px] md:h-[400px] object-cover rounded-lg"
+            alt="Event banner"
+            src={singleEvent.bannerUrl}
+          />
+          
+          {/* Watermark overlay */}
+          {singleEvent.watermarkUrl && (
+            <div className="absolute bottom-4 right-4 opacity-70">
+              <img
+                className="h-8 sm:h-12 md:h-16 w-auto object-contain"
+                alt="Event watermark"
+                src={singleEvent.watermarkUrl}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Event Trailer Section */}
+        {singleEvent.trailerUrl && (
+          <div className="w-full">
+            {!showTrailer ? (
+              <div className="relative w-full h-[200px] sm:h-[250px] md:h-[300px] bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                {/* Trailer thumbnail with play button */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                  <Button
+                    onClick={() => setShowTrailer(true)}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg"
+                  >
+                    <PlayCircle className="w-6 h-6" />
+                    <span className="text-lg font-medium">Watch Trailer</span>
+                  </Button>
+                </div>
+                
+                {/* Background image or placeholder */}
+                <img
+                  className="w-full h-full object-cover"
+                  alt="Event trailer thumbnail"
+                  src={singleEvent.bannerUrl}
+                />
+              </div>
+            ) : (
+              <div className="w-full">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Event Trailer
+                  </h3>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowTrailer(false)}
+                    className="text-sm"
+                  >
+                    Close Trailer
+                  </Button>
+                </div>
+                <video
+                  className="w-full h-[200px] sm:h-[250px] md:h-[300px] object-cover rounded-lg"
+                  controls
+                  autoPlay
+                  preload="metadata"
+                >
+                  <source src={singleEvent.trailerUrl} type="video/mp4" />
+                  <source src={singleEvent.trailerUrl} type="video/webm" />
+                  <source src={singleEvent.trailerUrl} type="video/ogg" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-6">
           {/* Left column - Event details */}
