@@ -7,13 +7,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 export const DashboardWatchEvent = (): JSX.Element => {
-  const { id } = useParams();
+  const { type, id } = useParams();
   const navigate = useNavigate();
   const { singleEvent, isLoading, fetchPurchasedEvent } = useEventStore();
 
   useEffect(() => {
     const fetchEvent = async () => {
-      if (!id ) {
+      if (!id || !type) {
         navigate('/not-found');
         return;
       }
@@ -26,7 +26,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
     };
 
     fetchEvent();
-  }, [id,  fetchPurchasedEvent, navigate]);
+  }, [id, type, fetchPurchasedEvent, navigate]);
 
   if (isLoading) {
     return (
@@ -39,6 +39,22 @@ export const DashboardWatchEvent = (): JSX.Element => {
   if (!singleEvent) {
     return <></>;
   }
+
+  // Determine event type based on URL parameter and event date
+  const getEventType = (): 'live' | 'past' | 'upcoming' => {
+    if (type === 'past') return 'past';
+    if (type === 'live') return 'live';
+    
+    // For other cases, determine based on event date
+    const eventDate = new Date(singleEvent.eventDateTime);
+    const now = new Date();
+    
+    if (eventDate < now) return 'past';
+    if (eventDate > now) return 'upcoming';
+    return 'live';
+  };
+
+  const eventType = getEventType();
 
   return (
     <div>
@@ -53,13 +69,17 @@ export const DashboardWatchEvent = (): JSX.Element => {
         </BreadcrumbSeparator>
         <BreadcrumbItem>
           <BreadcrumbLink className="font-text-lg-semibold text-gray-800">
-            Event Details
+            {eventType === 'past' ? 'Event Replay' : 'Event Details'}
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
       <div className="flex flex-col w-full px-4 md:px-6 lg:px-8 mx-auto items-start py-6 md:py-8 lg:py-10">
         <div className="flex flex-col w-full items-start gap-8 md:gap-10 lg:gap-14">
-          <StreamingProvider />
+          <StreamingProvider 
+            eventType={eventType}
+            eventId={id}
+            eventName={singleEvent.name}
+          />
           <WatchEventDetails event={singleEvent} />
         </div>
       </div>
