@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import {  useState } from "react";
 import { Avatar } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -6,8 +6,14 @@ import { Input } from "../../components/ui/input";
 import { ScrollArea, ScrollBar } from "../../components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { useAgoraViewerService } from "../utils/Agora";
+import { FeedbackModal } from "../modals/FeedbackModal";
 
-export const VideoPlayer = (): JSX.Element => {
+interface VideoPlayerProps {
+  eventId?: string;
+  eventName?: string;
+}
+
+export const VideoPlayer = ({ eventId, eventName }: VideoPlayerProps): JSX.Element => {
   // Agora integration
   const {
     remoteUsers,
@@ -18,12 +24,19 @@ export const VideoPlayer = (): JSX.Element => {
     channel: "YOUR_CHANNEL_NAME", // <-- Replace with your channel name
     token: "YOUR_TOKEN", // <-- Replace with your token or null
     uid: undefined,
+    onUserLeft: (user) => {
+      // Show feedback modal when all users leave (stream ends)
+      if (remoteUsers.length === 1 && eventId) { // Only one user left (the one leaving)
+        setShowFeedbackModal(true);
+      }
+    },
   });
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   // Message data for mapping
   const messages = Array(6).fill({
@@ -31,10 +44,6 @@ export const VideoPlayer = (): JSX.Element => {
     message: "Omg! This is so so good, yayy",
     avatar: "/image-6.png",
   });
-
-
- 
-
 
   // Video control icons (these will not control Agora streams, but you can adapt as needed)
   const videoControls = [
@@ -121,89 +130,101 @@ export const VideoPlayer = (): JSX.Element => {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-      <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
-        <CardContent className="p-0">
-          <div className="relative w-full h-full">
-            {/* Agora video container */}
-            <div
-              ref={videoContainerRef}
-              className="w-full h-full object-cover"
-              style={{ width: "100%", height: "100%" }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Chat section */}
-      <div className="w-full lg:w-[260px]">
-        {/* Mobile Accordion */}
-        <div className="lg:hidden">
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="messages" className="border-none">
-              <AccordionTrigger className="py-2 px-4 bg-[#edf0f5] rounded-t-[10px]">
-                <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] [font-family:'Sofia_Pro-Medium',Helvetica]">
-                  Messages
-                </h3>
-              </AccordionTrigger>
-              <AccordionContent className="bg-[#edf0f5]">
-                <div className="px-4 pb-4">
-                  <ScrollArea className="h-[200px] pr-2">
-                    <MessageList />
-                    <ScrollBar orientation="vertical" />
-                  </ScrollArea>
-                  
-                  {/* Message input */}
-                  <div className="flex h-[42px] items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
-                    <Input
-                      className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
-                      placeholder="Write here"
-                    />
-                    <Button className="w-8 h-8 p-1 bg-green-700 rounded-lg">
-                      <img
-                        className="w-5 h-5"
-                        alt="Microphone icon"
-                        src="/icon-video-audio-image-microphone-slash.svg"
-                      />
-                    </Button>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-
-        {/* Desktop Chat */}
-        <Card className="relative h-[455px] bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block pb-4">
+    <>
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
-            <div className="flex flex-col w-full h-full p-4">
-              <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] mb-[18px] [font-family:'Sofia_Pro-Medium',Helvetica]">
-                Messages
-              </h3>
-
-              <ScrollArea className="h-[350px] pr-2">
-                <MessageList />
-                <ScrollBar orientation="vertical" />
-              </ScrollArea>
-
-              {/* Message input */}
-              <div className="flex h-[42px] mb-4 items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
-                <Input
-                  className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
-                  placeholder="Write here"
-                />
-                <Button className="w-8 h-8 p-1 bg-green-700 rounded-lg">
-                  <img
-                    className="w-5 h-5"
-                    alt="Microphone icon"
-                    src="/icon-video-audio-image-microphone-slash.svg"
-                  />
-                </Button>
-              </div>
+            <div className="relative w-full h-full">
+              {/* Agora video container */}
+              <div
+                ref={videoContainerRef}
+                className="w-full h-full object-cover"
+                style={{ width: "100%", height: "100%" }}
+              />
             </div>
           </CardContent>
         </Card>
+
+        {/* Chat section */}
+        <div className="w-full lg:w-[260px]">
+          {/* Mobile Accordion */}
+          <div className="lg:hidden">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="messages" className="border-none">
+                <AccordionTrigger className="py-2 px-4 bg-[#edf0f5] rounded-t-[10px]">
+                  <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] [font-family:'Sofia_Pro-Medium',Helvetica]">
+                    Messages
+                  </h3>
+                </AccordionTrigger>
+                <AccordionContent className="bg-[#edf0f5]">
+                  <div className="px-4 pb-4">
+                    <ScrollArea className="h-[200px] pr-2">
+                      <MessageList />
+                      <ScrollBar orientation="vertical" />
+                    </ScrollArea>
+                    
+                    {/* Message input */}
+                    <div className="flex h-[42px] items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
+                      <Input
+                        className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
+                        placeholder="Write here"
+                      />
+                      <Button className="w-8 h-8 p-1 bg-green-700 rounded-lg">
+                        <img
+                          className="w-5 h-5"
+                          alt="Microphone icon"
+                          src="/icon-video-audio-image-microphone-slash.svg"
+                        />
+                      </Button>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+
+          {/* Desktop Chat */}
+          <Card className="relative h-[455px] bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block pb-4">
+            <CardContent className="p-0">
+              <div className="flex flex-col w-full h-full p-4">
+                <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] mb-[18px] [font-family:'Sofia_Pro-Medium',Helvetica]">
+                  Messages
+                </h3>
+
+                <ScrollArea className="h-[350px] pr-2">
+                  <MessageList />
+                  <ScrollBar orientation="vertical" />
+                </ScrollArea>
+
+                {/* Message input */}
+                <div className="flex h-[42px] mb-4 items-center gap-2.5 p-2.5 mt-2 bg-white rounded-[10px] border border-solid border-[#828b8633]">
+                  <Input
+                    className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-[#828b86] placeholder:text-[#828b86] focus-visible:ring-0"
+                    placeholder="Write here"
+                  />
+                  <Button className="w-8 h-8 p-1 bg-green-700 rounded-lg">
+                    <img
+                      className="w-5 h-5"
+                      alt="Microphone icon"
+                      src="/icon-video-audio-image-microphone-slash.svg"
+                    />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+
+      {/* Feedback Modal */}
+      {eventId && (
+        <FeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          eventId={eventId}
+          eventName={eventName}
+        />
+      )}
+    </>
   );
 };

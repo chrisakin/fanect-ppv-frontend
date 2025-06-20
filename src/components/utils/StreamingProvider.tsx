@@ -42,9 +42,16 @@ export const StreamingProvider = ({
         playbackUrl={eventData?.playbackUrl}
         chatRoomArn={eventData?.chatRoomArn}
         chatToken={eventData?.chatToken}
+        eventId={eventId}
+        eventName={eventName}
       />
     );
   } else {
-    return <VideoPlayer />;
+    return (
+      <VideoPlayer 
+        eventId={eventId}
+        eventName={eventName}
+      />
+    );
   }
 };
