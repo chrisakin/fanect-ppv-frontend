@@ -63,12 +63,10 @@ export const LocationPermissionModal = ({
               
               <div className="space-y-3 text-center">
                 <h2 className="text-2xl font-semibold tracking-tight">
-                  Location Access Required
+                  Approximate Location Permission
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  FaNect needs access to your location to provide you with relevant events 
-                  and ensure security. Your location data is used only for these purposes 
-                  and is not shared with third parties.
+                  FaNect needs access to your approximate location to display local pricing and event availability. This data isn’t shared and is used only for this purpose.
                 </p>
               </div>
             </div>
@@ -83,7 +81,7 @@ export const LocationPermissionModal = ({
             )}
 
             <div className="w-full space-y-4">
-              <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              {/* <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <ShieldCheckIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
@@ -94,7 +92,7 @@ export const LocationPermissionModal = ({
                     for security purposes. Your precise location is never stored or shared.
                   </p>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex gap-4 w-full">
                 <Button
