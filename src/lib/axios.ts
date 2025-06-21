@@ -54,8 +54,8 @@ axiosInstance.interceptors.response.use(
           refreshToken,
         });
         console.log(response)
-        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-        setTokens(accessToken, newRefreshToken);
+        const { accessToken } = response.data.data;
+        setTokens(accessToken, refreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest);
