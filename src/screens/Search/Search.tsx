@@ -40,7 +40,7 @@ export const Search = (): JSX.Element => {
   };
 
   const SearchContent = () => (
-    <main className="flex flex-col items-start gap-10 w-full max-w-7xl mx-auto px-4 md:px-8">
+    <main className="flex flex-col items-start gap-10 w-full max-w-7xl mx-auto px-2 md:px-8">
       <header className="flex flex-col w-full items-start justify-center gap-5">
         <Button
           variant="ghost"
@@ -76,7 +76,7 @@ export const Search = (): JSX.Element => {
                       src={event.bannerUrl}
                     />
 
-                    <div className="flex flex-col md:flex-row flex-1 gap-4 md:gap-6 w-full">
+                    <div className="flex flex-col md:flex-row flex-1 gap-1 md:gap-6 w-full">
                       <div className="flex-1 md:w-[249px]">
                         <Link 
                           to={isAuthenticated ? `/dashboard/tickets/event/streampass/${event._id}` : `/event/${event._id}`}

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth';
 import { locationService } from '../services/locationService';
+import { redirectToLogin } from '@/services/redirectService';
 
 const baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -35,7 +36,6 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-     console.log(error.response.status, error)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -43,13 +43,17 @@ axiosInstance.interceptors.response.use(
         const refreshToken = getRefreshToken();
         
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+           if (!refreshToken) {
+          clearTokens();
+          redirectToLogin(); // 🚀 no reload
+          return Promise.reject(error);
+        }
         }
 
         const response = await axios.post(`${baseURL}/auth/refresh-token`, {
           refreshToken,
         });
-
+        console.log(response)
         const { accessToken, refreshToken: newRefreshToken } = response.data.data;
         setTokens(accessToken, newRefreshToken);
 
@@ -58,12 +62,7 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
         clearTokens();
-        
-        // Only redirect if we're not already on the home page
-        if (window.location.pathname !== '/') {
-          window.location.href = '/';
-        }
-        
+        redirectToLogin(); 
         return Promise.reject(refreshError);
       }
     }

@@ -150,7 +150,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
             <div className="md:hidden block w-full lg:w-auto">
             {type === 'streampass' && <StreampassPurchaseCard event={singleEvent} />}
             {type === 'gift' && <GiftFriend event={singleEvent}/>}
-            {type === 'paid' && <RegisteredCard />}
+            {type === 'paid' && <RegisteredCard event={singleEvent} />}
           </div>
 
             {/* About this event section */}
@@ -181,7 +181,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
           <div className="hidden md:block w-full lg:w-auto">
             {type === 'streampass' && <StreampassPurchaseCard event={singleEvent}/>}
             {type === 'gift' && <GiftFriend  event={singleEvent}/>}
-            {type === 'paid' && <RegisteredCard />}
+            {type === 'paid' && <RegisteredCard  event={singleEvent}/>}
           </div>
         </div>
       </div>

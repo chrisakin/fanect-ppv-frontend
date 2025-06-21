@@ -1,6 +1,6 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Home } from "./screens/Home";
 import { AboutUs } from "./screens/AboutUs";
@@ -18,6 +18,7 @@ import { NotFound } from "./screens/NotFound";
 import { useFCM } from "./hooks/useFCM";
 import { LocationProvider } from "./components/LocationProvider";
 import { PasswordReset } from "./screens/PasswordReset";
+import { setRedirectNavigate } from "./services/redirectService";
 
 // Initialize auth state before rendering
 useAuthStore.getState().initAuth();
@@ -39,10 +40,14 @@ function App() {
   if (hasFirebaseConfig) {
     useFCM();
   }
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setRedirectNavigate(navigate);
+  }, [navigate]);
   
   return (
     <LocationProvider>
-    <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<AboutUs />} />
@@ -62,7 +67,6 @@ function App() {
         />
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </Router>
     </LocationProvider>
   );
 }
@@ -71,7 +75,9 @@ createRoot(document.getElementById("app") as HTMLElement).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ThemeProvider>
+        <Router>
         <App />
+        </Router>
         <Toaster />
       </ThemeProvider>
     </GoogleOAuthProvider>

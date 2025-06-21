@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Event } from "@/store/eventStore";
 
 interface EventCardsSectionProps {
@@ -13,7 +13,7 @@ interface EventCardsSectionProps {
 export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps) => {
   // Store countdowns for each event
   const [countdowns, setCountdowns] = useState<{ [id: string]: string }>({});
-
+  const navigate = useNavigate();
   // Helper to calculate countdown string
   const getCountdown = (dateString: string) => {
     const eventDate = new Date(dateString);
@@ -25,6 +25,10 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     return `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
+  };
+
+   const handleGiftStreampass = (eventId: string) => {
+      navigate(`/dashboard/tickets/event/gift/${eventId}`);
   };
 
   // Update countdowns every second for upcoming events
@@ -62,19 +66,19 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {events.map((event) => (
         <Card
           key={event._id}
-          className="w-full dark:bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] border-[#D5D7DA] relative flex flex-col"
+          className="w-full lg:h-[230px] dark:bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] border-[#D5D7DA] relative flex flex-col"
         >
           <div className="flex flex-col md:flex-row flex-1">
             <img
-              className="w-full md:w-[246px] h-[200px] md:h-[270px] object-cover"
+              className="w-full md:w-[246px] h-[200px] md:h-[240px] object-cover"
               alt="Event Image"
               src={event.bannerUrl}
             />
-            <CardContent className="flex flex-col h-full justify-between py-[35px] px-4 md:pl-6 md:pr-0 flex-1">
+            <CardContent className="flex flex-col h-full justify-between py-[20px] px-4 md:pl-6 md:pr-0 flex-1">
               <div className="flex flex-col w-full md:w-[250px] items-start">
                 <h3 className="text-xl md:text-2xl font-medium dark:text-[#828b86] mb-2">
                   {event.name}
@@ -88,6 +92,25 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                   })}
                 </p>
               </div>
+
+            {type === "upcoming" && (
+               <div className="flex flex-col gap-4">
+               <div className="flex w-[250px] h-[44px] items-center justify-center gap-5 px-2.5 py-0 relative dark:bg-[#0b331f]">
+            <div className="relative flex-1 font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] dark:text-[#baebd3] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)] [font-style:var(--text-lg-medium-font-style)]">
+               {countdowns[event._id] || getCountdown(event.eventDateTime)}
+            </div>
+          </div>
+           <Button
+            variant="outline"
+            className="flex w-52 h-10 items-center justify-center gap-2.5 p-2.5 relative rounded-[10px] border border-solid border-[#1aaa65] bg-transparent opacity-80 hover:bg-[#0b331f] hover:opacity-100"
+            onClick={() => handleGiftStreampass(event._id)}
+          >
+            <span className="relative w-fit mt-[-5.00px] mb-[-3.00px] [font-family:'Sofia_Pro-Medium',Helvetica] font-medium text-green-600 text-lg tracking-[-0.36px] leading-7 whitespace-nowrap">
+              Gift a Streampass
+            </span>
+          </Button>
+             </div>
+            )}
 
               <div className="flex flex-col gap-4 mt-4">
                 {type === 'past' && (
@@ -149,14 +172,6 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
               </div>
             </CardContent>
           </div>
-          
-          {type === "upcoming" && (
-            <div className="flex w-full h-[54px] items-center justify-center px-2.5 py-0 dark:bg-[#0b331f] bg-[#D5D7DA] mt-auto">
-              <div className="flex-1 font-medium dark:text-[#baebd3] text-dark">
-                {countdowns[event._id] || getCountdown(event.eventDateTime)}
-              </div>
-            </div>
-          )}
         </Card>
       ))}
     </div>
