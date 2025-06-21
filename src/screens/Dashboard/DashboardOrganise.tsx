@@ -119,22 +119,18 @@ export const DashboardOrganise = () => {
         </div>
       </div>
 
-      {isCreateModalOpen && (
         <EventModal 
           open={isCreateModalOpen} 
           onOpenChange={handleModalClose}
           event={selectedEvent}
         />
-      )}
 
-      {isDeleteModalOpen && (
         <DeleteEventModal 
           open={isDeleteModalOpen}
           onOpenChange={setIsDeleteModalOpen}
           onConfirm={handleDelete}
           isLoading={isDeleteLoading}
         />
-      )}
     </div>
   );
 };

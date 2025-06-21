@@ -1,10 +1,11 @@
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
 import { MoreVerticalIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Link } from "react-router-dom";
 import { Event } from "../../store/eventStore"
 import { formatInputDate, formatTime } from "@/lib/utils";
 import { Badge } from "../ui/badge";
+import { useState } from "react";
 
 interface EventCardsSectionProps {
   events: Event[];
@@ -15,15 +16,17 @@ interface EventCardsSectionProps {
 const getStatusClass = (status: string) => {
   switch (status) {
     case 'Approved':
-      return 'dark:bg-[#294435] bg-[#dcfcec] text-[#1aaa65]';
+      return 'dark:bg-[#294435] bg-[#dcfcec] text-[#1aaa65] hover:!bg-[#dcfcec] dark:hover:!bg-[#294435]' ;
     case 'Pending':
-      return 'dark:bg-[#294435] bg-[#feecb5] dark:text-[#87928C] text-[#ad923c]';
+      return 'dark:bg-[#294435] bg-[#feecb5] dark:text-[#87928C] text-[#ad923c] hover:!bg-[#feecb5] dark:hover:!bg-[#294435]';
     default:
-      return 'dark:bg-[#294435] bg-[#f5dbd9] text-[#d6675f]';
+      return 'dark:bg-[#294435] bg-[#f5dbd9] text-[#d6675f] hover:!bg-[#f5dbd9] dark:hover:!bg-[#294435]';
   }
 };
 
 export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSectionProps) => {
+const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+const [screenType, setScreenType] = useState<string>('')
   return (
    <div>
   {events.map((event) => (
@@ -51,7 +54,7 @@ export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSection
                   </div>
 
                   {/* Badge + Dropdown - mobile only */}
-                  <div className="md:hidden mt-2 flex items-center justify-between w-full">
+                  <div className="md:hidden block mt-2 flex items-center justify-between w-full">
                     <Badge
                       className={`flex h-[30px] items-center justify-center gap-2 px-3 rounded-[8px] font-medium text-sm tracking-[-0.32px] whitespace-nowrap border-none ${getStatusClass(event.adminStatus)}`}
                     >
@@ -61,14 +64,23 @@ export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSection
                       {event.adminStatus}
                     </Badge>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
+                    <DropdownMenu
+                    key={event._id}
+                    open={openDropdownId === event._id && screenType == 'isMobile'}
+                    onOpenChange={(open) => {
+                    setOpenDropdownId(open ? event._id : null);
+                    setScreenType(open ? 'isMobile' : '');
+                    }}>
+                      <DropdownMenuTrigger className="focus-visible:outline-none">
                         <MoreVerticalIcon className="w-5 h-5 dark:text-[#828b86] text-gray-600" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="dark:bg-[#062013] bg-[#FFFFFF] border dark:border-[#2e483a] border-gray-200 p-3 rounded-lg">
                         <DropdownMenuItem
                           className="dark:text-[#828b86] text-gray-600 cursor-pointer"
-                          onClick={() => onEdit(event)}
+                          onSelect={() => {
+                            setOpenDropdownId(null)// close dropdown
+                            onEdit(event);          // then open modal
+                          }}
                         >
                           Edit
                         </DropdownMenuItem>
@@ -81,7 +93,10 @@ export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSection
                         )}
                         <DropdownMenuItem
                           className="text-red-600 cursor-pointer"
-                          onClick={() => onDelete(event._id)}
+                          onSelect={() => {
+                          setOpenDropdownId(null)
+                          onDelete(event._id);
+                        }}
                         >
                           Delete
                         </DropdownMenuItem>
@@ -91,14 +106,14 @@ export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSection
                 </div>
 
                 {/* Date/Time - desktop */}
-                <div className="hidden md:block font-text-lg-regular text-base text-gray-600 dark:text-[#828b86] truncate">
+                <div className="hidden md:block font-text-lg-regular text-base text-gray-600 dark:text-[#828b86] truncate mt-2">
                   {`${formatInputDate(new Date(event.date))} ${formatTime(event.time)}`}
                 </div>
 
                 {/* Badge - desktop */}
                 <div className="hidden md:block">
                   <Badge
-                    className={`flex h-[30px] items-center justify-center gap-2 px-2 max-w-[170px] rounded-[8px] font-medium text-sm tracking-[-0.32px] whitespace-nowrap border-none ${getStatusClass(event.adminStatus)}`}
+                    className={`flex h-[30px] items-center justify-center gap-2 px-2 max-w-[170px]  rounded-[8px] font-medium text-sm tracking-[-0.32px] whitespace-nowrap border-none ${getStatusClass(event.adminStatus)}`}
                   >
                     {event.adminStatus === 'Approved' && (
                       <img src="/icons/tick-circle.svg" className="w-4 h-4" />
@@ -111,19 +126,28 @@ export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSection
 
             {/* Dropdown - desktop */}
             <div className="hidden md:block">
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <MoreVerticalIcon className="w-5 h-5 dark:text-[#828b86] text-gray-600" />
+              <DropdownMenu
+                  key={event._id}
+                    open={openDropdownId === event._id && screenType == 'isDesktop'}
+                    onOpenChange={(open) => {
+                    setOpenDropdownId(open ? event._id : null);
+                    setScreenType(open ? 'isDesktop' : '');
+                    }}>
+                <DropdownMenuTrigger className="focus-visible:outline-none">
+                  <MoreVerticalIcon className="w-5 h-5 dark:text-[#828b86] text-gray-600 " />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-[#062013] bg-[#FFFFFF] border dark:border-[#2e483a] border-gray-200 p-3 rounded-lg">
                   <DropdownMenuItem
-                    className="dark:text-[#828b86] text-gray-600 cursor-pointer"
-                    onClick={() => onEdit(event)}
+                    className="dark:text-[#828b86] text-gray-600 cursor-pointer dark:hover:!text-[#FFFFFF]"
+                    onSelect={() => {
+                      setOpenDropdownId(null);
+                      onEdit(event);          // then open modal
+                    }}
                   >
                     Edit
                   </DropdownMenuItem>
                   {event.adminStatus === 'Approved' && (
-                    <DropdownMenuItem className="dark:text-[#828b86] text-gray-600 cursor-pointer">
+                    <DropdownMenuItem className="dark:text-[#828b86] text-gray-600 cursor-pointer dark:hover:!text-[#FFFFFF]">
                       <Link to={`/dashboard/organise/analytics/${event._id}`}>
                         View Stats
                       </Link>
@@ -131,7 +155,10 @@ export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSection
                   )}
                   <DropdownMenuItem
                     className="text-red-600 cursor-pointer"
-                    onClick={() => onDelete(event._id)}
+                     onSelect={() => {
+                      setOpenDropdownId(null);
+                      onDelete(event._id);
+                    }}
                   >
                     Delete
                   </DropdownMenuItem>

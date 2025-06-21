@@ -6,14 +6,21 @@ import { clearTokens } from '../../lib/auth';
 import { Header } from './Header';
 import axios from '@/lib/axios';
 import { toast } from '../ui/use-toast';
+import HomeIcon from '../icons/HomeIcon';
+import CardPosIcon from '../icons/CardPosIcon';
+import MusicIcon from '../icons/MusicIcon';
+import SettingsIcon from '../icons/SettingsIcon';
+import NotificationBingIcon from '../icons/NotificationBingIcon';
+import MessageQuestionIcon from '../icons/MessageQuestionIcon';
+import LogoutIcon from '../icons/LogoutIcon';
 
 const sidebarItems = [
-  { icon: <img src='/icons/home.svg' className="h-6 w-6" />, label: 'Home', path: '/dashboard/home', slug:'home' },
-  { icon: <img src='/icons/card-pos.svg' className="h-6 w-6" />, label: 'Streampass', path: '/dashboard/tickets', slug:'tickets' },
-  { icon: <img src='/icons/music.svg' className="h-6 w-6" />, label: 'Organise Events', path: '/dashboard/organise', slug:'organise' },
-  { icon: <img src='/icons/setting.svg' className="h-6 w-6" />, label: 'Settings', path: '/dashboard/settings', slug:'settings' },
-  { icon: <img src='/icons/notification-bing.svg' className="h-6 w-6" />, label: 'Notifications', path: '/dashboard/notifications', slug: 'notifications' },
-  { icon: <img src='/icons/message-question.svg' className="h-6 w-6" />, label: 'Help', path: '/dashboard/help', slug: 'help' },
+  { icon: <HomeIcon className="!h-6 !w-6" />, label: 'Home', path: '/dashboard/home', slug:'home' },
+  { icon: <CardPosIcon className="!h-6 !w-6" />, label: 'Streampass', path: '/dashboard/tickets', slug:'tickets' },
+  { icon: <MusicIcon className="!h-6 !w-6" />, label: 'Organise Events', path: '/dashboard/organise', slug:'organise' },
+  { icon: <SettingsIcon className="!h-6 !w-6" />, label: 'Settings', path: '/dashboard/settings', slug:'settings' },
+  { icon: <NotificationBingIcon className="!h-6 !w-6" />, label: 'Notifications', path: '/dashboard/notifications', slug: 'notifications' },
+  { icon: <MessageQuestionIcon className="!h-6 !w-6" />, label: 'Help', path: '/dashboard/help', slug: 'help' },
 ];
 
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -68,7 +75,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                 onClick={() => setIsSidebarOpen(false)}
                   variant="ghost"
                   className={`flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 rounded ${
-                    isActive(item.slug) ? 'bg-[#1AAA65] text-[#FAFAFA] dark:bg-select-dark' : 'text-[#A4A7AE] dark:text-[#AAAAAA]'
+                    isActive(item.slug) ? 'bg-[#1AAA65] hover:!bg-[#1AAA65] hover:!text-[#FAFAFA] text-[#FAFAFA] dark:bg-select-dark' : 'text-[#717680] dark:text-[#AAAAAA] dark:hover:!text-white hover:!bg-transparent'
                   }`}
                 >
                   {item.icon}
@@ -84,9 +91,9 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 text-gray-400 dark:text-gray-300 rounded"
+              className="flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 text-gray-500 dark:text-gray-300 rounded dark:hover:!text-white hover:!bg-transparent"
             >
-              <img src='/icons/logout.svg' className="h-6 w-6" />
+              <LogoutIcon className="!h-6 !w-6" />
               <span className="font-medium text-base tracking-[-0.32px] leading-6">
                 Log Out
               </span>

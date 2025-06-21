@@ -89,7 +89,7 @@ export const DashboardSettings = (): JSX.Element => {
         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Manage your account settings</p>
       </div>
 
-      <div className="w-[70%] space-y-12 lg:space-y-16">
+      <div className="lg:w-[70%] w-full space-y-12 lg:space-y-16">
         {/* Account Settings Section */}
         <section className="flex flex-col gap-6 lg:gap-8">
           <div className="p-2.5 rounded-[20px]">
@@ -105,7 +105,7 @@ export const DashboardSettings = (): JSX.Element => {
                 Email Address
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.email}
                 disabled
                 readOnly
@@ -118,7 +118,7 @@ export const DashboardSettings = (): JSX.Element => {
                 First Name
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.firstName}
                 onChange={(e) => updateField('firstName', e.target.value)}
               />
@@ -130,7 +130,7 @@ export const DashboardSettings = (): JSX.Element => {
                 Last Name
               </label>
               <Input
-                className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                 value={settings.lastName}
                 onChange={(e) => updateField('lastName', e.target.value)}
               />
@@ -143,14 +143,14 @@ export const DashboardSettings = (): JSX.Element => {
               </label>
               <div className="flex flex-col sm:flex-row w-full items-stretch sm:items-center gap-3 sm:gap-4">
                 <Input
-                  className="w-full sm:flex-1 h-12 sm:h-14 lg:h-[42px] dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="h-[42px] w-full dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   type="password"
                   value="**************"
                   disabled
                   readOnly
                 />
                 <Button
-                  className="w-full sm:w-auto sm:flex-shrink-0 h-12 sm:h-14 lg:h-[42px] bg-green-600 text-white rounded-[10px] hover:bg-green-700 text-sm sm:text-base px-4 sm:px-6"
+                  className="w-full mt-6 md:mt-0 !h-[42px] sm:w-auto sm:flex-shrink-0 bg-green-600 text-white rounded-[10px] hover:bg-green-700 text-sm sm:text-base px-4 sm:px-6"
                   onClick={handleResetPassword}
                 >
                   Reset Password
@@ -162,14 +162,14 @@ export const DashboardSettings = (): JSX.Element => {
             {/* <div className="flex flex-col sm:flex-row justify-end gap-4 sm:gap-6 w-full mt-6">
               <Button
                 variant="outline"
-                className="w-full sm:w-auto sm:min-w-[140px] h-12 sm:h-14 border-[#D5D7DA] rounded-[10px] text-sm sm:text-base"
+                className="w-full sm:w-auto sm:min-w-[140px] h-14 border-[#D5D7DA] rounded-[10px] text-sm sm:text-base"
                 onClick={() => fetchProfile()}
                 disabled={isSaving}
               >
                 Cancel Changes
               </Button>
               <Button
-                className="w-full sm:w-auto sm:min-w-[120px] h-12 sm:h-14 bg-green-600 rounded-[10px] hover:bg-green-700 text-sm sm:text-base"
+                className="w-full sm:w-auto sm:min-w-[120px] h-14 bg-green-600 rounded-[10px] hover:bg-green-700 text-sm sm:text-base"
                 onClick={handleSaveChanges}
                 disabled={isSaving}
               >
@@ -203,7 +203,7 @@ export const DashboardSettings = (): JSX.Element => {
                   Bank Name
                 </label>
                 <Input
-                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   value={withdrawalDetails.bankName}
                   onChange={(e) => updateWithdrawalField('bankName', e.target.value)}
                 />
@@ -215,7 +215,7 @@ export const DashboardSettings = (): JSX.Element => {
                   Bank Account Number
                 </label>
                 <Input
-                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   value={withdrawalDetails.accountNumber}
                   onChange={(e) => updateWithdrawalField('accountNumber', e.target.value)}
                 />
@@ -227,7 +227,7 @@ export const DashboardSettings = (): JSX.Element => {
                   Name on Account
                 </label>
                 <Input
-                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   value={withdrawalDetails.accountName}
                   onChange={(e) => updateWithdrawalField('accountName', e.target.value)}
                 />
@@ -238,7 +238,7 @@ export const DashboardSettings = (): JSX.Element => {
                   Bank Type
                 </label>
                 <Input
-                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   value={withdrawalDetails.bankType}
                   onChange={(e) => updateWithdrawalField('bankType', e.target.value)}
                 />
@@ -249,7 +249,7 @@ export const DashboardSettings = (): JSX.Element => {
                   Bank Routing Number
                 </label>
                 <Input
-                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   value={withdrawalDetails.bankRoutingNumber}
                   onChange={(e) => updateWithdrawalField('bankRoutingNumber', e.target.value)}
                 />
@@ -260,7 +260,7 @@ export const DashboardSettings = (): JSX.Element => {
                   Address
                 </label>
                 <Input
-                  className="h-12 sm:h-14 lg:h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
+                  className="h-[42px] flex-1 dark:bg-[#13201A] dark:border-[#2E483A] dark:text-[#bbbbbb] border-[#D5D7DA] text-sm sm:text-base"
                   value={withdrawalDetails.address}
                   onChange={(e) => updateWithdrawalField('address', e.target.value)}
                 />
@@ -270,14 +270,14 @@ export const DashboardSettings = (): JSX.Element => {
               <div className="flex flex-col sm:flex-row justify-end gap-4 sm:gap-6 w-full mt-6">
                 <Button
                   variant="outline"
-                  className="w-full sm:w-auto sm:min-w-[140px] h-12 sm:h-14 border-[#D5D7DA] rounded-[10px] text-sm sm:text-base"
+                  className="w-full !h-[42px] sm:w-auto sm:min-w-[140px] border-[#D5D7DA] rounded-[10px] text-sm sm:text-base"
                   onClick={() => fetchWithdrawalDetails()}
                   disabled={isWithdrawalSaving}
                 >
                   Cancel Changes
                 </Button>
                 <Button
-                  className="w-full sm:w-auto sm:min-w-[120px] h-12 sm:h-14 bg-green-600 rounded-[10px] hover:bg-green-700 text-sm sm:text-base"
+                  className="w-full sm:w-auto sm:min-w-[120px] !h-[42px] bg-green-600 rounded-[10px] hover:bg-green-700 text-sm sm:text-base"
                   onClick={handleSaveWithdrawalDetails}
                   disabled={isWithdrawalSaving}
                 >
@@ -308,8 +308,8 @@ export const DashboardSettings = (): JSX.Element => {
               </h3>
 
               <div className="flex flex-col gap-6">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                  <div className="dark:text-[#bbbbbb] text-gray-700 flex-1 text-sm sm:text-base leading-relaxed">
+                <div className="flex flex-row sm:items-center gap-3 sm:gap-4">
+                  <div className="dark:text-[#bbbbbb] text-gray-700 flex-1 text-sm sm:text-base leading-relaxed ">
                     Notify me when my registered event live stream begins
                   </div>
                   <Checkbox
@@ -320,7 +320,7 @@ export const DashboardSettings = (): JSX.Element => {
                     }
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="dark:text-[#bbbbbb] text-gray-700 flex-1 text-sm sm:text-base leading-relaxed">
                     Notify me when my registered event live stream ends
                   </div>
@@ -342,7 +342,7 @@ export const DashboardSettings = (): JSX.Element => {
               </h3>
 
               <div className="flex flex-col gap-6">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="dark:text-[#bbbbbb] text-gray-700 flex-1 text-sm sm:text-base leading-relaxed">
                     Notify me when my registered event live stream begins
                   </div>
@@ -354,7 +354,7 @@ export const DashboardSettings = (): JSX.Element => {
                     }
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="dark:text-[#bbbbbb] text-gray-700 flex-1 text-sm sm:text-base leading-relaxed">
                     Notify me when my registered event live stream ends
                   </div>
@@ -372,7 +372,7 @@ export const DashboardSettings = (): JSX.Element => {
             {/* Save Button for Notifications */}
             <div className="flex items-center justify-end">
               <Button
-                className="w-full sm:w-auto sm:min-w-[120px] h-12 sm:h-14 bg-green-600 rounded-[10px] hover:bg-green-700 text-sm sm:text-base"
+                className="w-full sm:w-auto sm:min-w-[120px] !h-[42px] bg-green-600 rounded-[10px] hover:bg-green-700 text-sm sm:text-base"
                 onClick={handleSaveChanges}
                 disabled={isSaving}
               >
@@ -390,7 +390,7 @@ export const DashboardSettings = (): JSX.Element => {
         <section className="pt-8 border-t border-gray-200 dark:border-gray-700">
           <Button
             variant="outline"
-            className="w-full sm:w-auto sm:min-w-[240px] h-12 sm:h-14 border-[#d92c20] rounded-[10px] text-[#D92D20] hover:bg-red-50 dark:hover:bg-red-950 text-sm sm:text-base"
+            className="w-full sm:w-auto sm:min-w-[240px] !h-[42px] border-[#d92c20] rounded-[10px] text-[#D92D20] hover:bg-red-50 dark:hover:bg-red-950 text-sm sm:text-base"
             onClick={handleDeleteAccount}
           >
             Delete my Account

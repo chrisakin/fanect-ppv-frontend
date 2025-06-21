@@ -80,9 +80,9 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const isSelected = value && 
-        value.getDate() === day && 
-        value.getMonth() === currentMonth && 
-        value.getFullYear() === currentYear;
+        new Date(value).getDate() === day && 
+        new Date(value).getMonth() === currentMonth && 
+        new Date(value).getFullYear() === currentYear;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const isToday = new Date().toDateString() === new Date(currentYear, currentMonth, day).toDateString();
@@ -98,7 +98,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             isToday && !isSelected && "bg-gray-200 dark:bg-gray-600",
             "focus:outline-none focus:ring-2 focus:ring-green-500",
             isPast
-          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+          ? "bg-gray-100 text-gray-400 dark:bg-transparent cursor-not-allowed"
           : "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
           )}
           disabled={isPast}
@@ -135,7 +135,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       </div>
 
       {isOpen && !disabled && (
-        <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 p-4 min-w-[280px]">
+        <div className="absolute top-full left-0 mt-1 bg-white dark:bg-[#13201A] border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 p-4 min-w-[280px]">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <Button

@@ -1,5 +1,5 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "../ui/dialog";
-import { CalendarIcon, ClockIcon, X, EyeIcon, UploadIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { X, UploadIcon, PlusIcon, TrashIcon } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -66,7 +66,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { updateEvent } = useEventStore();
+  const { updateEvent, fetchMyEvents} = useEventStore();
 
   // Currency options
   const currencies = Object.values(Currency);
@@ -276,9 +276,9 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
       newErrors.bannerUrl = "Event banner is required";
     }
 
-    if (!event && !formData.watermarkUrl) {
-      newErrors.watermarkUrl = "Event watermark is required";
-    }
+    // if (!event && !formData.watermarkUrl) {
+    //   newErrors.watermarkUrl = "Event watermark is required";
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -344,7 +344,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
             description: "Event created successfully",
           });
         }
-
+        await fetchMyEvents()
         onOpenChange(false);
         setCurrentStep(1);
         setFormData({
@@ -395,19 +395,19 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-[680px] h-[90vh] p-0 bg-background overflow-y-auto">
+      <DialogContent className="w-full max-w-[600px] h-[90vh] p-0 bg-background overflow-y-auto">
         <form onSubmit={currentStep === 2 ? handleSubmit : (e) => e.preventDefault()}>
-          <Card className="w-full bg-gray-50 dark:bg-[#092D1B] rounded-[10px] border border-solid border-[#d5d7da] dark:border-[#1AAA65]">
+          <Card className="w-full bg-gray-50 dark:!bg-[#02150C] rounded-[10px] border border-solid border-[#d5d7da] dark:border-[#1AAA65]">
             <CardContent className="flex flex-col items-center p-0">
-              <DialogClose className="absolute right-4 top-4 z-10">
+              <DialogClose className="absolute right-4 top-4 z-10 focus-visible:outline-none">
                 <X className="h-4 w-4" />
               </DialogClose>
 
-              <div className="flex flex-col w-full max-w-[600px] items-center gap-[60px] py-[45px] px-6">
+              <div className="flex flex-col w-full max-w-[510px] items-center gap-[28px] py-[45px] px-6">
                 {/* Header Section */}
                 <div className="flex flex-col w-full max-w-[489px] items-center gap-[20px]">
                   <div className="flex flex-col items-center w-full">
-                    <DialogTitle className="text-[48px] text-gray-800 dark:text-[#CCCCCC] text-center tracking-[var(--display-lg-semibold-letter-spacing)] leading-[var(--display-lg-semibold-line-height)]">
+                    <DialogTitle className="text-[40px] text-gray-800 dark:text-[#DDDDDD] text-center tracking-[var(--display-lg-semibold-letter-spacing)] leading-[var(--display-lg-semibold-line-height)]">
                       {event ? 'Edit Event' : 'Organize Event'}
                     </DialogTitle>
 
@@ -433,7 +433,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         <div className="relative w-full">
                           <Input
                             id="name"
-                            className="h-[60px] px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                            className="h-[50px] px-3.5 py-2.5  dark:bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-[#2E483A] [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
                             placeholder="Enter event name"
                             value={formData.name}
                             onChange={handleInputChange}
@@ -455,7 +455,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           onChange={(date) => handleDateChange('date', date as unknown as string)}
                           placeholder="Select event date"
                           disabled={isSubmitting}
-                          className="h-[60px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                          className="h-[50px] w-full px-3.5 py-2.5 bg-gray-50 dark:!bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
                         />
                         {errors.date && (
                           <span className="text-xs text-red-500">{errors.date}</span>
@@ -472,7 +472,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           onChange={handleTimeChange}
                           placeholder="Select event time"
                           disabled={isSubmitting}
-                          className="h-[60px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                          className="h-[50px] w-full px-3.5 py-2.5 bg-gray-50 dark:!bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
                         />
                         {errors.time && (
                           <span className="text-xs text-red-500">{errors.time}</span>
@@ -486,7 +486,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </label>
                         <Textarea
                           id="description"
-                          className="h-[174px] px-3.5 pt-5 pb-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px] resize-none"
+                          className="h-[174px] px-3.5 pt-5 pb-2.5 bg-gray-50 dark:bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px] resize-none"
                           placeholder="Enter event description. You can use line breaks for paragraphs and format your text as needed."
                           value={formData.description}
                           onChange={handleInputChange}
@@ -507,7 +507,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                       <Button 
                         type="button"
                         onClick={handleContinue}
-                        className="h-[60px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-white text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
+                        className="h-[50px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-white text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
                         disabled={isSubmitting}
                       >
                         Continue
@@ -541,7 +541,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         
                         {formData.prices.map((price, index) => (
                           <div key={index} className="flex items-start gap-2 w-full">
-                            <div className="w-[120px] h-[60px] flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600">
+                            <div className="w-[120px] h-[50px] flex items-center bg-gray-50 dark:bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600">
                               {/* <Input
                                 value={price.currency}
                                 disabled
@@ -551,7 +551,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                               <SelectTrigger className="w-full h-full border-0 bg-transparent cursor-pointer">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="cursor-pointer dark:!bg-[#FFFFFF]">
                                 {currencies.map((currency) => {
                                   const isSelected = formData.prices.some(
                                     (p, i) => p.currency === currency && i !== index
@@ -561,6 +561,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                                       key={currency}
                                       value={currency}
                                       disabled={isSelected}
+                                      className="!cursor-pointer dark:!text-[#000000] dark:hover:bg-[#13201A] dark:hover:!text-[#FFFFFF] hover:bg-[#13201A] hover:text-[#FFFFFF]"
                                     >
                                       {currency}
                                     </SelectItem>
@@ -570,16 +571,25 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                             </Select>
                             </div>
 
-                            <div className="flex-1 h-[60px] bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600">
-                              <div className="flex items-center justify-between px-3.5 py-2.5 h-full">
-                                <Input
+                            <div className="flex-1 h-[50px] bg-gray-50 dark:bg-[#13201A] rounded-lg">
+                              <div className="flex items-center justify-between  h-full">
+                                {/* <Input
                                   type="number"
-                                  className="border-0 bg-transparent text-gray-700 dark:text-gray-200 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-base tracking-[-0.32px] shadow-none focus-visible:ring-0 p-0 h-full"
+                                  className="!border-0 bg-gray-50 dark:bg-[#13201A] text-gray-700 dark:text-gray-200 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-base tracking-[-0.32px] shadow-none p-0 h-full focus:!outline-none focus:!ring-0 focus-visible:!outline-none !appearance-none"
                                   placeholder="Enter amount"
                                   value={price.amount|| ''}
                                   onChange={(e) => handlePriceChange(index, 'amount', e.target.value)}
                                   disabled={isSubmitting}
-                                />
+                                /> */}
+                                 <Input
+                                  id="amount"
+                                  type="number"
+                                  className="h-[50px] px-3.5 py-2.5  dark:bg-[#13201A] rounded-lg [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                                  placeholder="Enter amount"
+                                  value={price.amount|| ''}
+                                  onChange={(e) => handlePriceChange(index, 'amount', e.target.value)}
+                                  disabled={isSubmitting}
+                                  />
                               </div>
                             </div>
 
@@ -589,7 +599,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                                 onClick={() => removePrice(index)}
                                 variant="outline"
                                 size="sm"
-                                className="h-[60px] w-[60px] p-0 border-red-300 text-red-500 hover:bg-red-50"
+                                className="h-[50px] w-[60px] p-0 border-red-300 text-red-500 hover:bg-red-50"
                               >
                                 <TrashIcon className="w-4 h-4" />
                               </Button>
@@ -609,12 +619,12 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </h3>
 
                         <Select value={formData.haveBroadcastRoom} onValueChange={(value) => handleSelectChange('haveBroadcastRoom', value)}>
-                          <SelectTrigger className="h-[60px] bg-gray-50 dark:bg-gray-800 border-[#d5d7da] dark:border-gray-600 w-full cursor-pointer">
+                          <SelectTrigger className="h-[50px] bg-gray-50 dark:bg-[#13201A] border-[#d5d7da] dark:border-gray-600 w-full cursor-pointer">
                             <SelectValue placeholder="Select answer" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="yes">Yes</SelectItem>
-                            <SelectItem value="no">No</SelectItem>
+                          <SelectContent className="cursor-pointer dark:!bg-[#FFFFFF]">
+                            <SelectItem className="!cursor-pointer dark:!text-[#000000] dark:hover:bg-[#13201A] dark:hover:!text-[#FFFFFF] hover:bg-[#13201A] hover:text-[#FFFFFF]" value="yes">Yes</SelectItem>
+                            <SelectItem className="!cursor-pointer dark:!text-[#000000] dark:hover:bg-[#13201A] dark:hover:!text-[#FFFFFF] hover:bg-[#13201A] hover:text-[#FFFFFF]"  value="no">No</SelectItem>
                           </SelectContent>
                         </Select>
                         {errors.haveBroadcastRoom && (
@@ -630,7 +640,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
 
                         <Textarea
                           id="broadcastSoftware"
-                          className="h-[94px] bg-gray-50 dark:bg-gray-800 border-[#d5d7da] dark:border-gray-600 rounded-lg pt-5 pb-2.5 px-3.5 text-gray-700 dark:text-gray-200 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-base tracking-[-0.32px] resize-none"
+                          className="h-[94px] bg-gray-50 dark:bg-[#13201A] border-[#d5d7da] dark:border-gray-600 rounded-lg pt-5 pb-2.5 px-3.5 text-gray-700 dark:text-gray-200 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-base tracking-[-0.32px] resize-none"
                           placeholder="Enter answer"
                           value={formData.broadcastSoftware}
                           onChange={handleInputChange}
@@ -652,7 +662,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           onChange={(date) => handleDateChange('scheduledTestDate', date as unknown as string)}
                           placeholder="Select test stream date"
                           disabled={isSubmitting}
-                          className="h-[60px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
+                          className="h-[50px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
                         />
                         {errors.scheduledTestDate && (
                           <span className="text-xs text-red-500">{errors.scheduledTestDate}</span>
@@ -666,7 +676,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </h3>
 
                         <label htmlFor="bannerUrl" className="cursor-pointer w-full">
-                          <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
+                          <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-[#13201A] rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
                             <div className="flex flex-col w-[157px] items-center justify-center gap-2.5">
                               {imagePreviews.bannerUrl ? (
                                 <img
@@ -705,7 +715,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </h3>
 
                         <label htmlFor="watermarkUrl" className="cursor-pointer w-full">
-                          <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
+                          <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-[#13201A] rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
                             <div className="flex flex-col w-[157px] items-center justify-center gap-2.5">
                               {imagePreviews.watermarkUrl ? (
                                 <img
@@ -744,7 +754,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </h3>
 
                         <label htmlFor="eventTrailer" className="cursor-pointer w-full">
-                          <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
+                          <div className="h-[133px] flex items-center justify-center w-full bg-gray-50 dark:bg-[#13201A] rounded-lg border border-dashed border-[#a4a7ae] dark:border-gray-600 shadow-shadow-xs hover:border-green-600 transition-colors">
                             <div className="flex flex-col w-[157px] items-center justify-center gap-2.5">
                               {imagePreviews.eventTrailer ? (
                                 <div className="flex flex-col items-center gap-2">
@@ -783,7 +793,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="h-[60px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-white text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
+                        className="h-[50px] w-full bg-green-600 rounded-[10px] font-text-lg-semibold text-white text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)] hover:bg-green-700"
                       >
                         {isSubmitting ? 
                           (event ? "Updating Event..." : "Creating Event...") : 
@@ -796,7 +806,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         variant="outline"
                         onClick={handleBack}
                         disabled={isSubmitting}
-                        className="h-[60px] w-full border-[#d5d7da] dark:border-gray-600 rounded-[10px] font-text-lg-semibold text-gray-700 dark:text-gray-200 text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)]"
+                        className="h-[50px] w-full border-[#d5d7da] dark:border-gray-600 rounded-[10px] font-text-lg-semibold text-gray-700 dark:text-gray-200 text-[length:var(--text-lg-semibold-font-size)] tracking-[var(--text-lg-semibold-letter-spacing)] leading-[var(--text-lg-semibold-line-height)]"
                       >
                         Back
                       </Button>

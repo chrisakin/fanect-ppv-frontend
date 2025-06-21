@@ -150,8 +150,8 @@ export const DashboardHelp = (): JSX.Element => {
                   value={tab}
                   className={`flex w-[133px] items-center justify-center gap-2.5 p-2.5 rounded-[10px] ${
                     selectedCategory === tab
-                      ? "bg-green-600"
-                      : "border border-solid border-[#2e483a]"
+                      ? "!bg-green-600"
+                      : "border border-solid border-[#2E483A]"
                   }`}
                 >
                   <span
@@ -172,11 +172,13 @@ export const DashboardHelp = (): JSX.Element => {
                   <AccordionItem
                     key={index}
                     value={index.toString()}
-                    className={`${
-                      index === 0
-                        ? "dark:bg-[#032313] bg-[#F5F5F5] rounded-[10px] p-5 mb-10"
-                        : "mb-10"
-                    }`}
+                    className="
+                    mb-10
+                    data-[state=open]:bg-[#F5F5F5]
+                    data-[state=open]:dark:bg-[#032313]
+                    data-[state=open]:rounded-[10px]
+                    data-[state=open]:p-5
+                    "
                   >
                     <AccordionTrigger className="flex justify-between w-full">
                       <span className="font-text-lg-medium font-[number:var(--text-lg-medium-font-weight)] dark:text-[#828b86] text-gray-600 text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)] [font-style:var(--text-lg-medium-font-style)] text-left w-full pr-4">

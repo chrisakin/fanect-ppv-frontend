@@ -52,16 +52,16 @@ export const DashboardHome = (): JSX.Element => {
           type="single"
           value={eventType}
           onValueChange={(value) => value && setEventType(value as 'upcoming' | 'live')}
-          className="flex w-[265px] items-center gap-[11px] px-2.5 py-1 bg-[#E8FFF4] dark:bg-[#062013] rounded-[40px]"
+          className="flex w-[265px] items-center gap-[11px] px-2.5 py-1  dark:bg-[#062013] rounded-[20px] border dark:!border-[#2E483A] !border-[#1AAA6580]"
         >
           <ToggleGroupItem
             value="upcoming"
             className={`flex w-[117px] items-center justify-center gap-2.5 p-2.5 rounded-[20px] ${
-              eventType === 'upcoming' ? "bg-[#1AAA65]" : "bg-[#E8FFF4] dark:bg-[#062013]"
+              eventType === 'upcoming' ? "!bg-[#1AAA65]" : " dark:!bg-[#062013] hover:!bg-transparent"
             }`}
           >
             <span className={`font-text-lg-regular ${
-              eventType === 'upcoming' ? "text-gray-50" : "dark:text-[#828B86] text-[#44D48F]"
+              eventType === 'upcoming' ? "!text-gray-50" : "dark:!text-[#828B86] !text-[#44D48F]"
             }`}>
               Upcoming
             </span>
@@ -69,22 +69,22 @@ export const DashboardHome = (): JSX.Element => {
           <ToggleGroupItem
             value="live"
             className={`flex w-[117px] items-center justify-center gap-2.5 p-2.5 rounded-[20px] ${
-              eventType === 'live' ? "bg-[#1AAA65]" : "bg-[#E8FFF4] dark:bg-[#062013]"
+              eventType === 'live' ? "!bg-[#1AAA65]" : " dark:!bg-[#062013] hover:!bg-transparent"
             }`}
           >
             <span className={`font-text-lg-regular ${
-              eventType === 'live' ? "text-gray-50" : "dark:text-[#828B86] text-[#44D48F]"
+              eventType === 'live' ? "!text-gray-50" : "dark:!text-[#828B86] !text-[#44D48F]"
             }`}>
               Live
             </span>
           </ToggleGroupItem>
         </ToggleGroup>
 
-        <Alert className="relative w-full h-[72px] bg-green-900 rounded overflow-hidden p-0 mt-5">
+        <Alert className="relative w-full md:h-[72px] h-[100px] bg-green-900 rounded overflow-hidden p-0 mt-5">
           <div className="w-full flex items-start gap-2.5 p-4">
             <div className="flex items-center gap-2.5 w-full">
               <InfoIcon className="w-7 h-7 text-gray-100" />
-              <div className="flex w-full items-center justify-between">
+              <div className="flex w-full items-center  gap-3 justify-between">
                 <div className="flex items-center gap-[15px]">
                   <AlertDescription className="text-gray-100 font-text-sm-regular">
                     Fido live in lagos live streaming has begun

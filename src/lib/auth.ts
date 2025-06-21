@@ -39,7 +39,7 @@ export const isAuthenticated = () => {
 
   try {
     const decoded = jwtDecode<DecodedToken>(token);
-    return decoded.exp * 1000 > Date.now();
+    return decoded;
   } catch {
     return false;
   }
