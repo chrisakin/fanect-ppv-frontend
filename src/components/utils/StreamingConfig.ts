@@ -34,8 +34,8 @@ export const getStreamingConfig = (): StreamingConfig => {
       playbackUrl: '', // This should come from your event data
       chatRoomArn: '', // This should come from your event data
       chatToken: '', // This should come from your backend
-      region: import.meta.env.VITE_AWS_IVS_REGION || 'us-east-1',
-      chatRegion: import.meta.env.VITE_AWS_IVS_CHAT_REGION || 'us-east-1',
+      region: import.meta.env.VITE_AWS_IVS_REGION || 'eu-west-1',
+      chatRegion: import.meta.env.VITE_AWS_IVS_CHAT_REGION || 'eu-west-1',
     };
   }
 

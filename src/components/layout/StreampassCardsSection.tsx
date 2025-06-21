@@ -139,7 +139,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                         variant="outline"
                         className="w-full md:w-[167px] h-10 rounded-[10px] border border-solid border-[#1aaa65] bg-transparent p-2.5"
                       >
-                        <span className="font-medium text-green-600">
+                        <span className="font-medium text-green-600 cursor-pointer">
                           Watch Live Event
                         </span>
                       </Button>

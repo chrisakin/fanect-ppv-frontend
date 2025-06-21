@@ -22,7 +22,7 @@ interface AWSIVSPlayerProps {
 export const AWSIVSPlayer = ({
   playbackUrl = "https://fcc3ddae59ed.us-west-2.playback.live-video.net/api/video/v1/us-west-2.893648527354.channel.DmumNckWFTqz.m3u8", // Demo stream
   chatApiEndpoint,
-  chatRoomArn,
+  chatRoomArn = "arn:aws:ivs:eu-west-1:408768385908:channel/pm4NBDHAKHzm",
   chatToken,
   username = "viewer",
   eventId,

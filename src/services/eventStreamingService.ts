@@ -20,10 +20,13 @@ class EventStreamingService {
   }
 
   // Get stream key for upcoming/live events (for organizers)
-  public async getStreamKey(eventId: string): Promise<string> {
+  public async getStreamKey(eventId: string): Promise<StreamingData> {
     try {
       const response = await axios.get(`/event/streamkey/${eventId}`);
-      return response.data.streamKey;
+      return {
+        streamKey: response.data.streamKey,
+        chatToken: response.data.chatToken,
+      };
     } catch (error) {
       console.error('Error fetching stream key:', error);
       throw new Error('Failed to get stream key');
@@ -36,8 +39,6 @@ class EventStreamingService {
       const response = await axios.get(`/event/playbackurl/${eventId}`);
       return {
         playbackUrl: response.data.playbackUrl,
-        chatRoomArn: response.data.chatRoomArn,
-        chatToken: response.data.chatToken,
       };
     } catch (error) {
       console.error('Error fetching playback URL:', error);
@@ -51,9 +52,7 @@ class EventStreamingService {
       if (eventType === 'past') {
         return await this.getPlaybackUrl(eventId);
       } else if (eventType === 'live' || eventType === 'upcoming') {
-        // For live events, you might need both playback URL and stream key
-        // depending on whether the user is viewing or streaming
-        const playbackData = await this.getPlaybackUrl(eventId);
+        const playbackData = await this.getStreamKey(eventId);
         return playbackData;
       }
       

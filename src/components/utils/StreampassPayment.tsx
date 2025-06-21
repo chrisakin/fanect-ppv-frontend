@@ -3,8 +3,8 @@ import { Loader2 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useToast } from "../ui/use-toast";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import intaxios from "../../lib/axios"
+import { locationService } from "@/services/locationService";
 
 type StreampassPaymentButtonProps = {
   friends?: any[] | null;
@@ -21,15 +21,15 @@ export function StreampassPaymentButton({
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"flutterwave" | "stripe" | null>(null);
-
+  const flutterwaveCountries = ["NG", "GH"]
   // Detect location to select payment method
   useEffect(() => {
     const detectLocation = async () => {
       try {
-        const response = await axios.get("https://ipapi.co/json/");
-        setPaymentMethod(response.data.country === "NG" ? "flutterwave" : "stripe");
+       const location = locationService.getCurrentLocation();
+        setPaymentMethod(flutterwaveCountries.includes(location?.country ?? "") ? "flutterwave" : "stripe");
       } catch {
-        setPaymentMethod("flutterwave");
+        setPaymentMethod("stripe");
       }
     };
     detectLocation();
@@ -55,7 +55,7 @@ export function StreampassPaymentButton({
     try {
       const payload: any = { 
         eventId: id, 
-        currency: currency || 'NGN'
+        currency: currency || 'usd'
       };
 
       // Add friends data if this is a gift payment

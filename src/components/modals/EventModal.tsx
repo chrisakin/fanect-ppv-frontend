@@ -12,7 +12,6 @@ import { useEventStore } from "@/store/eventStore";
 import { CustomDatePicker } from "../ui/custom-date-picker";
 import { CustomTimePicker } from "../ui/custom-time-picker";
 import { Currency, IPrice } from "../../types/event";
-import { formatCurrency } from "@/lib/utils";
 
 interface EventModalProps {
   open: boolean;
