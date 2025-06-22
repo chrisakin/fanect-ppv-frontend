@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from '@/lib/axios';
+import { isAuthenticated } from '@/lib/auth';
 
 export interface Event {
   _id: string;
@@ -16,6 +17,7 @@ export interface Event {
   chatRoomArn: string;
   playbackUrl: string;
   chatToken: string;
+  hasStreamPass: boolean;
 }
 
 interface PaginationData {
@@ -136,7 +138,7 @@ export const useEventStore = create<EventState>((set) => ({
   fetchSingleEvent: async (id: string) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/events/${id}`);
+      const response = await axios.get(isAuthenticated() ? `/events/auth/${id}` : `/events/${id}`);
       set({ singleEvent: response.data.event, isLoading: false });
     } catch (error) {
       console.error('Error fetching single event:', error);

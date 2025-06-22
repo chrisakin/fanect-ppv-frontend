@@ -66,7 +66,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
       {events.map((event) => (
         <Card
           key={event._id}

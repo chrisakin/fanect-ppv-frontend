@@ -7,7 +7,7 @@ export const setRedirectNavigate = (navigate: (path: string) => void) => {
 
 export const redirectToLogin = () => {
   if (navigateFn) {
-    navigateFn('/');
+    navigateFn('');
   } else {
     console.warn('Navigate function not set yet.');
   }

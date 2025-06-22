@@ -66,9 +66,10 @@ export const Event = (): JSX.Element => {
 
               {/* Action Buttons */}
               <div className="lg:w-[80%] w-full flex flex-col sm:flex-row items-start justify-between gap-4">
-                <Button 
+                 <Button 
                   className="w-full sm:flex-1 md:w-[400px] h-[45px] md:h-[50px] bg-green-600 hover:bg-green-700 rounded-[10px] text-white"
-                  onClick={() => handleActionClick('streampass')}
+                  onClick={() => !singleEvent.hasStreamPass && handleActionClick('streampass')}
+                  disabled={singleEvent.hasStreamPass}
                 >
                   <span className="text-sm md:text-base font-semibold">
                     Buy Streampass
