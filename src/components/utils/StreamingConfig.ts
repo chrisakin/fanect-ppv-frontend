@@ -26,7 +26,7 @@ export const getStreamingConfig = (): StreamingConfig => {
     config.agora = {
       appId: import.meta.env.VITE_AGORA_APP_ID || '',
       channel: 'default-channel', // This should come from your event data
-      token: null, // This should come from your backend
+      token: '', // This should come from your backend
       uid: undefined,
     };
   } else {

@@ -52,13 +52,25 @@ class EventStreamingService {
       if (eventType === 'past') {
         return await this.getPlaybackUrl(eventId);
       } else if (eventType === 'live' || eventType === 'upcoming') {
-        const playbackData = await this.getStreamKey(eventId);
+        // For live/upcoming events, we need the playback URL for viewers
+        // The stream key is typically for organizers/streamers
+        const playbackData = await this.getPlaybackUrl(eventId);
         return playbackData;
       }
       
       throw new Error('Invalid event type');
     } catch (error) {
       console.error('Error getting streaming data:', error);
+      throw error;
+    }
+  }
+
+  // Get stream key specifically for organizers
+  public async getOrganizerStreamData(eventId: string): Promise<StreamingData> {
+    try {
+      return await this.getStreamKey(eventId);
+    } catch (error) {
+      console.error('Error getting organizer stream data:', error);
       throw error;
     }
   }

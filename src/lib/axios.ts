@@ -43,11 +43,9 @@ axiosInstance.interceptors.response.use(
         const refreshToken = getRefreshToken();
         
         if (!refreshToken) {
-           if (!refreshToken) {
           clearTokens();
-          redirectToLogin(); // 🚀 no reload
+          redirectToLogin();
           return Promise.reject(error);
-        }
         }
 
         const response = await axios.post(`${baseURL}/auth/refresh-token`, {
