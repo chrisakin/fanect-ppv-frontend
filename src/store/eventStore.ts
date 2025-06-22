@@ -13,6 +13,9 @@ export interface Event {
   price: {currency: string, amount: string};
   eventDateTime: string;
   adminStatus: string;
+  chatRoomArn: string;
+  playbackUrl: string;
+  chatToken: string;
 }
 
 interface PaginationData {

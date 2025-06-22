@@ -19,7 +19,6 @@ interface AWSIVSServiceProps {
 
 export function useAWSIVSService({
   playbackUrl,
-  chatRoomArn,
   chatToken,
   chatApiEndpoint,
   username,
@@ -77,29 +76,45 @@ export function useAWSIVSService({
           console.error("IVS Player not supported");
           return;
         }
-
         // Create player with configuration
         const player = IVSPlayer.create({
           // Add configuration options for better compatibility
           wasmWorker: IVSPlayer.wasmWorker,
           wasmBinary: IVSPlayer.wasmBinary,
         });
-        
-        playerRef.current = player;
 
-        const videoElement = player.videoElement;
-        if (videoContainerRef.current && videoElement) {
-          // Clear container and add video element
-          videoContainerRef.current.innerHTML = '';
-          videoContainerRef.current.appendChild(videoElement);
+        // const videoElement = player.videoElement;
+        // console.log(videoElement)
+        // if (videoContainerRef.current && videoElement) {
+        //   // Clear container and add video element
+        //   videoContainerRef.current.innerHTML = '';
+        //   videoContainerRef.current.appendChild(videoElement);
           
-          // Style the video element
-          videoElement.style.width = '100%';
-          videoElement.style.height = '100%';
-          videoElement.style.objectFit = 'cover';
-          videoElement.style.backgroundColor = '#000';
+        //   // Style the video element
+        //   videoElement.style.width = '100%';
+        //   videoElement.style.height = '100%';
+        //   videoElement.style.objectFit = 'cover';
+        //   videoElement.style.backgroundColor = '#000';
+        //   console.log(videoElement)
+        // }
+        playerRef.current = player;
+        const videoElement = document.createElement("video");
+          videoElement.setAttribute("playsinline", "true"); // required for mobile
+          videoElement.style.width = "100%";
+          videoElement.style.height = "100%";
+            videoElement.style.objectFit = "cover";
+          if (videoContainerRef.current && videoElement) {
+            videoContainerRef.current.innerHTML = ""; // Clear old content
+            videoContainerRef.current.appendChild(videoElement);
+            player.attachHTMLVideoElement(videoElement); // Attach player to element
         }
+             
+        player.addEventListener(IVSPlayer.PlayerEventType.ERROR, (err: any) => {
+  console.error("Player error", err);
+});
 
+console.log("Player state:", player.getState());
+console.log("Is supported:", IVSPlayer.isPlayerSupported);
         // Set up event listeners
         player.addEventListener(IVSPlayer.PlayerEventType.INITIALIZED, () => {
           console.log("Player initialized");
@@ -136,6 +151,12 @@ export function useAWSIVSService({
           onPlayerStateChange?.("ENDED");
         });
 
+        Object.values(IVSPlayer.PlayerEventType).forEach((eventType) => {
+  player.addEventListener(eventType, (e: any) => {
+    console.log(`IVS Player Event: ${eventType}`, e);
+  });
+});
+
         player.addEventListener(IVSPlayer.PlayerEventType.ERROR, (error: any) => {
           console.error("IVS Player error:", error);
           setPlayerError(`Player error: ${error.type || 'Unknown error'}`);
@@ -155,8 +176,12 @@ export function useAWSIVSService({
         // Load the stream
         try {
           console.log("Loading stream:", playbackUrl);
-          player.load(playbackUrl);
           
+          player.load(playbackUrl);
+          console.log("player.getState():", player.getState());
+console.log("player.getDuration():", player.getDuration());
+console.log("player.getCurrentTime():", player.getCurrentTime());
+          console.log(player)
           // Set autoplay and other properties
           player.setAutoplay(true);
           player.setMuted(false); // Start unmuted
@@ -173,9 +198,7 @@ export function useAWSIVSService({
         setPlayerError("Failed to initialize player");
       }
     };
-
     initializePlayer();
-
     return () => {
       mounted = false;
       if (playerRef.current) {
@@ -248,7 +271,7 @@ export function useAWSIVSService({
                         messageData.Sender?.Attributes?.displayName ||
                         messageData.sender?.attributes?.displayName ||
                         messageData.username || 
-                        "Anonymous",
+                        username,
                 content: messageData.Content || messageData.content || "",
                 timestamp: new Date(messageData.SendTime || messageData.sendTime || Date.now()),
               };

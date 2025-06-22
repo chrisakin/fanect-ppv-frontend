@@ -213,7 +213,7 @@ export const AWSIVSPlayer = ({
               <div
                 ref={videoContainerRef}
                 className="w-full h-full"
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: "1000px", height: "1000px" }}
               />
               
               {/* Video controls overlay */}

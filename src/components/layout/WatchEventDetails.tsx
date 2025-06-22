@@ -1,4 +1,3 @@
-import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Event } from "@/store/eventStore";
 
@@ -16,11 +15,11 @@ export const WatchEventDetails = ({ event }: WatchEventDetailsProps): JSX.Elemen
               {event.name}
             </h1>
 
-            <Button className="h-10 bg-green-600 text-gray-50 rounded-[10px] border border-solid border-[#1aaa65] hover:bg-green-700 w-full sm:w-auto">
+            {/* <Button className="h-10 bg-green-600 text-gray-50 rounded-[10px] border border-solid border-[#1aaa65] hover:bg-green-700 w-full sm:w-auto">
               <span className="[font-family:'Sofia_Pro-Medium',Helvetica] font-medium text-lg tracking-[-0.36px] leading-7">
                 Follow
               </span>
-            </Button>
+            </Button> */}
           </div>
         </div>
 

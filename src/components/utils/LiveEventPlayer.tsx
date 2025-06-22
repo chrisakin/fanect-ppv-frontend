@@ -10,6 +10,7 @@ import { Loader2, AlertCircle, Wifi } from "lucide-react";
 import { eventStreamingService, StreamingData } from "../../services/eventStreamingService";
 import { useToast } from "../ui/use-toast";
 import { FeedbackModal } from "../modals/FeedbackModal";
+import { getUser } from "@/lib/auth";
 
 interface LiveEventPlayerProps {
   eventId: string;
@@ -38,9 +39,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   } = useAWSIVSService({
     playbackUrl: streamingData?.playbackUrl || '',
     chatApiEndpoint: import.meta.env.VITE_CHAT_API_ENDPOINT ,
-    chatRoomArn: streamingData?.chatRoomArn,
     chatToken: streamingData?.chatToken,
-    username: "viewer",
+    username: getUser()?.firstName,
     onPlayerStateChange: (state) => {
       // Show feedback modal when stream ends
       if (state === "ENDED" && eventId) {
@@ -312,6 +312,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
 
               {/* AWS IVS Player container */}
               <div
+                id="video"
                 ref={videoContainerRef}
                 className="w-full h-full"
                 style={{ width: "1000px", height: "1000px" }}
