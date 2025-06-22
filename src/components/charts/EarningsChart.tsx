@@ -48,7 +48,7 @@ export const EarningsChart = ({
   const availableCurrencies = Object.keys(stats.earnings.totalRevenue || {});
   
   // Get total revenue for selected currency and month
-  const totalRevenue = stats.earnings.monthlyRevenue[selectedCurrency]?.[selectedMonth] || 0;
+  const totalRevenue = stats.earnings?.monthlyRevenue[selectedCurrency]?.[selectedMonth] || 0;
   
   // Get recent transactions for selected currency
   const recentTransactions = stats.earnings.transactions
