@@ -13,6 +13,7 @@ interface ImportMetaEnv {
     readonly VITE_AGORA_APP_ID: string;
     readonly VITE_AWS_IVS_REGION: string;
     readonly VITE_AWS_IVS_CHAT_REGION: string;
+    readonly VITE_CHAT_API_ENDPOINT: string;
   }
   
   interface ImportMeta {

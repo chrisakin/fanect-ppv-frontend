@@ -36,8 +36,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     setMuted,
     setVolume,
   } = useAWSIVSService({
-    playbackUrl: streamingData?.playbackUrl || "",
-    chatApiEndpoint: process.env.REACT_APP_CHAT_API_ENDPOINT,
+    playbackUrl: streamingData?.playbackUrl || '',
+    chatApiEndpoint: import.meta.env.VITE_CHAT_API_ENDPOINT ,
     chatRoomArn: streamingData?.chatRoomArn,
     chatToken: streamingData?.chatToken,
     username: "viewer",
@@ -223,7 +223,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
             <div className="relative w-full h-full bg-black flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
                 <Loader2 className="h-8 w-8 animate-spin text-white" />
-                <p className="text-white text-sm">Loading event stream...</p>
+                <p className="text-white text-sm">Loading live stream...</p>
               </div>
             </div>
           </CardContent>
@@ -251,7 +251,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                   {eventType === 'upcoming' && (
                     <div className="flex items-center gap-2 text-gray-400 text-xs mt-4">
                       <Wifi className="h-4 w-4" />
-                      <span>The stream will be available when the event starts</span>
+                      <span>The live stream will be available when the event starts</span>
                     </div>
                   )}
                 </div>

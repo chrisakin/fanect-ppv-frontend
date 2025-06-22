@@ -2,6 +2,7 @@ import { VideoPlayer } from "../layout/VideoPlayer";
 import { AWSIVSPlayer } from "./AWSIVSPlayer";
 import { PastEventPlayer } from "./PastEventPlayer";
 import { LiveEventPlayer } from "./LiveEventPlayer";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 interface StreamingProviderProps {
   eventData?: {
@@ -40,18 +41,22 @@ export const StreamingProvider = ({
   if ((eventType === 'live' || eventType === 'upcoming') && eventId) {
     if (useAWSIVS) {
       return (
-        <LiveEventPlayer 
+       <ErrorBoundary fallback={<p className="text-red-500">Unable to load livestream. Please refresh.</p>}>
+         <LiveEventPlayer 
           eventId={eventId}
           eventName={eventName}
           eventType={eventType}
         />
+       </ErrorBoundary>
       );
     } else {
       return (
+        <ErrorBoundary fallback={<p className="text-red-500">Unable to load livestream. Please refresh.</p>}>
         <VideoPlayer 
           eventId={eventId}
           eventName={eventName}
         />
+        </ErrorBoundary>
       );
     }
   }
