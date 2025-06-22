@@ -22,7 +22,7 @@ class EventStreamingService {
   // Get stream key for upcoming/live events (for organizers)
   public async getStreamKey(eventId: string): Promise<StreamingData> {
     try {
-      const response = await axios.get(`/event/streamkey/${eventId}`);
+      const response = await axios.get(`/events/streamkey/${eventId}`);
       return {
         streamKey: response.data.streamKey,
         chatToken: response.data.chatToken,
@@ -36,7 +36,7 @@ class EventStreamingService {
   // Get playback URL for past events
   public async getPlaybackUrl(eventId: string): Promise<StreamingData> {
     try {
-      const response = await axios.get(`/event/playbackurl/${eventId}`);
+      const response = await axios.get(`/events/playbackurl/${eventId}`);
       return {
         playbackUrl: response.data.playbackUrl,
       };
