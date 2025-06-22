@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Avatar } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -23,7 +23,12 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const [isLoadingStream, setIsLoadingStream] = useState(true);
   const [streamError, setStreamError] = useState<string | null>(null);
   const { toast } = useToast();
-
+    const handlePlayerStateChange = useCallback((state: string) => {
+  console.log(state, '..........');
+  if (state === "ENDED" && eventId) {
+    setShowFeedbackModal(true);
+  }
+}, []);
   const {
     videoContainerRef,
     messages,
@@ -38,16 +43,12 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     setVolume,
   } = useAWSIVSService({
     playbackUrl: streamingData?.playbackUrl || '',
-    chatApiEndpoint: import.meta.env.VITE_CHAT_API_ENDPOINT ,
+    chatApiEndpoint: import.meta.env.VITE_CHAT_API_ENDPOINT || '',
     chatToken: streamingData?.chatToken,
-    username: getUser()?.firstName,
-    onPlayerStateChange: (state) => {
-      // Show feedback modal when stream ends
-      if (state === "ENDED" && eventId) {
-        setShowFeedbackModal(true);
-      }
-    },
+    username: getUser()?.firstName || 'Anonymous',
+    onPlayerStateChange: handlePlayerStateChange,
   });
+
 
   const [messageInput, setMessageInput] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
@@ -132,56 +133,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
       }
     }
   };
-
-  // Video control icons
-  const videoControls = [
-    {
-      src: "/ico-play.svg",
-      alt: isPlaying ? "Pause" : "Play",
-      className: "relative w-[15.91px] h-[19.58px] mt-[-1.79px] mb-[-1.79px] ml-[-1.00px] cursor-pointer",
-      onClick: togglePlayPause,
-    },
-    {
-      src: "/ico-sound.svg",
-      alt: isMuted ? "Unmute" : "Mute",
-      className: "relative w-[15.25px] h-[20.83px] mt-[-2.41px] mb-[-2.41px] cursor-pointer",
-      onClick: toggleMute,
-    },
-  ];
-
-  // Video settings icons
-  const videoSettings = [
-    {
-      src: "/icon-essential-happyemoji.svg",
-      alt: "Icon essential",
-      className: "relative w-4 h-4 cursor-pointer",
-      onClick: () => console.log("Reactions clicked"),
-    },
-    {
-      src: "/ico-titles.svg",
-      alt: "Ico titles",
-      className: "relative w-5 h-4 cursor-pointer",
-      onClick: () => console.log("Subtitles clicked"),
-    },
-    {
-      src: "/ico-theater.svg",
-      alt: "Ico theater",
-      className: "relative w-[22px] h-4 cursor-pointer",
-      onClick: () => console.log("Theater mode clicked"),
-    },
-    {
-      src: "/ico-tv.svg",
-      alt: "Ico tv",
-      className: "relative w-6 h-5 mt-[-1.00px] mb-[-1.00px] cursor-pointer",
-      onClick: () => console.log("Picture-in-Picture clicked"),
-    },
-    {
-      src: "/ico-fullscreen.svg",
-      alt: "Ico fullscreen",
-      className: "relative w-[18px] h-[18px] mr-[-1.00px] cursor-pointer",
-      onClick: toggleFullscreen,
-    },
-  ];
 
   const MessageList = () => (
     <div className="flex flex-col gap-4">
@@ -312,55 +263,15 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
 
               {/* AWS IVS Player container */}
               <div
-                id="video"
                 ref={videoContainerRef}
                 className="w-full h-full"
-                style={{ width: "1000px", height: "1000px" }}
               />
               
-              {/* Video controls overlay */}
+              {/* Player state indicator */}
               {isPlayerLoaded && !playerError && (
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/50 rounded-lg p-2">
-                  <div className="flex items-center gap-2">
-                    {videoControls.map((control, index) => (
-                      <button
-                        key={index}
-                        onClick={control.onClick}
-                        className={control.className}
-                        title={control.alt}
-                      >
-                        <img src={control.src} alt={control.alt} className="w-full h-full" />
-                      </button>
-                    ))}
-                    
-                    {/* Volume control */}
-                    <div className="flex items-center gap-2 ml-2">
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={volume}
-                        onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                        className="w-16 h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
-                      {playerState} • {eventType.toUpperCase()}
-                    </div>
-                    {videoSettings.map((setting, index) => (
-                      <button
-                        key={index}
-                        onClick={setting.onClick}
-                        className={setting.className}
-                        title={setting.alt}
-                      >
-                        <img src={setting.src} alt={setting.alt} className="w-full h-full" />
-                      </button>
-                    ))}
+                <div className="absolute bottom-4 right-4 z-10">
+                  <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
+                    {playerState} • {eventType.toUpperCase()}
                   </div>
                 </div>
               )}
