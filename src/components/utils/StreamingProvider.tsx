@@ -1,6 +1,7 @@
 import { VideoPlayer } from "../layout/VideoPlayer";
 import { AWSIVSPlayer } from "./AWSIVSPlayer";
 import { PastEventPlayer } from "./PastEventPlayer";
+import { LiveEventPlayer } from "./LiveEventPlayer";
 
 interface StreamingProviderProps {
   eventData?: {
@@ -35,7 +36,27 @@ export const StreamingProvider = ({
     );
   }
 
-  // For live and upcoming events, use the regular players
+  // For live events, use the LiveEventPlayer that fetches data
+  if ((eventType === 'live' || eventType === 'upcoming') && eventId) {
+    if (useAWSIVS) {
+      return (
+        <LiveEventPlayer 
+          eventId={eventId}
+          eventName={eventName}
+          eventType={eventType}
+        />
+      );
+    } else {
+      return (
+        <VideoPlayer 
+          eventId={eventId}
+          eventName={eventName}
+        />
+      );
+    }
+  }
+
+  // Fallback to static data if no eventId
   if (useAWSIVS) {
     return (
       <AWSIVSPlayer 
