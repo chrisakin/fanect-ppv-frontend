@@ -206,11 +206,11 @@ export function useAWSIVSService({
         }
         wsUrl.replace(/\/+$/, '');
         // For AWS IVS Chat, the token should be passed as a query parameter
-        const finalUrl = `${wsUrl}?token=${encodeURIComponent(chatToken)}`;
+        const finalUrl = `${wsUrl}`;
          console.log(finalUrl)
         console.log("Connecting to AWS IVS Chat WebSocket...");
 
-        const socket = new WebSocket(finalUrl);
+        const socket = new WebSocket(finalUrl, chatToken);
         socketRef.current = socket;
 
         socket.onopen = () => {
