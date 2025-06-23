@@ -127,7 +127,7 @@ export function useAWSIVSService({
         });
 
         player.addEventListener(IVSPlayer.PlayerEventType.ENDED, () => {
-          console.log("Player ended");
+          console.log("Player ended - triggering feedback modal");
           setPlayerState("ENDED");
           onPlayerStateChange?.("ENDED");
         });
@@ -205,10 +205,9 @@ export function useAWSIVSService({
           wsUrl = `wss://${wsUrl}`;
         }
         wsUrl.replace(/\/+$/, '');
-
         // For AWS IVS Chat, the token should be passed as a query parameter
         const finalUrl = `${wsUrl}?token=${encodeURIComponent(chatToken)}`;
-
+         console.log(finalUrl)
         console.log("Connecting to AWS IVS Chat WebSocket...");
 
         const socket = new WebSocket(finalUrl);

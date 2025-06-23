@@ -22,13 +22,18 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const [streamingData, setStreamingData] = useState<StreamingData | null>(null);
   const [isLoadingStream, setIsLoadingStream] = useState(true);
   const [streamError, setStreamError] = useState<string | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { toast } = useToast();
-    const handlePlayerStateChange = useCallback((state: string) => {
-  console.log(state, '..........');
-  if (state === "ENDED" && eventId) {
-    setShowFeedbackModal(true);
-  }
-}, []);
+
+  // Define the callback before using it in useAWSIVSService
+  const handlePlayerStateChange = useCallback((state: string) => {
+    console.log('Player state changed to:', state);
+    if (state === "ENDED" && eventId) {
+      console.log('Stream ended, showing feedback modal');
+      setShowFeedbackModal(true);
+    }
+  }, [eventId]);
+
   const {
     videoContainerRef,
     messages,
@@ -49,12 +54,10 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     onPlayerStateChange: handlePlayerStateChange,
   });
 
-
   const [messageInput, setMessageInput] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolumeState] = useState(1);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   // Fetch streaming data for live event
   useEffect(() => {
@@ -86,6 +89,14 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
       fetchStreamingData();
     }
   }, [eventId, eventType, toast]);
+
+  // Additional check for stream end based on player state
+  useEffect(() => {
+    if (playerState === "ENDED" && eventId && eventType === 'live') {
+      console.log('Player state is ENDED, showing feedback modal');
+      setShowFeedbackModal(true);
+    }
+  }, [playerState, eventId, eventType]);
 
   const handleSendMessage = async () => {
     if (messageInput.trim() && isConnected) {
