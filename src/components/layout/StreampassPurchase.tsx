@@ -31,7 +31,7 @@ export const StreampassPurchaseCard = ({ event }: StreampassPurchaseProps): JSX.
                 </p>
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">Price</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-[#CCCCCC]">Price</p>
                 <p className="text-xl font-medium text-gray-800 dark:text-[#CCCCCC]">
                   {event.price?.currency} {Number(event.price?.amount).toLocaleString()}
                 </p>
