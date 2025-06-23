@@ -1,9 +1,7 @@
-import { CalendarIcon, ChevronDownIcon } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { useState } from "react";
 
 interface EarningsChartProps {
   stats: any;
@@ -20,8 +18,6 @@ export const EarningsChart = ({
   onMonthChange, 
   onCurrencyChange 
 }: EarningsChartProps): JSX.Element => {
-  const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
   // Generate month options for the last 12 months
   const generateMonthOptions = () => {
@@ -44,19 +40,19 @@ export const EarningsChart = ({
   const monthOptions = generateMonthOptions();
   const currentMonthLabel = monthOptions.find(m => m.key === selectedMonth)?.label || 'Select Month';
 
-  // Get available currencies from stats
-  const availableCurrencies = Object.keys(stats.earnings.totalRevenue || {});
+  // Get available currencies from stats with proper null checks
+  const availableCurrencies = Object.keys(stats?.earnings?.totalRevenue || {});
   
-  // Get total revenue for selected currency and month
-  const totalRevenue = stats.earnings?.monthlyRevenue[selectedCurrency]?.[selectedMonth] || 0;
+  // Get total revenue for selected currency and month with proper null checks
+  const totalRevenue = stats?.earnings?.monthlyRevenue?.[selectedCurrency]?.[selectedMonth] || 0;
   
-  // Get recent transactions for selected currency
-  const recentTransactions = stats.earnings.transactions
+  // Get recent transactions for selected currency with proper null checks
+  const recentTransactions = (stats?.earnings?.transactions || [])
     .filter((t: any) => t.currency === selectedCurrency)
     .slice(0, 5);
 
-  // Prepare drop-off chart data
-  const dropOffData = stats.viewers.dropOff || [];
+  // Prepare drop-off chart data with proper null checks
+  const dropOffData = stats?.viewers?.dropOff || [];
 
   const textColor = 'dark:#828b86 #333333';
   const chartColor = 'dark:#1aaa65 #22c55e';
@@ -85,7 +81,7 @@ export const EarningsChart = ({
             <div className="flex items-center gap-2">
               {/* Currency Selector */}
               <Select value={selectedCurrency} onValueChange={onCurrencyChange}>
-                <SelectTrigger className="w-20 h-8 text-xs dark:bg-[#062013] border-[#2e483a] bg-gray-50 border-gray-200">
+                <SelectTrigger className="md:w-32 w-16 h-8 text-xs dark:bg-[#062013] border-[#2e483a] bg-gray-50 border-gray-200">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -99,7 +95,7 @@ export const EarningsChart = ({
 
               {/* Month Selector */}
               <Select value={selectedMonth} onValueChange={onMonthChange}>
-                <SelectTrigger className="w-32 h-8 text-xs dark:bg-[#062013] border-[#2e483a] bg-gray-50 border-gray-200">
+                <SelectTrigger className="md:w-36 w-28 h-8 text-xs dark:bg-[#062013] border-[#2e483a] bg-gray-50 border-gray-200">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

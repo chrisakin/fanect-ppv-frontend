@@ -51,8 +51,7 @@ axiosInstance.interceptors.response.use(
         const response = await axios.post(`${baseURL}/auth/refresh-token`, {
           refreshToken,
         });
-        console.log(response)
-        const { accessToken } = response.data.data;
+        const { accessToken } = response.data
         setTokens(accessToken, refreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
