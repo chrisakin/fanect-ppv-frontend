@@ -55,7 +55,7 @@ export function StreampassPaymentButton({
     try {
       const payload: any = { 
         eventId: id, 
-        currency: currency || 'usd'
+        currency: currency
       };
 
       // Add friends data if this is a gift payment
@@ -86,7 +86,7 @@ export function StreampassPaymentButton({
     try {
       const payload: any = { 
         eventId: id, 
-        currency: currency || 'usd'
+        currency: currency
       };
 
       // Add friends data if this is a gift payment
