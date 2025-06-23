@@ -139,10 +139,10 @@ export const DashboardSingleEvent = (): JSX.Element => {
           <div className="flex flex-col items-start gap-[30px] flex-1 w-full lg:w-auto">
             {/* Event title and price */}
             <div className="flex flex-col items-start gap-2 w-full">
-              <h1 className="font-display-lg-semibold text-gray-900 text-2xl md:text-3xl lg:text-4xl">
+              <h1 className="font-display-lg-semibold text-gray-900 dark:text-[#FFFFFF] text-2xl md:text-3xl lg:text-4xl">
                 {singleEvent.name}
               </h1>
-              <h2 className="font-display-sm-medium text-[#414651] text-xl md:text-2xl">
+              <h2 className="font-display-sm-medium  text-gray-900 dark:text-[#FFFFFF] text-xl md:text-2xl">
                {singleEvent.price?.currency} {Number(singleEvent.price?.amount).toLocaleString()}
               </h2>
             </div>
