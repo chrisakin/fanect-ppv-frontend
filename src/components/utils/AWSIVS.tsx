@@ -204,6 +204,7 @@ export function useAWSIVSService({
         if (!wsUrl.startsWith('ws://') && !wsUrl.startsWith('wss://')) {
           wsUrl = `wss://${wsUrl}`;
         }
+        wsUrl.replace(/\/+$/, '');
 
         // For AWS IVS Chat, the token should be passed as a query parameter
         const finalUrl = `${wsUrl}?token=${encodeURIComponent(chatToken)}`;
