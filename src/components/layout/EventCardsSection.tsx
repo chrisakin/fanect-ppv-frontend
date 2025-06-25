@@ -1,3 +1,4 @@
+import { isAuthenticated } from "@/lib/auth";
 import { Card, CardContent } from "../../components/ui/card";
 import { Link } from "react-router-dom";
 
@@ -6,6 +7,7 @@ interface Event {
     title: string;
     date: string;
     image: string;
+    hasStreamPass: boolean;
   }
   
   interface EventCardsSectionProps {
@@ -16,7 +18,7 @@ export const EventCardsSection = ( { events }: EventCardsSectionProps ) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     {events.map((event, index) => (
-                      <Link to={`/event/${event.id}`} key={index}>
+                      <Link to={event.hasStreamPass && isAuthenticated() ? `/dashboard/tickets/watch-event/live/${event.id}` : `/event/${event.id}`} key={index}>
                         <Card
                           className="w-full h-[250px] rounded-lg overflow-hidden border border-solid border-[#d5d7da] hover:shadow-lg transition-shadow"
                         >

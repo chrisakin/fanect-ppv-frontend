@@ -229,9 +229,7 @@ export function useAWSIVSService({
               const messageData = data.Data || data.data || data;
               const newMessage = {
                 id: messageData.Id || messageData.id || Date.now().toString(),
-                sender: messageData.Sender?.UserId || 
-                        messageData.sender?.userId || 
-                        messageData.Sender?.Attributes?.displayName ||
+                sender: messageData.Sender?.Attributes?.displayName ||
                         messageData.sender?.attributes?.displayName ||
                         messageData.username || 
                         username || 'Anonymous',

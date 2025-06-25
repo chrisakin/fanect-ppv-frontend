@@ -39,7 +39,8 @@ export const DashboardHome = (): JSX.Element => {
       month: 'long',
       year: 'numeric'
     }),
-    image: event.bannerUrl
+    image: event.bannerUrl,
+    hasStreamPass: event.hasStreamPass
   }));
 
   return (

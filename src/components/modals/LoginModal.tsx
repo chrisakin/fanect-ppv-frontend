@@ -21,6 +21,7 @@ const loginSchema = z.object({
 
 const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
+  userName: z.string().min(1, "User name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -549,6 +550,21 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           {signupErrors.lastName && (
                             <span className="text-xs text-red-500 mt-1">
                               {signupErrors.lastName.message}
+                            </span>
+                          )}
+                        </div>
+                         <div>
+                          <Input
+                            id="userName"
+                            type="text"
+                            placeholder="User Name (Nick Name)"
+                            {...registerSignup("userName")}
+                            className="h-10"
+                            disabled={isLoading}
+                          />
+                          {signupErrors.userName && (
+                            <span className="text-xs text-red-500 mt-1">
+                              {signupErrors.userName.message}
                             </span>
                           )}
                         </div>
