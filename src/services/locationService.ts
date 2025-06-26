@@ -18,6 +18,11 @@ interface IPLocationResponse {
   timezone: string;
   org: string;
   asn: string;
+  // Additional fields that might indicate VPN/proxy
+  proxy?: boolean;
+  hosting?: boolean;
+  mobile?: boolean;
+  threat?: string;
 }
 
 class LocationService {
@@ -75,32 +80,142 @@ class LocationService {
     }
   }
 
-  // Check if VPN is detected based on various indicators
+  // Enhanced VPN detection with multiple methods
   private async detectVPN(ipData: IPLocationResponse): Promise<boolean> {
+    console.log('Checking for VPN/Proxy with data:', ipData);
+
+    // Method 1: Check explicit proxy/hosting flags if available
+    if (ipData.proxy === true || ipData.hosting === true) {
+      console.log('VPN detected: Explicit proxy/hosting flag');
+      return true;
+    }
+
+    // Method 2: Check threat indicators
+    if (ipData.threat && ['proxy', 'vpn', 'tor'].some(threat => 
+      (ipData.threat as string).toLowerCase().includes(threat)
+    )) {
+      console.log('VPN detected: Threat indicator');
+      return true;
+    }
+
+    // Method 3: Enhanced organization name checking
     const vpnIndicators = [
-      // Common VPN/proxy organizations
+      // VPN services
       /vpn/i,
       /proxy/i,
+      /tunnel/i,
+      /anonymizer/i,
+      /private.*internet.*access/i,
+      /nordvpn/i,
+      /expressvpn/i,
+      /surfshark/i,
+      /cyberghost/i,
+      /protonvpn/i,
+      /mullvad/i,
+      /windscribe/i,
+      
+      // Hosting/Cloud providers (commonly used by VPNs)
       /hosting/i,
       /datacenter/i,
+      /data.*center/i,
       /cloud/i,
       /server/i,
-      /digital ocean/i,
-      /amazon/i,
-      /google cloud/i,
-      /microsoft/i,
+      /digital.*ocean/i,
+      /amazon.*web.*services/i,
+      /amazon.*technologies/i,
+      /google.*cloud/i,
+      /microsoft.*corporation/i,
       /linode/i,
       /vultr/i,
       /ovh/i,
       /hetzner/i,
+      /scaleway/i,
+      /rackspace/i,
+      /godaddy/i,
+      /namecheap/i,
+      
+      // Tor and anonymity networks
+      /tor/i,
+      /onion/i,
+      /anonymous/i,
+      
+      // Common VPN/proxy keywords
+      /residential.*proxy/i,
+      /mobile.*proxy/i,
+      /dedicated.*server/i,
+      /virtual.*private/i,
     ];
 
     // Check organization name for VPN indicators
-    const orgIndicatesVPN = vpnIndicators.some(pattern => 
-      pattern.test(ipData.org || '')
-    );
+    const orgName = ipData.org || '';
+    const orgIndicatesVPN = vpnIndicators.some(pattern => pattern.test(orgName));
+    
+    if (orgIndicatesVPN) {
+      console.log('VPN detected: Organization name indicates VPN/proxy:', orgName);
+      return true;
+    }
 
-    return orgIndicatesVPN;
+    // Method 4: Check ASN (Autonomous System Number) for known VPN providers
+    const knownVPNASNs = [
+      'AS13335', // Cloudflare (often used by VPNs)
+      'AS14061', // DigitalOcean
+      'AS16509', // Amazon
+      'AS15169', // Google
+      'AS8075',  // Microsoft
+      'AS63949', // Linode
+      'AS20473', // Choopa (Vultr)
+      'AS16276', // OVH
+      'AS24940', // Hetzner
+    ];
+
+    if (ipData.asn && knownVPNASNs.includes(ipData.asn)) {
+      console.log('VPN detected: Known VPN/hosting ASN:', ipData.asn);
+      return true;
+    }
+
+    // Method 5: Additional API check for more accurate VPN detection
+    try {
+      const vpnCheckResult = await this.checkVPNWithSecondaryAPI(ipData);
+      if (vpnCheckResult) {
+        console.log('VPN detected: Secondary API confirmation');
+        return true;
+      }
+    } catch (error) {
+      console.warn('Secondary VPN check failed:', error);
+    }
+
+    console.log('No VPN detected');
+    return false;
+  }
+
+  // Secondary VPN detection using a different API
+  private async checkVPNWithSecondaryAPI(ipData: IPLocationResponse): Promise<boolean> {
+    try {
+      // Using a different IP info service for cross-validation
+      const response = await fetch('https://ipinfo.io/json');
+      
+      if (!response.ok) {
+        throw new Error('Secondary API unavailable');
+      }
+
+      const secondaryData = await response.json();
+      
+      // Check if the organization from both APIs indicates hosting/VPN
+      const hostingKeywords = ['hosting', 'datacenter', 'cloud', 'server', 'vpn', 'proxy'];
+      const secondaryOrgIndicatesHosting = hostingKeywords.some(keyword => 
+        (secondaryData.org || '').toLowerCase().includes(keyword)
+      );
+
+      // If both APIs indicate hosting/VPN, it's likely a VPN
+      const primaryOrgIndicatesHosting = hostingKeywords.some(keyword => 
+        (ipData.org || '').toLowerCase().includes(keyword)
+      );
+
+      return primaryOrgIndicatesHosting && secondaryOrgIndicatesHosting;
+    } catch (error) {
+      // If secondary check fails, don't block the user
+      return false;
+    }
   }
 
   // Get location using GPS
@@ -182,39 +297,90 @@ class LocationService {
     }
   }
 
-  // Get location using IP address
+  // Enhanced IP location detection with better VPN checking
   private async getIPLocation(): Promise<LocationData> {
-    try {
-      const response = await fetch('https://ipapi.co/json/');
-      
-      if (!response.ok) {
-        throw new Error('IP location service unavailable');
+    const apis = [
+      {
+        url: 'https://ipapi.co/json/',
+        parser: (data: any): IPLocationResponse => ({
+          country: data.country_code,
+          country_code: data.country_code,
+          city: data.city,
+          region: data.region,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          timezone: data.timezone,
+          org: data.org,
+          asn: data.asn,
+        })
+      },
+      {
+        url: 'http://ip-api.com/json/',
+        parser: (data: any): IPLocationResponse => ({
+          country: data.countryCode,
+          country_code: data.countryCode,
+          city: data.city,
+          region: data.regionName,
+          latitude: data.lat,
+          longitude: data.lon,
+          timezone: data.timezone,
+          org: data.isp,
+          asn: data.as,
+          proxy: data.proxy,
+          hosting: data.hosting,
+          mobile: data.mobile,
+        })
       }
+    ];
 
-      const data: IPLocationResponse = await response.json();
+    let lastError: Error | null = null;
 
-      // Check for VPN
-      const isVPN = await this.detectVPN(data);
-      if (isVPN) {
-        throw new Error('VPN_DETECTED');
+    for (const api of apis) {
+      try {
+        console.log(`Trying IP location API: ${api.url}`);
+        const response = await fetch(api.url);
+        
+        if (!response.ok) {
+          throw new Error(`API returned ${response.status}`);
+        }
+
+        const rawData = await response.json();
+        const data = api.parser(rawData);
+
+        console.log('IP location data received:', data);
+
+        // Check for VPN with enhanced detection
+        const isVPN = await this.detectVPN(data);
+        if (isVPN) {
+          throw new Error('VPN_DETECTED');
+        }
+
+        const locationData: LocationData = {
+          latitude: data.latitude,
+          longitude: data.longitude,
+          country: data.country_code,
+          city: data.city,
+          region: data.region,
+          source: 'ip',
+        };
+
+        console.log('Location data processed:', locationData);
+        return locationData;
+      } catch (error) {
+        console.warn(`API ${api.url} failed:`, error);
+        lastError = error as Error;
+        
+        if (error instanceof Error && error.message === 'VPN_DETECTED') {
+          throw error;
+        }
+        
+        // Continue to next API
+        continue;
       }
-
-      const locationData: LocationData = {
-        latitude: data.latitude,
-        longitude: data.longitude,
-        country: data.country_code,
-        city: data.city,
-        region: data.region,
-        source: 'ip',
-      };
-
-      return locationData;
-    } catch (error) {
-      if (error instanceof Error && error.message === 'VPN_DETECTED') {
-        throw error;
-      }
-      throw new Error('Failed to get IP-based location');
     }
+
+    // If all APIs failed
+    throw lastError || new Error('Failed to get IP-based location');
   }
 
   // Check location permission status
@@ -310,6 +476,17 @@ class LocationService {
     this.locationPermissionStatus = null;
     localStorage.removeItem(this.LOCATION_STORAGE_KEY);
     localStorage.removeItem(this.PERMISSION_STORAGE_KEY);
+  }
+
+  // Method to test VPN detection (for debugging)
+  public async testVPNDetection(): Promise<void> {
+    try {
+      console.log('Testing VPN detection...');
+      const location = await this.getIPLocation();
+      console.log('VPN test completed. Location obtained:', location);
+    } catch (error) {
+      console.log('VPN test result:', error);
+    }
   }
 }
 
