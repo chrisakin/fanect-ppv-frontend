@@ -236,7 +236,7 @@ class LocationService {
   // Request location permission
   public async requestLocationPermission(): Promise<boolean> {
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           timeout: 5000,
         });

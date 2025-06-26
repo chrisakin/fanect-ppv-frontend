@@ -15,7 +15,7 @@ export const useFCM = () => {
         fcmService.initializeFCM().catch(error => {
           console.warn('FCM initialization failed:', error);
         });
-      }, 1000);
+      }, 2000); // Increased delay to ensure service worker registration
 
       // Listen for FCM messages
       const handleFCMMessage = (event: CustomEvent) => {

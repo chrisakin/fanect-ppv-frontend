@@ -1,7 +1,6 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyAv2J2KxX0s6ToG_MyqKct95i9UJWK0M4M",
   authDomain: "fanect-ppv-df7d7.firebaseapp.com",
@@ -41,6 +40,7 @@ if (isConfigValid) {
 
     // Handle notification click events
     self.addEventListener('notificationclick', function(event) {
+      console.log('Notification clicked:', event);
 
       event.notification.close();
       
@@ -61,6 +61,29 @@ if (isConfigValid) {
           }
         })
       );
+    });
+
+    // Handle push events (for when the app is closed)
+    self.addEventListener('push', function(event) {
+      console.log('Push event received:', event);
+      
+      if (event.data) {
+        const payload = event.data.json();
+        const notificationTitle = payload.notification?.title || 'FaNect Notification';
+        const notificationOptions = {
+          body: payload.notification?.body || 'You have a new notification',
+          icon: '/icon-192x192.png',
+          badge: '/icon-192x192.png',
+          tag: 'fanect-notification',
+          requireInteraction: false,
+          silent: false,
+          data: payload.data || {}
+        };
+
+        event.waitUntil(
+          self.registration.showNotification(notificationTitle, notificationOptions)
+        );
+      }
     });
 
     console.log('Firebase messaging service worker initialized successfully');

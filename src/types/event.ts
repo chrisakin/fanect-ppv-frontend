@@ -1,11 +1,11 @@
 export enum Currency {
   NONE = 'Select Currency',
   USD = 'USD',
-  NGN = 'NGN',
-  EUR = 'EUR',
-  GBP = 'GBP',
-  CAD = 'CAD',
-  GHS = 'GHS'
+  // NGN = 'NGN',
+  // EUR = 'EUR',
+  // GBP = 'GBP',
+  // CAD = 'CAD',
+  // GHS = 'GHS'
 }
 
 export interface IPrice {

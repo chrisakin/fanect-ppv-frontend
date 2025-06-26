@@ -28,11 +28,22 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   // Define the callback before using it in useAWSIVSService
   const handlePlayerStateChange = useCallback((state: string) => {
     console.log('Player state changed to:', state);
-    if (state === "ENDED" && eventId) {
+    
+    // Show feedback modal when stream ends
+    if (state === "ENDED" && eventId && eventType === 'live') {
       console.log('Stream ended, showing feedback modal');
-      setShowFeedbackModal(true);
+      // Add a small delay to ensure the stream has actually ended
+      setTimeout(() => {
+        setShowFeedbackModal(true);
+      }, 1000);
     }
-  }, [eventId]);
+  }, [eventId, eventType]);
+
+  // Handle chat message callback
+  const handleChatMessage = useCallback((message: any) => {
+    console.log('Chat message received:', message);
+    // You can add additional chat message handling here if needed
+  }, []);
 
   const {
     videoContainerRef,
@@ -52,6 +63,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     chatToken: streamingData?.chatToken,
     username: getUser()?.firstName || 'Anonymous',
     onPlayerStateChange: handlePlayerStateChange,
+    onChatMessage: handleChatMessage,
   });
 
   const [messageInput, setMessageInput] = useState("");
@@ -94,9 +106,17 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   useEffect(() => {
     if (playerState === "ENDED" && eventId && eventType === 'live') {
       console.log('Player state is ENDED, showing feedback modal');
-      setShowFeedbackModal(true);
+      // Add a small delay to ensure the stream has actually ended
+      setTimeout(() => {
+        setShowFeedbackModal(true);
+      }, 1000);
     }
   }, [playerState, eventId, eventType]);
+
+  // Handle feedback modal close
+  const handleFeedbackModalClose = useCallback(() => {
+    setShowFeedbackModal(false);
+  }, []);
 
   const handleSendMessage = async () => {
     if (messageInput.trim() && isConnected) {
@@ -381,7 +401,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
       {eventId && (
         <FeedbackModal
           isOpen={showFeedbackModal}
-          onClose={() => setShowFeedbackModal(false)}
+          onClose={handleFeedbackModalClose}
           eventId={eventId}
           eventName={eventName}
         />

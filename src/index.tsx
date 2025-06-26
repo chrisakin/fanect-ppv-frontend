@@ -33,13 +33,9 @@ if (!GOOGLE_CLIENT_ID) {
 }
 
 function App() {
-  // Only initialize FCM if Firebase is properly configured
-  const hasFirebaseConfig = import.meta.env.VITE_FIREBASE_API_KEY && 
-                           import.meta.env.VITE_FIREBASE_PROJECT_ID;
+  // Initialize FCM for push notifications
+  useFCM();
   
-  if (hasFirebaseConfig) {
-    useFCM();
-  }
   const navigate = useNavigate();
 
   useEffect(() => {

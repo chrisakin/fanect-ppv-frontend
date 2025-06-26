@@ -1,4 +1,4 @@
-import { getFCMToken, requestNotificationPermission, onMessageListener } from '../lib/firebase';
+import { getFCMToken, requestNotificationPermission, onMessageListener, registerServiceWorker } from '../lib/firebase';
 import axios from '../lib/axios';
 
 export class FCMService {
@@ -33,6 +33,13 @@ export class FCMService {
           !import.meta.env.VITE_FIREBASE_PROJECT_ID || 
           !import.meta.env.VITE_FIREBASE_VAPID_KEY) {
         console.warn('Firebase configuration incomplete, skipping FCM initialization');
+        return;
+      }
+
+      // Register service worker first
+      const registration = await registerServiceWorker();
+      if (!registration) {
+        console.error('Service Worker registration failed, cannot initialize FCM');
         return;
       }
 
@@ -79,12 +86,27 @@ export class FCMService {
         .then((payload: any) => {
           console.log('Received foreground message:', payload);
           
-          // Show notification
+          // Show notification if permission is granted
           if (Notification.permission === 'granted') {
-            new Notification(payload.notification.title, {
-              body: payload.notification.body,
+            const notificationTitle = payload.notification?.title || 'FaNect Notification';
+            const notificationOptions = {
+              body: payload.notification?.body || 'You have a new notification',
               icon: '/icon-192x192.png',
-            });
+              badge: '/icon-192x192.png',
+              tag: 'fanect-notification',
+              requireInteraction: false,
+              silent: false,
+              data: payload.data || {}
+            };
+
+            const notification = new Notification(notificationTitle, notificationOptions);
+            
+            // Handle notification click
+            notification.onclick = () => {
+              window.focus();
+              notification.close();
+              // You can add navigation logic here if needed
+            };
           }
           
           // Dispatch custom event

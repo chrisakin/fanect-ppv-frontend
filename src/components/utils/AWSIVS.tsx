@@ -119,15 +119,24 @@ export function useAWSIVSService({
         player.addEventListener(IVSPlayer.PlayerEventType.BUFFERING, () => {
           console.log("Player buffering");
           setPlayerState("BUFFERING");
+          onPlayerStateChange?.("BUFFERING");
         });
 
         player.addEventListener(IVSPlayer.PlayerEventType.IDLE, () => {
           console.log("Player idle");
           setPlayerState("IDLE");
+          onPlayerStateChange?.("IDLE");
         });
 
+        window.addEventListener("offline", () => {
+          console.log("User lost network connection");
+        });
+        window.addEventListener("online", () => {
+          console.log("User is back online");
+      });
+
         player.addEventListener(IVSPlayer.PlayerEventType.ENDED, () => {
-          console.log("Player ended - triggering feedback modal");
+          console.log("Player ended - stream has finished");
           setPlayerState("ENDED");
           onPlayerStateChange?.("ENDED");
         });

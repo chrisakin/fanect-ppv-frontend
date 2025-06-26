@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAccessToken, getRefreshToken, setTokens, clearTokens, isAuthenticated } from './auth';
+import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth';
 import { locationService } from '../services/locationService';
 import { redirectToLogin } from '@/services/redirectService';
 

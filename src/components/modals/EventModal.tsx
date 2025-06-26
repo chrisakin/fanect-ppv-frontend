@@ -527,7 +527,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           <h3 className="font-text-lg-medium text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
                             Event Pricing
                           </h3>
-                          <Button
+                          {/* <Button
                             type="button"
                             onClick={addPrice}
                             variant="outline"
@@ -536,7 +536,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           >
                             <PlusIcon className="w-4 h-4" />
                             Add Currency
-                          </Button>
+                          </Button> */}
                         </div>
                         
                         {formData.prices.map((price, index) => (

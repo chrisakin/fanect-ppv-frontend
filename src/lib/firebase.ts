@@ -27,6 +27,7 @@ const firebaseConfig = {
   appId: "1:1083480182974:web:2d741ab010ee95c5878eef",
   measurementId: "G-C0W89Y3NEL"
 };
+
 // Only initialize Firebase if all required config is present
 let app: any = null;
 let messaging: any = null;
@@ -67,6 +68,30 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   }
 };
 
+export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
+  try {
+    if (!('serviceWorker' in navigator)) {
+      console.warn('Service Worker not supported');
+      return null;
+    }
+
+    // Register the service worker
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+      scope: '/'
+    });
+
+    console.log('Service Worker registered successfully:', registration);
+    
+    // Wait for the service worker to be ready
+    await navigator.serviceWorker.ready;
+    
+    return registration;
+  } catch (error) {
+    console.error('Service Worker registration failed:', error);
+    return null;
+  }
+};
+
 export const getFCMToken = async (): Promise<string | null> => {
   try {
     if (!messaging) {
@@ -79,21 +104,20 @@ export const getFCMToken = async (): Promise<string | null> => {
       return null;
     }
 
-    // Check if service worker is registered
-    if (!('serviceWorker' in navigator)) {
-      console.warn('Service Worker not supported');
+    // Register service worker first
+    const registration = await registerServiceWorker();
+    if (!registration) {
+      console.error('Service Worker registration failed');
       return null;
     }
 
-    // Wait for service worker to be ready
-    await navigator.serviceWorker.ready;
-
-const token = await getToken(messaging, {
-  vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-  serviceWorkerRegistration: await navigator.serviceWorker.ready, // ✅ This is the fix
-});
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    });
     
     if (token) {
+      console.log('FCM Token obtained:', token);
       return token;
     } else {
       console.log('No registration token available.');
@@ -114,6 +138,23 @@ export const onMessageListener = () =>
 
     onMessage(messaging, (payload) => {
       console.log('Message received. ', payload);
+      
+      // Show notification if permission is granted
+      if (Notification.permission === 'granted') {
+        const notificationTitle = payload.notification?.title || 'FaNect Notification';
+        const notificationOptions = {
+          body: payload.notification?.body || 'You have a new notification',
+          icon: '/icon-192x192.png',
+          badge: '/icon-192x192.png',
+          tag: 'fanect-notification',
+          requireInteraction: false,
+          silent: false,
+          data: payload.data || {}
+        };
+
+        new Notification(notificationTitle, notificationOptions);
+      }
+      
       resolve(payload);
     });
   });
