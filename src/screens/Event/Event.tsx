@@ -3,6 +3,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Header } from "../../components/layout/Header";
 import { Footer } from "../../components/layout/Footer";
+import { BreadcrumbNavigation } from "../../components/layout/BreadcrumbNavigation";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { LoginModal } from "../../components/modals/LoginModal";
@@ -32,6 +33,18 @@ export const Event = (): JSX.Element => {
     }
   };
 
+  // Breadcrumb items for authenticated users
+  const breadcrumbItems = [
+    {
+      label: 'Home',
+      href: '/dashboard/home'
+    },
+    {
+      label: 'Event Details',
+      isCurrentPage: true
+    }
+  ];
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -42,6 +55,23 @@ export const Event = (): JSX.Element => {
 
   const EventContent = () => (
     <>
+      {/* Breadcrumb for authenticated users */}
+      {isAuthenticated && (
+        <BreadcrumbNavigation items={breadcrumbItems} className="mb-6" />
+      )}
+
+      {/* Back button for non-authenticated users */}
+      {!isAuthenticated && (
+        <Button
+          variant="ghost"
+          className="mb-6 hover:bg-transparent p-0 h-auto text-foreground"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span className="text-sm">Back</span>
+        </Button>
+      )}
+
       {/* Banner Section */}
       <section className="w-full flex flex-col items-center justify-center gap-5 pb-[30px]">
         <img
@@ -111,14 +141,6 @@ export const Event = (): JSX.Element => {
   if (isAuthenticated) {
     return (
       <DashboardLayout>
-        <Button
-          variant="ghost"
-          className="mb-6 hover:bg-transparent p-0 h-auto text-foreground"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-sm">Back</span>
-        </Button>
         <EventContent />
       </DashboardLayout>
     );
@@ -132,14 +154,6 @@ export const Event = (): JSX.Element => {
         onClose={() => setIsLoginModalOpen(false)} 
       />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 lg:px-16 py-8">
-        <Button
-          variant="ghost"
-          className="mb-6 hover:bg-transparent p-0 h-auto text-foreground"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-sm">Back</span>
-        </Button>
         <EventContent />
       </main>
       <Footer />

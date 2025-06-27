@@ -2,6 +2,7 @@ import { EarningsChart } from "@/components/charts/EarningsChart";
 import { ViewersChart } from "@/components/charts/ViewersChart";
 import { RatingChart } from "@/components/charts/RatingChart";
 import { FeedbackChart } from "@/components/charts/FeedbackChart";
+import { BreadcrumbNavigation } from "@/components/layout/BreadcrumbNavigation";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -65,6 +66,22 @@ export const DashboardEventAnalytics = (): JSX.Element => {
   const [selectedCurrency, setSelectedCurrency] = useState<string>('NGN');
   const { toast } = useToast();
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    {
+      label: 'Home',
+      href: '/dashboard/home'
+    },
+    {
+      label: 'Organise Events',
+      href: '/dashboard/organise'
+    },
+    {
+      label: 'Event Analytics',
+      isCurrentPage: true
+    }
+  ];
+
   const fetchEventStats = async () => {
     if (!id) return;
 
@@ -95,16 +112,22 @@ export const DashboardEventAnalytics = (): JSX.Element => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+      <div className="flex flex-col gap-6">
+        <BreadcrumbNavigation items={breadcrumbItems} />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+        </div>
       </div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-lg text-gray-500">No statistics available for this event</p>
+      <div className="flex flex-col gap-6">
+        <BreadcrumbNavigation items={breadcrumbItems} />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <p className="text-lg text-gray-500">No statistics available for this event</p>
+        </div>
       </div>
     );
   }
@@ -112,6 +135,8 @@ export const DashboardEventAnalytics = (): JSX.Element => {
   return (
     <div className="min-h-screen w-full">
       <div className="flex flex-col w-full mx-auto p-4 items-start gap-6">
+        <BreadcrumbNavigation items={breadcrumbItems} />
+        
         <div className="w-full gap-6 md:gap-8 flex flex-col items-start justify-center relative">
           <EarningsChart 
             stats={stats}

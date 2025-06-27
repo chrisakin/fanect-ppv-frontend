@@ -1,12 +1,7 @@
 import { StreampassPurchaseCard } from "@/components/layout/StreampassPurchase";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-} from "../../components/ui/breadcrumb";
 import { GiftFriend } from "@/components/layout/GiftFriendForm";
 import { RegisteredCard } from "@/components/layout/RegisteredCard";
+import { BreadcrumbNavigation } from "@/components/layout/BreadcrumbNavigation";
 import { useParams } from "react-router-dom";
 import { useEventStore } from "@/store/eventStore";
 import { useEffect, useState } from "react";
@@ -25,6 +20,31 @@ export const DashboardSingleEvent = (): JSX.Element => {
       fetchSingleEvent(id);
     }
   }, [id, fetchSingleEvent]);
+
+  // Generate breadcrumb items based on event type
+  const getBreadcrumbItems = () => {
+    const typeLabels: { [key: string]: string } = {
+      'streampass': 'Purchase Streampass',
+      'gift': 'Gift Streampass',
+      'paid': 'Event Ticket',
+      'giftpaid': 'Gift Confirmation'
+    };
+
+    return [
+      {
+        label: 'Home',
+        href: '/dashboard/home'
+      },
+      {
+        label: 'Streampass',
+        href: '/dashboard/tickets'
+      },
+      {
+        label: typeLabels[type || ''] || 'Event Details',
+        isCurrentPage: true
+      }
+    ];
+  };
 
   if (isLoading) {
     return (
@@ -45,21 +65,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
   return (
     <div className="flex flex-col w-full items-start gap-[30px]">
       {/* Breadcrumb navigation */}
-      <Breadcrumb className="flex items-center">
-        <BreadcrumbItem>
-          <BreadcrumbLink className="font-text-lg-medium text-gray-400">
-            Home
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator>
-         /
-        </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbLink className="font-text-lg-semibold text-gray-800">
-            Event Details
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
+      <BreadcrumbNavigation items={getBreadcrumbItems()} />
 
       <div className="flex flex-col items-start gap-[50px] w-full">
         {/* Event banner image with watermark */}

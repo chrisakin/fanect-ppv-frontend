@@ -1,6 +1,6 @@
 import { StreamingProvider } from "@/components/utils/StreamingProvider";
 import { WatchEventDetails } from "@/components/layout/WatchEventDetails";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { BreadcrumbNavigation } from "@/components/layout/BreadcrumbNavigation";
 import { useEventStore } from "@/store/eventStore";
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -27,6 +27,30 @@ export const DashboardWatchEvent = (): JSX.Element => {
 
     fetchEvent();
   }, [id, type, fetchPurchasedEvent, navigate]);
+
+  // Generate breadcrumb items based on watch type
+  const getBreadcrumbItems = () => {
+    const typeLabels: { [key: string]: string } = {
+      'live': 'Live Event',
+      'past': 'Event Replay',
+      'upcoming': 'Upcoming Event'
+    };
+
+    return [
+      {
+        label: 'Home',
+        href: '/dashboard/home'
+      },
+      {
+        label: 'Streampass',
+        href: '/dashboard/tickets'
+      },
+      {
+        label: typeLabels[type || ''] || 'Watch Event',
+        isCurrentPage: true
+      }
+    ];
+  };
 
   if (isLoading) {
     return (
@@ -58,21 +82,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
 
   return (
     <div>
-      <Breadcrumb className="flex items-center">
-        <BreadcrumbItem>
-          <BreadcrumbLink className="font-text-lg-medium text-gray-400">
-            Home
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator>
-         /
-        </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbLink className="font-text-lg-semibold text-gray-800">
-            {eventType === 'past' ? 'Event Replay' : 'Event Details'}
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
+      <BreadcrumbNavigation items={getBreadcrumbItems()} />
       <div className="flex flex-col w-full px-4 md:px-6 lg:px-8 mx-auto items-start py-6 md:py-8 lg:py-10">
         <div className="flex flex-col w-full items-start gap-8 md:gap-10 lg:gap-14">
           <StreamingProvider 

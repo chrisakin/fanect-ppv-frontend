@@ -6,6 +6,7 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Header } from "../../components/layout/Header";
 import { Footer } from "../../components/layout/Footer";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
+import { BreadcrumbNavigation } from "../../components/layout/BreadcrumbNavigation";
 import { PaginationIndex } from "../../components/utils/Pagination";
 import { EmptyState } from "../../components/layout/EmptyState";
 import { useAuthStore } from "../../store/authStore";
@@ -39,17 +40,35 @@ export const Search = (): JSX.Element => {
     }
   };
 
+  // Breadcrumb items for authenticated users
+  const breadcrumbItems = [
+    {
+      label: 'Home',
+      href: isAuthenticated ? '/dashboard/home' : '/'
+    },
+    {
+      label: 'Search Results',
+      isCurrentPage: true
+    }
+  ];
+
   const SearchContent = () => (
     <main className="flex flex-col items-start gap-10 w-full max-w-7xl mx-auto px-2 md:px-8">
       <header className="flex flex-col w-full items-start justify-center gap-5">
-        <Button
-          variant="ghost"
-          className="mb-2 hover:bg-transparent p-0 h-auto text-foreground"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-sm">Back</span>
-        </Button>
+        {/* Breadcrumb for authenticated users */}
+        {isAuthenticated ? (
+          <BreadcrumbNavigation items={breadcrumbItems} />
+        ) : (
+          /* Back button for non-authenticated users */
+          <Button
+            variant="ghost"
+            className="mb-2 hover:bg-transparent p-0 h-auto text-foreground"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            <span className="text-sm">Back</span>
+          </Button>
+        )}
         
         <h1 className="font-display-xs-semibold text-gray-400 dark:text-gray-400 text-xl md:text-2xl tracking-[var(--display-xs-semibold-letter-spacing)] leading-[var(--display-xs-semibold-line-height)]">
           Search result for &apos;{query}&apos;
