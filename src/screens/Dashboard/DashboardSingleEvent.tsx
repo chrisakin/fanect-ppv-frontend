@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Loader2, PlayCircle } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { GiftCard } from "@/components/layout/GiftCard";
 
 export const DashboardSingleEvent = (): JSX.Element => {
   const { type, id } = useParams<{ type: string; id: string }>();
@@ -151,6 +152,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
             {type === 'streampass' && <StreampassPurchaseCard event={singleEvent} />}
             {type === 'gift' && <GiftFriend event={singleEvent}/>}
             {type === 'paid' && <RegisteredCard event={singleEvent} />}
+            {type === 'giftpaid' && <GiftCard />}
           </div>
 
             {/* About this event section */}
@@ -182,6 +184,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
             {type === 'streampass' && <StreampassPurchaseCard event={singleEvent}/>}
             {type === 'gift' && <GiftFriend  event={singleEvent}/>}
             {type === 'paid' && <RegisteredCard  event={singleEvent}/>}
+            {type === 'giftpaid' && <GiftCard/>}
           </div>
         </div>
       </div>

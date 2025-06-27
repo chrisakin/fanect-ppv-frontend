@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 
 export const PaymentSuccess = () => {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [giftStatus, setGiftStatus] = useState(false)
   const [message, setMessage] = useState("");
   const [eventId, setEventId] = useState("")
   const [searchParams] = useSearchParams();
@@ -40,6 +41,7 @@ export const PaymentSuccess = () => {
           setStatus("success");
           setMessage(data.message || "Payment verified successfully!");
           setEventId(data.streampass.event)
+          setGiftStatus(data.streampass.isGift)
         } else {
           setStatus("error");
           setMessage(data.message || "Payment verification failed.");
@@ -66,7 +68,7 @@ export const PaymentSuccess = () => {
       timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
     }
     if (status === "success" && countdown === 0) {
-      navigate(`/dashboard/tickets/event/paid/${eventId}`);
+      navigate(giftStatus == true ? `/dashboard/tickets/event/giftpaid/${eventId}` :`/dashboard/tickets/event/paid/${eventId}`);
     }
     return () => clearTimeout(timer);
   }, [status, countdown, navigate]);
@@ -89,7 +91,7 @@ export const PaymentSuccess = () => {
           <p className="text-sm text-gray-500">
               Redirecting to ticket page in {countdown} second{countdown !== 1 ? "s" : ""}...
             </p>
-            <Button onClick={() => navigate(`/dashboard/tickets/event/paid/${eventId}`)}>Go to Streampass Page</Button>
+            <Button onClick={() => navigate(giftStatus == true ? `/dashboard/tickets/event/giftpaid/${eventId}` :`/dashboard/tickets/event/paid/${eventId}`)}>Go to Streampass Page</Button>
         </>
       )}
       {status === "error" && (
