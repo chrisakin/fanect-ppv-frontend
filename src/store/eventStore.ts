@@ -67,7 +67,7 @@ export const useEventStore = create<EventState>((set) => ({
   fetchUpcomingEvents: async (page = 1) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/events/upcoming?page=${page}&limit=12`);
+      const response = await axios.get(isAuthenticated() ? `/events/auth/upcoming?page=${page}&limit=12` :`/events/upcoming?page=${page}&limit=12`);
       const { docs, ...paginationData } = response.data;
       
       set({
@@ -159,7 +159,7 @@ export const useEventStore = create<EventState>((set) => ({
   searchEvents: async (query: string, page = 1) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/events/upcoming?page=${page}&limit=12&search=${encodeURIComponent(query)}`);
+      const response = await axios.get(isAuthenticated() ? `/events/auth/upcoming?page=${page}&limit=12&search=${encodeURIComponent(query)}`: `/events/upcoming?page=${page}&limit=12&search=${encodeURIComponent(query)}`);
       const { docs, ...paginationData } = response.data;
       
       set({
