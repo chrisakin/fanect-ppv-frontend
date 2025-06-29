@@ -23,36 +23,52 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const [isLoadingStream, setIsLoadingStream] = useState(true);
   const [streamError, setStreamError] = useState<string | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackShown, setFeedbackShown] = useState(false);
+  const [hasStreamStarted, setHasStreamStarted] = useState(false); // Track if stream has actually started
   const { toast } = useToast();
 
   // Define the callback before using it in useAWSIVSService
   const handlePlayerStateChange = useCallback((state: string) => {
     console.log('Player state changed to:', state);
     
-    // Show feedback modal when stream ends
-    if (state === "ENDED" && eventId && eventType === 'live') {
-      console.log('Stream ended, showing feedback modal');
-      // Add a small delay to ensure the stream has actually ended
+    // Track when stream actually starts playing
+    if (state === "PLAYING") {
+      setHasStreamStarted(true);
+    }
+    
+    // Only show feedback modal if stream has started and then ended
+    if (state === "ENDED" && eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
+      console.log('Stream ended via player state change, showing feedback modal');
+      setFeedbackShown(true);
       setTimeout(() => {
         setShowFeedbackModal(true);
-      }, 1000);
+      }, 500);
     }
-  }, [eventId, eventType]);
+  }, [eventId, eventType, feedbackShown, hasStreamStarted]);
 
   // Handle chat message callback
   const handleChatMessage = useCallback((message: any) => {
     console.log('Chat message received:', message);
-    // You can add additional chat message handling here if needed
   }, []);
 
-  // Handle stream end callback
+  // Handle stream end callback - this is the primary method for detecting stream end
   const handleStreamEnd = useCallback(() => {
     console.log('Stream ended callback triggered');
-    if (eventId && eventType === 'live') {
+    
+    // Only show feedback modal if stream has actually started and this is a live event
+    if (eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
       console.log('Showing feedback modal for live stream end');
+      setFeedbackShown(true);
       setShowFeedbackModal(true);
+    } else {
+      console.log('Not showing feedback modal:', {
+        eventId: !!eventId,
+        eventType,
+        hasStreamStarted,
+        feedbackShown
+      });
     }
-  }, [eventId, eventType]);
+  }, [eventId, eventType, feedbackShown, hasStreamStarted]);
 
   const {
     videoContainerRef,
@@ -73,7 +89,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     username: getUser()?.firstName || 'Anonymous',
     onPlayerStateChange: handlePlayerStateChange,
     onChatMessage: handleChatMessage,
-    onStreamEnd: handleStreamEnd, // Add the stream end callback
+    onStreamEnd: handleStreamEnd,
   });
 
   const [messageInput, setMessageInput] = useState("");
@@ -87,6 +103,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
       try {
         setIsLoadingStream(true);
         setStreamError(null);
+        setFeedbackShown(false);
+        setHasStreamStarted(false); // Reset stream started state
         
         const data = await eventStreamingService.getStreamingData(eventId, eventType);
         setStreamingData(data);
@@ -111,17 +129,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
       fetchStreamingData();
     }
   }, [eventId, eventType, toast]);
-
-  // Additional check for stream end based on player state
-  useEffect(() => {
-    if (playerState === "ENDED" && eventId && eventType === 'live') {
-      console.log('Player state is ENDED, showing feedback modal');
-      // Add a small delay to ensure the stream has actually ended
-      setTimeout(() => {
-        setShowFeedbackModal(true);
-      }, 1000);
-    }
-  }, [playerState, eventId, eventType]);
 
   // Handle feedback modal close
   const handleFeedbackModalClose = useCallback(() => {
@@ -407,8 +414,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
         </div>
       </div>
 
-      {/* Feedback Modal */}
-      {eventId && (
+      {/* Feedback Modal - Only show if stream has actually started */}
+      {eventId && hasStreamStarted && (
         <FeedbackModal
           isOpen={showFeedbackModal}
           onClose={handleFeedbackModalClose}

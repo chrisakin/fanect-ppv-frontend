@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import AgoraRTC, { IAgoraRTCClient } from "agora-rtc-sdk-ng";
+
+// Define RemoteUser type based on the client
+type RemoteUser = ReturnType<typeof AgoraRTC.createClient>['remoteUsers'][number];
 
 interface ChatMessage {
   id: string;
@@ -15,7 +19,7 @@ interface AWSIVSServiceProps {
   chatApiEndpoint: string;
   onPlayerStateChange?: (state: string) => void;
   onChatMessage?: (message: ChatMessage) => void;
-  onStreamEnd?: () => void; // New callback for stream end
+  onStreamEnd?: () => void;
 }
 
 export function useAWSIVSService({
@@ -30,12 +34,33 @@ export function useAWSIVSService({
   const playerRef = useRef<any>(null);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const streamEndedRef = useRef<boolean>(false);
+  const hasStartedPlayingRef = useRef<boolean>(false); // Track if stream has actually started
 
   const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [playerState, setPlayerState] = useState<string>("IDLE");
   const [isConnected, setIsConnected] = useState(false);
   const [playerError, setPlayerError] = useState<string | null>(null);
+
+  // Centralized stream end handler - only trigger if stream has actually started
+  const handleStreamEnd = useCallback(() => {
+    if (streamEndedRef.current) {
+      console.log('Stream end already handled, skipping duplicate call');
+      return;
+    }
+    
+    if (!hasStartedPlayingRef.current) {
+      console.log('Stream has not started playing yet, ignoring end event');
+      return;
+    }
+    
+    streamEndedRef.current = true;
+    console.log('Stream ended - triggering feedback modal');
+    setPlayerState("ENDED");
+    onPlayerStateChange?.("ENDED");
+    onStreamEnd?.();
+  }, [onPlayerStateChange, onStreamEnd]);
 
   const loadIVSPlayer = useCallback(async () => {
     if (window.IVSPlayer) return window.IVSPlayer;
@@ -60,6 +85,8 @@ export function useAWSIVSService({
 
   useEffect(() => {
     let mounted = true;
+    streamEndedRef.current = false;
+    hasStartedPlayingRef.current = false; // Reset on new playback URL
 
     const initializePlayer = async () => {
       if (!videoContainerRef.current || !playbackUrl) {
@@ -113,7 +140,8 @@ export function useAWSIVSService({
         });
 
         player.addEventListener(IVSPlayer.PlayerEventType.PLAYING, () => {
-          console.log("Player playing");
+          console.log("Player playing - stream has started");
+          hasStartedPlayingRef.current = true; // Mark that stream has actually started
           setPlayerState("PLAYING");
           onPlayerStateChange?.("PLAYING");
         });
@@ -131,49 +159,66 @@ export function useAWSIVSService({
         });
 
         player.addEventListener(IVSPlayer.PlayerEventType.ENDED, () => {
-          console.log("Player ended - stream has finished");
-          setPlayerState("ENDED");
-          onPlayerStateChange?.("ENDED");
-          // Call the stream end callback
-          onStreamEnd?.();
+          console.log("IVS Player ended event");
+          handleStreamEnd();
         });
 
-        // Add additional event listeners for better stream end detection
         player.addEventListener(IVSPlayer.PlayerEventType.ERROR, (error: any) => {
           console.error("IVS Player error:", error);
           setPlayerError(`Player error: ${error.type || 'Unknown error'}`);
           setPlayerState("ERROR");
           onPlayerStateChange?.("ERROR");
+          
+          // Only treat certain errors as stream end if stream was actually playing
+          if (hasStartedPlayingRef.current && (error.type === 'ErrorNotAvailable' || error.type === 'ErrorStreamOffline')) {
+            console.log("Stream error indicates stream ended");
+            handleStreamEnd();
+          }
         });
 
-        // Listen for video element events as well
+        // Enhanced video element event listeners - only after stream starts
         videoElement.addEventListener('ended', () => {
           console.log("Video element ended event");
-          setPlayerState("ENDED");
-          onPlayerStateChange?.("ENDED");
-          onStreamEnd?.();
+          handleStreamEnd();
         });
 
         videoElement.addEventListener('loadedmetadata', () => {
           console.log("Video metadata loaded, duration:", videoElement.duration);
+          // Reset flags when new content loads
+          streamEndedRef.current = false;
+          hasStartedPlayingRef.current = false;
         });
 
+        // Only set up time-based end detection for VOD content with known duration
         videoElement.addEventListener('timeupdate', () => {
-          // Check if we're near the end of the video
-          if (videoElement.duration && videoElement.currentTime) {
+          if (videoElement.duration && videoElement.currentTime && hasStartedPlayingRef.current && !streamEndedRef.current) {
             const timeRemaining = videoElement.duration - videoElement.currentTime;
-            if (timeRemaining < 1 && timeRemaining > 0) {
-              console.log("Video is about to end");
+            
+            // Only trigger end detection if we're very close to the end and have been playing
+            if (timeRemaining < 0.1 && timeRemaining > 0 && videoElement.currentTime > 5) {
+              console.log("Video reached end via timeupdate");
+              handleStreamEnd();
             }
           }
         });
 
-        window.addEventListener("offline", () => {
-          console.log("User lost network connection");
-        });
-        
-        window.addEventListener("online", () => {
-          console.log("User is back online");
+        // Error handling - only consider as stream end if we were actually playing
+        videoElement.addEventListener('error', (e) => {
+          console.error("Video element error:", e);
+          if (videoElement.error && hasStartedPlayingRef.current) {
+            const errorCode = videoElement.error.code;
+            console.log("Video error code:", errorCode);
+            
+            // Only treat network errors as stream end if we were playing
+            if (errorCode === 2 || errorCode === 4) {
+              console.log("Video error suggests stream ended");
+              setTimeout(() => {
+                if (!streamEndedRef.current && hasStartedPlayingRef.current) {
+                  handleStreamEnd();
+                }
+              }, 2000); // Longer delay to avoid false positives
+            }
+          }
         });
 
         // Load the stream
@@ -212,8 +257,10 @@ export function useAWSIVSService({
         }
       }
       setIsPlayerLoaded(false);
+      streamEndedRef.current = false;
+      hasStartedPlayingRef.current = false;
     };
-  }, [playbackUrl, loadIVSPlayer, onPlayerStateChange, onStreamEnd]);
+  }, [playbackUrl, loadIVSPlayer, onPlayerStateChange, handleStreamEnd]);
 
   useEffect(() => {
     if (!chatToken || !chatApiEndpoint) {
