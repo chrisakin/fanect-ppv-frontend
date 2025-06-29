@@ -184,8 +184,8 @@ export const AWSIVSPlayer = ({
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[350px] md:h-[400px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black">
               {/* Loading state */}
@@ -267,7 +267,7 @@ export const AWSIVSPlayer = ({
         </Card>
 
         {/* Chat section */}
-        <div className="w-full lg:w-[260px]">
+        <div className="w-full lg:w-[260px] lg:px-0 px-4">
           {/* Mobile Accordion */}
           <div className="lg:hidden">
             <Accordion type="single" collapsible className="w-full">

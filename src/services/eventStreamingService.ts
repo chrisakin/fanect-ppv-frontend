@@ -4,6 +4,7 @@ export interface StreamingData {
   streamKey?: string;
   liveStreamUrl?: string;  // For live events - the URL viewers use to watch live
   playbackUrl?: string;    // For past events - the URL for recorded content
+  savedBroadcastUrl?: string; // For past events - the saved broadcast URL
   chatRoomArn?: string;
   chatToken?: string;
 }
@@ -37,8 +38,21 @@ class EventStreamingService {
     }
   }
 
+  // Get saved broadcast URL for past events (for recorded content)
+  public async getSavedBroadcastUrl(eventId: string): Promise<StreamingData> {
+    try {
+      const response = await axios.get(`/events/savedbroadcasturl/${eventId}`);
+      return {
+        savedBroadcastUrl: response.data.savedBroadcastUrl,
+        playbackUrl: response.data.savedBroadcastUrl, // Use saved broadcast URL as playback URL
+      };
+    } catch (error) {
+      console.error('Error fetching saved broadcast URL:', error);
+      throw new Error('Failed to get saved broadcast URL');
+    }
+  }
 
-  // Get playback URL for past events (for recorded content)
+  // Get playback URL for past events (for recorded content) - Legacy method
   public async getPlaybackUrl(eventId: string): Promise<StreamingData> {
     try {
       const response = await axios.get(`/events/playbackurl/${eventId}`);
@@ -55,8 +69,14 @@ class EventStreamingService {
   public async getStreamingData(eventId: string, eventType: 'live' | 'past' | 'upcoming'): Promise<StreamingData> {
     try {
       if (eventType === 'past') {
-        // For past events, get the recorded content URL
-        return await this.getPlaybackUrl(eventId);
+        // For past events, try to get the saved broadcast URL first
+        try {
+          return await this.getSavedBroadcastUrl(eventId);
+        } catch (error) {
+          console.warn('Saved broadcast URL not available, falling back to playback URL:', error);
+          // Fallback to the legacy playback URL method
+          return await this.getPlaybackUrl(eventId);
+        }
       } else if (eventType === 'live' || eventType === 'upcoming') {
         // For live/upcoming events, get the live stream URL
         return await this.getStreamKey(eventId);

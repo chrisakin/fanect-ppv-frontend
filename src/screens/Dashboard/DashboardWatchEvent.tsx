@@ -83,7 +83,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
   return (
     <div>
       <BreadcrumbNavigation items={getBreadcrumbItems()} />
-      <div className="flex flex-col w-full px-4 md:px-6 lg:px-8 mx-auto items-start py-6 md:py-8 lg:py-10">
+      <div className="flex flex-col w-full lg:px-8 md:px-6 px-0 mx-auto items-start py-6 md:py-8 lg:py-10">
         <div className="flex flex-col w-full items-start gap-8 md:gap-10 lg:gap-14">
           <StreamingProvider 
           eventData={{playbackUrl: singleEvent.playbackUrl, chatRoomArn:singleEvent.chatRoomArn, chatToken: singleEvent.chatToken}}
@@ -91,7 +91,9 @@ export const DashboardWatchEvent = (): JSX.Element => {
             eventId={singleEvent._id}
             eventName={singleEvent.name}
           />
-          <WatchEventDetails event={singleEvent} />
+          <div className="lg:px-0 md:px-0 px-4">
+            <WatchEventDetails event={singleEvent} />
+          </div>
         </div>
       </div>
     </div>

@@ -45,6 +45,15 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     // You can add additional chat message handling here if needed
   }, []);
 
+  // Handle stream end callback
+  const handleStreamEnd = useCallback(() => {
+    console.log('Stream ended callback triggered');
+    if (eventId && eventType === 'live') {
+      console.log('Showing feedback modal for live stream end');
+      setShowFeedbackModal(true);
+    }
+  }, [eventId, eventType]);
+
   const {
     videoContainerRef,
     messages,
@@ -64,6 +73,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     username: getUser()?.firstName || 'Anonymous',
     onPlayerStateChange: handlePlayerStateChange,
     onChatMessage: handleChatMessage,
+    onStreamEnd: handleStreamEnd, // Add the stream end callback
   });
 
   const [messageInput, setMessageInput] = useState("");
@@ -199,8 +209,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   // Show loading state while fetching streaming data
   if (isLoadingStream) {
     return (
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[300px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
@@ -217,8 +227,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   // Show error state if streaming data couldn't be loaded
   if (streamError) {
     return (
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[300px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black flex items-center justify-center">
               <div className="flex flex-col items-center gap-4 text-center p-4">
@@ -247,8 +257,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[350px] md:h-[400px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black">
               {/* Live indicator */}
@@ -311,7 +321,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
         </Card>
 
         {/* Chat section */}
-        <div className="w-full lg:w-[260px]">
+        <div className="w-full lg:w-[260px] lg:px-0 px-4">
           {/* Mobile Accordion */}
           <div className="lg:hidden">
             <Accordion type="single" collapsible className="w-full">

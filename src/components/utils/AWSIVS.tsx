@@ -15,6 +15,7 @@ interface AWSIVSServiceProps {
   chatApiEndpoint: string;
   onPlayerStateChange?: (state: string) => void;
   onChatMessage?: (message: ChatMessage) => void;
+  onStreamEnd?: () => void; // New callback for stream end
 }
 
 export function useAWSIVSService({
@@ -24,6 +25,7 @@ export function useAWSIVSService({
   username,
   onPlayerStateChange,
   onChatMessage,
+  onStreamEnd,
 }: AWSIVSServiceProps) {
   const playerRef = useRef<any>(null);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -128,24 +130,50 @@ export function useAWSIVSService({
           onPlayerStateChange?.("IDLE");
         });
 
-        window.addEventListener("offline", () => {
-          console.log("User lost network connection");
-        });
-        window.addEventListener("online", () => {
-          console.log("User is back online");
-      });
-
         player.addEventListener(IVSPlayer.PlayerEventType.ENDED, () => {
           console.log("Player ended - stream has finished");
           setPlayerState("ENDED");
           onPlayerStateChange?.("ENDED");
+          // Call the stream end callback
+          onStreamEnd?.();
         });
 
+        // Add additional event listeners for better stream end detection
         player.addEventListener(IVSPlayer.PlayerEventType.ERROR, (error: any) => {
           console.error("IVS Player error:", error);
           setPlayerError(`Player error: ${error.type || 'Unknown error'}`);
           setPlayerState("ERROR");
           onPlayerStateChange?.("ERROR");
+        });
+
+        // Listen for video element events as well
+        videoElement.addEventListener('ended', () => {
+          console.log("Video element ended event");
+          setPlayerState("ENDED");
+          onPlayerStateChange?.("ENDED");
+          onStreamEnd?.();
+        });
+
+        videoElement.addEventListener('loadedmetadata', () => {
+          console.log("Video metadata loaded, duration:", videoElement.duration);
+        });
+
+        videoElement.addEventListener('timeupdate', () => {
+          // Check if we're near the end of the video
+          if (videoElement.duration && videoElement.currentTime) {
+            const timeRemaining = videoElement.duration - videoElement.currentTime;
+            if (timeRemaining < 1 && timeRemaining > 0) {
+              console.log("Video is about to end");
+            }
+          }
+        });
+
+        window.addEventListener("offline", () => {
+          console.log("User lost network connection");
+        });
+        
+        window.addEventListener("online", () => {
+          console.log("User is back online");
         });
 
         // Load the stream
@@ -185,7 +213,7 @@ export function useAWSIVSService({
       }
       setIsPlayerLoaded(false);
     };
-  }, [playbackUrl, loadIVSPlayer, onPlayerStateChange]);
+  }, [playbackUrl, loadIVSPlayer, onPlayerStateChange, onStreamEnd]);
 
   useEffect(() => {
     if (!chatToken || !chatApiEndpoint) {

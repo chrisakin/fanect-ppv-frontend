@@ -34,8 +34,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
     setMuted,
     setVolume,
   } = useAWSIVSService({
-    playbackUrl: streamingData?.playbackUrl || "",
-    chatApiEndpoint: process.env.REACT_APP_CHAT_API_ENDPOINT,
+    playbackUrl: streamingData?.playbackUrl || streamingData?.savedBroadcastUrl || "",
+    chatApiEndpoint: import.meta.env.REACT_APP_CHAT_API_ENDPOINT as string,
     chatRoomArn: streamingData?.chatRoomArn,
     chatToken: streamingData?.chatToken,
     username: "viewer"
@@ -56,8 +56,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
         const data = await eventStreamingService.getStreamingData(eventId, 'past');
         setStreamingData(data);
         
-        if (!data.playbackUrl) {
-          setStreamError("Playback URL not available for this event");
+        if (!data.playbackUrl && !data.savedBroadcastUrl) {
+          setStreamError("Replay URL not available for this event");
         }
       } catch (error: any) {
         console.error('Error fetching streaming data:', error);
@@ -208,8 +208,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
   // Show loading state while fetching streaming data
   if (isLoadingStream) {
     return (
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[300px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
@@ -226,8 +226,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
   // Show error state if streaming data couldn't be loaded
   if (streamError) {
     return (
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[300px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black flex items-center justify-center">
               <div className="flex flex-col items-center gap-4 text-center p-4">
@@ -251,8 +251,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
   }
 
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] p-4 lg:p-0">
-      <Card className="relative w-full lg:w-[calc(100%-280px)] h-[300px] sm:h-[400px] lg:h-[460px] bg-white rounded-[10px] overflow-hidden border-0">
+    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
+      <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[350px] md:h-[400px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
         <CardContent className="p-0">
           <div className="relative w-full h-full bg-black">
             {/* Replay indicator */}
@@ -342,7 +342,7 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
       </Card>
 
       {/* Chat section */}
-      <div className="w-full lg:w-[260px]">
+      <div className="w-full lg:w-[260px] lg:px-0 px-4">
         {/* Mobile Accordion */}
         <div className="lg:hidden">
           <Accordion type="single" collapsible className="w-full">
