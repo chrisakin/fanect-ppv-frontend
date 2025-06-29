@@ -3,6 +3,8 @@ import { AWSIVSPlayer } from "./AWSIVSPlayer";
 import { PastEventPlayer } from "./PastEventPlayer";
 import { LiveEventPlayer } from "./LiveEventPlayer";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { ScreenRecordingProtection } from "./ScreenRecordingProtection";
+import { VideoProtection } from "./VideoProtection";
 
 interface StreamingProviderProps {
   eventData?: {
@@ -22,7 +24,7 @@ export const StreamingProvider = ({
   eventType = 'live',
   eventId,
   eventName,
-  enableRecordingProtection = false, // Disabled by default
+  enableRecordingProtection = true,
   strictRecordingProtection = false
 }: StreamingProviderProps): JSX.Element => {
   // Get streaming provider from environment variable
@@ -88,6 +90,32 @@ export const StreamingProvider = ({
     }
   };
 
-  // Return player without any protection wrappers
-  return renderPlayer();
+  const player = renderPlayer();
+
+  // // Wrap with protection if enabled
+  // if (enableRecordingProtection) {
+  //   return (
+  //     <ScreenRecordingProtection
+  //       enableWatermark={false}
+  //       enableBlurOnFocusLoss={false}
+  //       enableDevToolsDetection={true}
+  //       strictMode={strictRecordingProtection}
+  //       onRecordingDetected={() => {
+  //         console.warn('Recording detected on video stream');
+  //         // You can add additional actions here like logging to analytics
+  //       }}
+  //     >
+  //       <VideoProtection
+  //         enableTextSelection={false}
+  //         enableRightClick={false}
+  //         enableDragAndDrop={false}
+  //         enablePrintScreen={false}
+  //       >
+  //         {player}
+  //       </VideoProtection>
+  //     </ScreenRecordingProtection>
+  //   );
+  // }
+
+  return player;
 };
