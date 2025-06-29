@@ -7,8 +7,9 @@ export const setRedirectNavigate = (navigate: (path: string) => void) => {
 
 export const redirectToLogin = () => {
   if (navigateFn) {
-    navigateFn('');
+    navigateFn('/'); // Navigate to home page where login modal can be triggered
   } else {
-    console.warn('Navigate function not set yet.');
+    // Fallback: redirect to home page using window.location
+    window.location.href = '/';
   }
 };
