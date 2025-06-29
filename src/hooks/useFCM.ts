@@ -5,7 +5,7 @@ import { useNotificationStore } from '../store/notificationStore';
 
 export const useFCM = () => {
   const { isAuthenticated } = useAuthStore();
-  const { fetchUnreadCount } = useNotificationStore();
+  const { updateUnreadCount } = useNotificationStore();
 
   useEffect(() => {
     // Only initialize FCM if user is authenticated and we're in browser environment
@@ -15,22 +15,19 @@ export const useFCM = () => {
         fcmService.initializeFCM().catch(error => {
           console.warn('FCM initialization failed:', error);
         });
-      }, 1000); // Reduced delay for faster initialization
+      }, 1000);
 
-      // Listen for FCM messages and refresh notifications
+      // Listen for FCM messages and update notification store
       const handleFCMMessage = (event: CustomEvent) => {
         console.log('FCM message received in hook:', event.detail);
         
-        // Only refresh database notifications, FCM notifications are handled separately
-        fetchUnreadCount().catch(error => {
-          console.error('Failed to fetch unread count:', error);
-        });
+        // Update unread count when new FCM notification arrives
+        updateUnreadCount();
       };
 
       const handleRefreshNotifications = () => {
-        fetchUnreadCount().catch(error => {
-          console.error('Failed to refresh notifications:', error);
-        });
+        console.log('Refreshing notifications from FCM hook');
+        updateUnreadCount();
       };
 
       window.addEventListener('fcm-message', handleFCMMessage as EventListener);
@@ -42,9 +39,9 @@ export const useFCM = () => {
         window.removeEventListener('refresh-notifications', handleRefreshNotifications);
       };
     }
-  }, [isAuthenticated, fetchUnreadCount]);
+  }, [isAuthenticated, updateUnreadCount]);
 
-  // Periodically refresh FCM token and unread count
+  // Periodically refresh unread count
   useEffect(() => {
     if (isAuthenticated) {
       const interval = setInterval(() => {
@@ -53,13 +50,11 @@ export const useFCM = () => {
           console.warn('Failed to refresh FCM token:', error);
         });
         
-        // Refresh unread count every 5 minutes
-        fetchUnreadCount().catch(error => {
-          console.error('Failed to refresh unread count:', error);
-        });
+        // Update unread count every 5 minutes
+        updateUnreadCount();
       }, 5 * 60 * 1000); // 5 minutes
 
       return () => clearInterval(interval);
     }
-  }, [isAuthenticated, fetchUnreadCount]);
+  }, [isAuthenticated, updateUnreadCount]);
 };

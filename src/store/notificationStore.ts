@@ -1,14 +1,18 @@
 import { create } from 'zustand';
 import axios from '../lib/axios';
+import { fcmService } from '../services/fcmService';
 
 export interface Notification {
   _id: string;
   title: string;
   message: string;
+  body?: string; // Add body field for backend compatibility
   type: string;
   isRead: boolean;
+  read?: boolean; // Add read field for backend compatibility
   createdAt: string;
   updatedAt: string;
+  source?: 'database' | 'fcm'; // Track notification source
 }
 
 interface PaginationData {
@@ -27,11 +31,13 @@ interface NotificationState {
   isMarkingAllAsRead: boolean;
   pagination: PaginationData;
   fetchNotifications: (page?: number) => Promise<void>;
-  fetchUnreadCount: () => Promise<void>;
   fetchUnreadNotifications: () => Promise<Notification[]>;
   markAsRead: (notificationId: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   addNotification: (notification: Notification) => void;
+  addFCMNotification: (fcmNotification: any) => void;
+  updateUnreadCount: () => void;
+  getUnreadCount: () => number;
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
@@ -48,69 +54,127 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     limit: 20
   },
 
+  // Calculate unread count from current notifications + FCM notifications
+  updateUnreadCount: () => {
+    const state = get();
+    const databaseUnreadCount = state.notifications.filter(n => !n.isRead && n.source !== 'fcm').length;
+    const fcmUnreadCount = fcmService.isReady() ? fcmService.getUnreadCount() : 0;
+    const totalUnreadCount = databaseUnreadCount + fcmUnreadCount;
+    
+    console.log('Updating unread count:', {
+      databaseUnread: databaseUnreadCount,
+      fcmUnread: fcmUnreadCount,
+      total: totalUnreadCount
+    });
+    
+    set({ unreadCount: totalUnreadCount });
+  },
+
+  // Get current unread count
+  getUnreadCount: () => {
+    const state = get();
+    const databaseUnreadCount = state.notifications.filter(n => !n.isRead && n.source !== 'fcm').length;
+    const fcmUnreadCount = fcmService.isReady() ? fcmService.getUnreadCount() : 0;
+    return databaseUnreadCount + fcmUnreadCount;
+  },
+
   fetchNotifications: async (page = 1) => {
     try {
       set({ isLoading: true });
       const response = await axios.get(`/notifications?page=${page}&limit=20`);
       const { docs, ...paginationData } = response.data;
       
-      // Ensure we're working with the correct data structure
-      const notifications = docs.map((notification: any) => ({
+      console.log('Raw notification data from backend:', docs);
+      
+      // Map backend data to frontend format - handle both 'read' and 'isRead' fields
+      const databaseNotifications = docs.map((notification: any) => ({
         _id: notification._id,
         title: notification.title,
-        message: notification.message,
-        type: notification.type,
-        isRead: Boolean(notification.isRead), // Ensure boolean type
+        message: notification.message || notification.body || '', // Handle both message and body
+        type: notification.type || 'general',
+        isRead: Boolean(notification.read !== undefined ? notification.read : notification.isRead), // Use 'read' field from backend
         createdAt: notification.createdAt,
         updatedAt: notification.updatedAt,
+        source: 'database' as const
       }));
+
+      // Get FCM notifications and convert them to the same format
+      const fcmNotifications = fcmService.isReady() ? 
+        fcmService.getAllFCMNotifications().map(fcmNotif => ({
+          _id: fcmNotif.id,
+          title: fcmNotif.title,
+          message: fcmNotif.body,
+          type: 'fcm',
+          isRead: fcmNotif.isRead,
+          createdAt: new Date(fcmNotif.timestamp).toISOString(),
+          updatedAt: new Date(fcmNotif.timestamp).toISOString(),
+          source: 'fcm' as const
+        })) : [];
+
+      // Combine and sort notifications by creation date (newest first)
+      const allNotifications = [...databaseNotifications, ...fcmNotifications]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      console.log('Combined notifications:', {
+        database: databaseNotifications.length,
+        fcm: fcmNotifications.length,
+        total: allNotifications.length,
+        unread: allNotifications.filter(n => !n.isRead).length
+      });
       
       set({
-        notifications,
+        notifications: allNotifications,
         pagination: paginationData,
         isLoading: false
       });
 
-      // Also update unread count
-      get().fetchUnreadCount();
+      // Update unread count based on combined notifications
+      get().updateUnreadCount();
     } catch (error) {
       console.error('Error fetching notifications:', error);
       set({ notifications: [], isLoading: false });
     }
   },
 
-  fetchUnreadCount: async () => {
-    try {
-      const response = await axios.get('/notifications/unread-count');
-      const count = response.data.count || 0;
-      console.log('Fetched unread count from backend:', count);
-      set({ unreadCount: count });
-    } catch (error) {
-      console.error('Error fetching unread count:', error);
-      set({ unreadCount: 0 });
-    }
-  },
-
   fetchUnreadNotifications: async () => {
     try {
       const response = await axios.get('/notifications?isRead=false&limit=50');
-      const unreadNotifications = (response.data.docs || []).map((notification: any) => ({
+      const databaseUnreadNotifications = (response.data.docs || []).map((notification: any) => ({
         _id: notification._id,
         title: notification.title,
-        message: notification.message,
-        type: notification.type,
-        isRead: Boolean(notification.isRead),
+        message: notification.message || notification.body || '',
+        type: notification.type || 'general',
+        isRead: Boolean(notification.read !== undefined ? notification.read : notification.isRead),
         createdAt: notification.createdAt,
         updatedAt: notification.updatedAt,
+        source: 'database' as const
       }));
+
+      // Get FCM unread notifications
+      const fcmUnreadNotifications = fcmService.isReady() ? 
+        fcmService.getUnreadFCMNotifications().map(fcmNotif => ({
+          _id: fcmNotif.id,
+          title: fcmNotif.title,
+          message: fcmNotif.body,
+          type: 'fcm',
+          isRead: fcmNotif.isRead,
+          createdAt: new Date(fcmNotif.timestamp).toISOString(),
+          updatedAt: new Date(fcmNotif.timestamp).toISOString(),
+          source: 'fcm' as const
+        })) : [];
+
+      const allUnreadNotifications = [...databaseUnreadNotifications, ...fcmUnreadNotifications];
       
-      console.log('Fetched unread notifications:', unreadNotifications.length);
+      console.log('Fetched unread notifications:', {
+        database: databaseUnreadNotifications.length,
+        fcm: fcmUnreadNotifications.length,
+        total: allUnreadNotifications.length
+      });
       
-      // Update unread count based on actual unread notifications
-      const actualUnreadCount = unreadNotifications.filter((n: any )=> !n.isRead).length;
-      set({ unreadCount: actualUnreadCount });
+      // Update unread count
+      set({ unreadCount: allUnreadNotifications.length });
       
-      return unreadNotifications;
+      return allUnreadNotifications;
     } catch (error) {
       console.error('Error fetching unread notifications:', error);
       return [];
@@ -119,7 +183,18 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   markAsRead: async (notificationId: string) => {
     try {
-      await axios.patch(`/notifications/${notificationId}/read`);
+      const state = get();
+      const notification = state.notifications.find(n => n._id === notificationId);
+      
+      if (!notification) return;
+
+      if (notification.source === 'fcm') {
+        // Handle FCM notification
+        fcmService.markNotificationAsRead(notificationId);
+      } else {
+        // Handle database notification
+        await axios.patch(`/notifications/${notificationId}/read`);
+      }
       
       // Update the notification in the store
       set((state) => {
@@ -129,14 +204,11 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
             : notification
         );
         
-        // Calculate new unread count
-        const newUnreadCount = Math.max(0, state.unreadCount - 1);
-        
-        return {
-          notifications: updatedNotifications,
-          unreadCount: newUnreadCount
-        };
+        return { notifications: updatedNotifications };
       });
+
+      // Update unread count
+      get().updateUnreadCount();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -146,10 +218,15 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     try {
       set({ isMarkingAllAsRead: true });
       
-      // Call the backend endpoint to mark ALL notifications as read
+      // Mark all database notifications as read
       await axios.patch('/notifications/mark-all-read');
       
-      console.log('Successfully marked all notifications as read on backend');
+      // Mark all FCM notifications as read
+      if (fcmService.isReady()) {
+        fcmService.clearAllUnreadNotifications();
+      }
+      
+      console.log('Successfully marked all notifications as read');
       
       // Update all notifications in the current store to read
       set((state) => ({
@@ -170,9 +247,34 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   addNotification: (notification: Notification) => {
-    set((state) => ({
-      notifications: [notification, ...state.notifications],
-      unreadCount: notification.isRead ? state.unreadCount : state.unreadCount + 1
-    }));
+    set((state) => {
+      const updatedNotifications = [notification, ...state.notifications];
+      return { notifications: updatedNotifications };
+    });
+    
+    // Update unread count
+    get().updateUnreadCount();
+  },
+
+  addFCMNotification: (fcmNotification: any) => {
+    // Convert FCM notification to our format
+    const notification: Notification = {
+      _id: fcmNotification.id || `fcm_${Date.now()}`,
+      title: fcmNotification.title || 'FaNect Notification',
+      message: fcmNotification.body || fcmNotification.message || '',
+      type: 'fcm',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      source: 'fcm'
+    };
+
+    set((state) => {
+      const updatedNotifications = [notification, ...state.notifications];
+      return { notifications: updatedNotifications };
+    });
+    
+    // Update unread count
+    get().updateUnreadCount();
   },
 }));

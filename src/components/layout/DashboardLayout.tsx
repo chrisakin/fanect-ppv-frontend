@@ -7,7 +7,6 @@ import { clearTokens } from '../../lib/auth';
 import { Header } from './Header';
 import axios from '@/lib/axios';
 import { toast } from '../ui/use-toast';
-import { fcmService } from '../../services/fcmService';
 import HomeIcon from '../icons/HomeIcon';
 import CardPosIcon from '../icons/CardPosIcon';
 import MusicIcon from '../icons/MusicIcon';
@@ -28,40 +27,24 @@ const sidebarItems = [
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { logout } = useAuthStore();
-  const { unreadCount, fetchUnreadCount } = useNotificationStore();
-  const [fcmUnreadCount, setFcmUnreadCount] = useState(0);
+  const { unreadCount, updateUnreadCount } = useNotificationStore();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Calculate total unread count (only unread FCM + database notifications)
-  const totalUnreadCount = unreadCount + fcmUnreadCount;
-
-  // Fetch unread count on mount and set up listeners
+  // Update unread count on mount and set up listeners
   useEffect(() => {
-    fetchUnreadCount();
-
-    // Update FCM unread count - only count unread FCM notifications
-    const updateFcmCount = () => {
-      if (fcmService.isReady()) {
-        const unreadFcmNotifications = fcmService.getUnreadFCMNotifications();
-        setFcmUnreadCount(unreadFcmNotifications.length);
-        console.log('FCM unread count updated:', unreadFcmNotifications.length);
-      }
-    };
-
-    // Initial FCM count
-    updateFcmCount();
+    // Initial update
+    updateUnreadCount();
 
     // Listen for real-time notification updates
     const handleRefreshNotifications = () => {
-      console.log('Refreshing notification counts...');
-      fetchUnreadCount();
-      updateFcmCount();
+      console.log('Refreshing notification counts in sidebar...');
+      updateUnreadCount();
     };
 
     const handleFcmMessage = (event: CustomEvent) => {
       console.log('FCM message received in sidebar:', event.detail);
-      updateFcmCount();
+      updateUnreadCount();
     };
 
     window.addEventListener('refresh-notifications', handleRefreshNotifications);
@@ -69,8 +52,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
 
     // Periodic update every 30 seconds
     const interval = setInterval(() => {
-      fetchUnreadCount();
-      updateFcmCount();
+      updateUnreadCount();
     }, 30000);
 
     return () => {
@@ -78,19 +60,17 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       window.removeEventListener('fcm-message', handleFcmMessage as EventListener);
       clearInterval(interval);
     };
-  }, [fetchUnreadCount]);
+  }, [updateUnreadCount]);
 
-  // Clear FCM notifications when visiting notifications page
+  // Update unread count when visiting notifications page
   useEffect(() => {
-    if (location.pathname === '/dashboard/notifications' && fcmService.isReady()) {
-      // Clear FCM unread notifications when user visits notifications page
+    if (location.pathname === '/dashboard/notifications') {
+      // Small delay to allow page to load and mark notifications as read
       setTimeout(() => {
-        fcmService.clearAllUnreadNotifications();
-        setFcmUnreadCount(0);
-        console.log('Cleared FCM notifications on notifications page visit');
-      }, 1000); // Small delay to allow page to load
+        updateUnreadCount();
+      }, 1000);
     }
-  }, [location.pathname]);
+  }, [location.pathname, updateUnreadCount]);
 
   const handleLogout = async () => {
     try {
@@ -144,9 +124,9 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                   <div className="relative">
                     {item.icon}
                     {/* Notification Badge - Only show for notifications item and only unread notifications */}
-                    {item.showBadge && totalUnreadCount > 0 && (
+                    {item.showBadge && unreadCount > 0 && (
                       <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-medium">
-                        {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                        {unreadCount > 99 ? '99+' : unreadCount}
                       </div>
                     )}
                   </div>
