@@ -23,16 +23,49 @@ if (isConfigValid) {
     messaging.onBackgroundMessage(function(payload) {
       console.log('Received background message ', payload);
       
+      // Generate unique notification ID
+      const notificationId = payload.data?.notificationId || `fcm_bg_${Date.now()}_${Math.random()}`;
+      
       const notificationTitle = payload.notification?.title || 'FaNect Notification';
       const notificationOptions = {
         body: payload.notification?.body || 'You have a new notification',
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
-        tag: 'fanect-notification',
+        tag: `fanect-notification-${notificationId}`,
         requireInteraction: false,
         silent: false,
-        data: payload.data || {}
+        data: { 
+          ...payload.data,
+          notificationId,
+          isUnread: true,
+          timestamp: Date.now()
+        },
+        actions: [
+          {
+            action: 'view',
+            title: 'View'
+          },
+          {
+            action: 'dismiss',
+            title: 'Dismiss'
+          }
+        ]
       };
+
+      // Store unread notification in localStorage for persistence
+      try {
+        const unreadNotifications = JSON.parse(localStorage.getItem('fcm_unread_notifications') || '[]');
+        unreadNotifications.push({
+          id: notificationId,
+          title: notificationTitle,
+          body: notificationOptions.body,
+          timestamp: Date.now(),
+          isUnread: true
+        });
+        localStorage.setItem('fcm_unread_notifications', JSON.stringify(unreadNotifications));
+      } catch (error) {
+        console.error('Error storing unread notification:', error);
+      }
 
       // Show the notification
       return self.registration.showNotification(notificationTitle, notificationOptions);
@@ -42,25 +75,61 @@ if (isConfigValid) {
     self.addEventListener('notificationclick', function(event) {
       console.log('Notification clicked:', event);
 
+      const notificationId = event.notification.data?.notificationId;
+      
       event.notification.close();
       
-      // Focus or open the app when notification is clicked
-      event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-          // If a window/tab is already open, focus it
-          for (let i = 0; i < clientList.length; i++) {
-            const client = clientList[i];
-            if (client.url.includes(self.location.origin) && 'focus' in client) {
-              return client.focus();
+      // Handle action clicks
+      if (event.action === 'dismiss') {
+        // Mark as read in localStorage
+        if (notificationId) {
+          try {
+            const unreadNotifications = JSON.parse(localStorage.getItem('fcm_unread_notifications') || '[]');
+            const updatedNotifications = unreadNotifications.filter(n => n.id !== notificationId);
+            localStorage.setItem('fcm_unread_notifications', JSON.stringify(updatedNotifications));
+          } catch (error) {
+            console.error('Error updating unread notifications:', error);
+          }
+        }
+        return;
+      }
+      
+      // For 'view' action or default click
+      if (event.action === 'view' || !event.action) {
+        // Mark as read in localStorage
+        if (notificationId) {
+          try {
+            const unreadNotifications = JSON.parse(localStorage.getItem('fcm_unread_notifications') || '[]');
+            const updatedNotifications = unreadNotifications.filter(n => n.id !== notificationId);
+            localStorage.setItem('fcm_unread_notifications', JSON.stringify(updatedNotifications));
+          } catch (error) {
+            console.error('Error updating unread notifications:', error);
+          }
+        }
+
+        // Focus or open the app when notification is clicked
+        event.waitUntil(
+          clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+            // If a window/tab is already open, focus it and navigate to notifications
+            for (let i = 0; i < clientList.length; i++) {
+              const client = clientList[i];
+              if (client.url.includes(self.location.origin) && 'focus' in client) {
+                client.focus();
+                // Try to navigate to notifications page
+                if (client.navigate) {
+                  return client.navigate('/dashboard/notifications');
+                }
+                return client;
+              }
             }
-          }
-          
-          // If no window/tab is open, open a new one
-          if (clients.openWindow) {
-            return clients.openWindow('/dashboard/notifications');
-          }
-        })
-      );
+            
+            // If no window/tab is open, open a new one
+            if (clients.openWindow) {
+              return clients.openWindow('/dashboard/notifications');
+            }
+          })
+        );
+      }
     });
 
     // Handle push events (for when the app is closed)
@@ -69,16 +138,48 @@ if (isConfigValid) {
       
       if (event.data) {
         const payload = event.data.json();
+        const notificationId = payload.data?.notificationId || `fcm_push_${Date.now()}_${Math.random()}`;
+        
         const notificationTitle = payload.notification?.title || 'FaNect Notification';
         const notificationOptions = {
           body: payload.notification?.body || 'You have a new notification',
           icon: '/icon-192x192.png',
           badge: '/icon-192x192.png',
-          tag: 'fanect-notification',
+          tag: `fanect-notification-${notificationId}`,
           requireInteraction: false,
           silent: false,
-          data: payload.data || {}
+          data: { 
+            ...payload.data,
+            notificationId,
+            isUnread: true,
+            timestamp: Date.now()
+          },
+          actions: [
+            {
+              action: 'view',
+              title: 'View'
+            },
+            {
+              action: 'dismiss',
+              title: 'Dismiss'
+            }
+          ]
         };
+
+        // Store unread notification in localStorage
+        try {
+          const unreadNotifications = JSON.parse(localStorage.getItem('fcm_unread_notifications') || '[]');
+          unreadNotifications.push({
+            id: notificationId,
+            title: notificationTitle,
+            body: notificationOptions.body,
+            timestamp: Date.now(),
+            isUnread: true
+          });
+          localStorage.setItem('fcm_unread_notifications', JSON.stringify(unreadNotifications));
+        } catch (error) {
+          console.error('Error storing unread notification:', error);
+        }
 
         event.waitUntil(
           self.registration.showNotification(notificationTitle, notificationOptions)

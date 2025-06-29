@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { useNotificationStore } from '../../store/notificationStore';
 import { Button } from '../ui/button';
 import { clearTokens } from '../../lib/auth';
 import { Header } from './Header';
 import axios from '@/lib/axios';
 import { toast } from '../ui/use-toast';
+import { fcmService } from '../../services/fcmService';
 import HomeIcon from '../icons/HomeIcon';
 import CardPosIcon from '../icons/CardPosIcon';
 import MusicIcon from '../icons/MusicIcon';
@@ -19,15 +21,69 @@ const sidebarItems = [
   { icon: <CardPosIcon className="!h-6 !w-6" />, label: 'Streampass', path: '/dashboard/tickets', slug:'tickets' },
   { icon: <MusicIcon className="!h-6 !w-6" />, label: 'Organise Events', path: '/dashboard/organise', slug:'organise' },
   { icon: <SettingsIcon className="!h-6 !w-6" />, label: 'Settings', path: '/dashboard/settings', slug:'settings' },
-  { icon: <NotificationBingIcon className="!h-6 !w-6" />, label: 'Notifications', path: '/dashboard/notifications', slug: 'notifications' },
+  { icon: <NotificationBingIcon className="!h-6 !w-6" />, label: 'Notifications', path: '/dashboard/notifications', slug: 'notifications', showBadge: true },
   { icon: <MessageQuestionIcon className="!h-6 !w-6" />, label: 'Help', path: '/dashboard/help', slug: 'help' },
 ];
 
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { logout } = useAuthStore();
+  const { unreadCount, fetchUnreadCount } = useNotificationStore();
+  const [fcmUnreadCount, setFcmUnreadCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Calculate total unread count (FCM + database notifications)
+  const totalUnreadCount = unreadCount + fcmUnreadCount;
+
+  // Fetch unread count on mount and set up listeners
+  useEffect(() => {
+    fetchUnreadCount();
+
+    // Update FCM unread count
+    const updateFcmCount = () => {
+      if (fcmService.isReady()) {
+        setFcmUnreadCount(fcmService.getUnreadCount());
+      }
+    };
+
+    // Initial FCM count
+    updateFcmCount();
+
+    // Listen for real-time notification updates
+    const handleRefreshNotifications = () => {
+      fetchUnreadCount();
+      updateFcmCount();
+    };
+
+    const handleFcmMessage = (event: CustomEvent) => {
+      console.log('FCM message received in sidebar:', event.detail);
+      updateFcmCount();
+    };
+
+    window.addEventListener('refresh-notifications', handleRefreshNotifications);
+    window.addEventListener('fcm-message', handleFcmMessage as EventListener);
+
+    // Periodic update every 30 seconds
+    const interval = setInterval(updateFcmCount, 30000);
+
+    return () => {
+      window.removeEventListener('refresh-notifications', handleRefreshNotifications);
+      window.removeEventListener('fcm-message', handleFcmMessage as EventListener);
+      clearInterval(interval);
+    };
+  }, [fetchUnreadCount]);
+
+  // Clear FCM notifications when visiting notifications page
+  useEffect(() => {
+    if (location.pathname === '/dashboard/notifications' && fcmService.isReady()) {
+      // Clear FCM unread notifications when user visits notifications page
+      setTimeout(() => {
+        fcmService.clearAllUnreadNotifications();
+        setFcmUnreadCount(0);
+      }, 1000); // Small delay to allow page to load
+    }
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -74,11 +130,19 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                 <Button
                 onClick={() => setIsSidebarOpen(false)}
                   variant="ghost"
-                  className={`flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 rounded ${
+                  className={`flex h-[50px] w-full justify-start gap-[11px] px-2 py-0 rounded relative ${
                     isActive(item.slug) ? 'bg-[#1AAA65] hover:!bg-[#1AAA65] hover:!text-[#FAFAFA] text-[#FAFAFA] dark:bg-select-dark' : 'text-[#717680] dark:text-[#AAAAAA] dark:hover:!text-white hover:!bg-transparent'
                   }`}
                 >
-                  {item.icon}
+                  <div className="relative">
+                    {item.icon}
+                    {/* Notification Badge - Only show for notifications item */}
+                    {item.showBadge && totalUnreadCount > 0 && (
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-medium">
+                        {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                      </div>
+                    )}
+                  </div>
                   <span className="font-small text-base tracking-[-0.32px] leading-6">
                     {item.label}
                   </span>

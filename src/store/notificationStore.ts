@@ -22,15 +22,20 @@ interface PaginationData {
 
 interface NotificationState {
   notifications: Notification[];
+  unreadCount: number;
   isLoading: boolean;
   pagination: PaginationData;
   fetchNotifications: (page?: number) => Promise<void>;
+  fetchUnreadCount: () => Promise<void>;
+  fetchUnreadNotifications: () => Promise<Notification[]>;
   markAsRead: (notificationId: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  addNotification: (notification: Notification) => void;
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
+  unreadCount: 0,
   isLoading: false,
   pagination: {
     totalDocs: 0,
@@ -52,9 +57,37 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         pagination: paginationData,
         isLoading: false
       });
+
+      // Also update unread count
+      get().fetchUnreadCount();
     } catch (error) {
       console.error('Error fetching notifications:', error);
       set({ notifications: [], isLoading: false });
+    }
+  },
+
+  fetchUnreadCount: async () => {
+    try {
+      const response = await axios.get('/notifications/unread-count');
+      set({ unreadCount: response.data.count || 0 });
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+      set({ unreadCount: 0 });
+    }
+  },
+
+  fetchUnreadNotifications: async () => {
+    try {
+      const response = await axios.get('/notifications?isRead=false&limit=50');
+      const unreadNotifications = response.data.docs || [];
+      
+      // Update unread count
+      set({ unreadCount: unreadNotifications.length });
+      
+      return unreadNotifications;
+    } catch (error) {
+      console.error('Error fetching unread notifications:', error);
+      return [];
     }
   },
 
@@ -68,7 +101,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
           notification._id === notificationId
             ? { ...notification, isRead: true }
             : notification
-        )
+        ),
+        unreadCount: Math.max(0, state.unreadCount - 1)
       }));
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -92,10 +126,18 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         notifications: state.notifications.map(notification => ({
           ...notification,
           isRead: true
-        }))
+        })),
+        unreadCount: 0
       }));
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
+  },
+
+  addNotification: (notification: Notification) => {
+    set((state) => ({
+      notifications: [notification, ...state.notifications],
+      unreadCount: notification.isRead ? state.unreadCount : state.unreadCount + 1
+    }));
   },
 }));
