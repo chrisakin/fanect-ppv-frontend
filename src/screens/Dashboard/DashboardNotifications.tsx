@@ -11,13 +11,13 @@ export const DashboardNotifications = () => {
   const { 
     notifications, 
     isLoading, 
+    isMarkingAllAsRead,
     pagination, 
     fetchNotifications, 
     markAsRead, 
     markAllAsRead 
   } = useNotificationStore();
   const { toast } = useToast();
-  const [markingAllAsRead, setMarkingAllAsRead] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -40,7 +40,6 @@ export const DashboardNotifications = () => {
   };
 
   const handleMarkAllAsRead = async () => {
-    setMarkingAllAsRead(true);
     try {
       await markAllAsRead();
       toast({
@@ -53,8 +52,6 @@ export const DashboardNotifications = () => {
         title: "Error",
         description: "Failed to mark all notifications as read",
       });
-    } finally {
-      setMarkingAllAsRead(false);
     }
   };
 
@@ -86,15 +83,15 @@ export const DashboardNotifications = () => {
         {unreadCount > 0 && (
           <Button
             onClick={handleMarkAllAsRead}
-            disabled={markingAllAsRead}
+            disabled={isMarkingAllAsRead}
             className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
           >
-            {markingAllAsRead ? (
+            {isMarkingAllAsRead ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
               <CheckIcon className="h-4 w-4 mr-2" />
             )}
-            Mark All as Read
+            {isMarkingAllAsRead ? "Marking as Read..." : "Mark All as Read"}
           </Button>
         )}
       </div>

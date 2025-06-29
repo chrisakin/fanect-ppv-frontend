@@ -24,6 +24,7 @@ interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
   isLoading: boolean;
+  isMarkingAllAsRead: boolean;
   pagination: PaginationData;
   fetchNotifications: (page?: number) => Promise<void>;
   fetchUnreadCount: () => Promise<void>;
@@ -37,6 +38,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
   unreadCount: 0,
   isLoading: false,
+  isMarkingAllAsRead: false,
   pagination: {
     totalDocs: 0,
     totalPages: 1,
@@ -111,26 +113,24 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   markAllAsRead: async () => {
     try {
-      const { notifications } = get();
-      const unreadNotifications = notifications.filter(n => !n.isRead);
+      set({ isMarkingAllAsRead: true });
       
-      // Mark all unread notifications as read
-      await Promise.all(
-        unreadNotifications.map(notification =>
-          axios.patch(`/notifications/${notification._id}/read`)
-        )
-      );
+      // Call the backend endpoint to mark ALL notifications as read
+      await axios.patch('/notifications/mark-all-read');
       
-      // Update all notifications to read in the store
+      // Update all notifications in the current store to read
       set((state) => ({
         notifications: state.notifications.map(notification => ({
           ...notification,
           isRead: true
         })),
-        unreadCount: 0
+        unreadCount: 0,
+        isMarkingAllAsRead: false
       }));
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
+      set({ isMarkingAllAsRead: false });
+      throw error; // Re-throw to handle in component
     }
   },
 
