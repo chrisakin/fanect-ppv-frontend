@@ -41,6 +41,7 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 402) {
   redirectToLogin();
+  clearTokens();
   return Promise.reject(error);
 }
     const originalRequest = error.config;
@@ -51,8 +52,8 @@ axiosInstance.interceptors.response.use(
         const refreshToken = getRefreshToken();
         
         if (!refreshToken) {
-          clearTokens();
           redirectToLogin();
+          clearTokens();
           return Promise.reject(error);
         }
 
