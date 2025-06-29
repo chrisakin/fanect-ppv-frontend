@@ -33,17 +33,19 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Calculate total unread count (FCM + database notifications)
+  // Calculate total unread count (only unread FCM + database notifications)
   const totalUnreadCount = unreadCount + fcmUnreadCount;
 
   // Fetch unread count on mount and set up listeners
   useEffect(() => {
     fetchUnreadCount();
 
-    // Update FCM unread count
+    // Update FCM unread count - only count unread FCM notifications
     const updateFcmCount = () => {
       if (fcmService.isReady()) {
-        setFcmUnreadCount(fcmService.getUnreadCount());
+        const unreadFcmNotifications = fcmService.getUnreadFCMNotifications();
+        setFcmUnreadCount(unreadFcmNotifications.length);
+        console.log('FCM unread count updated:', unreadFcmNotifications.length);
       }
     };
 
@@ -52,6 +54,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
 
     // Listen for real-time notification updates
     const handleRefreshNotifications = () => {
+      console.log('Refreshing notification counts...');
       fetchUnreadCount();
       updateFcmCount();
     };
@@ -65,7 +68,10 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     window.addEventListener('fcm-message', handleFcmMessage as EventListener);
 
     // Periodic update every 30 seconds
-    const interval = setInterval(updateFcmCount, 30000);
+    const interval = setInterval(() => {
+      fetchUnreadCount();
+      updateFcmCount();
+    }, 30000);
 
     return () => {
       window.removeEventListener('refresh-notifications', handleRefreshNotifications);
@@ -81,6 +87,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
       setTimeout(() => {
         fcmService.clearAllUnreadNotifications();
         setFcmUnreadCount(0);
+        console.log('Cleared FCM notifications on notifications page visit');
       }, 1000); // Small delay to allow page to load
     }
   }, [location.pathname]);
@@ -136,7 +143,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                 >
                   <div className="relative">
                     {item.icon}
-                    {/* Notification Badge - Only show for notifications item */}
+                    {/* Notification Badge - Only show for notifications item and only unread notifications */}
                     {item.showBadge && totalUnreadCount > 0 && (
                       <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-medium">
                         {totalUnreadCount > 99 ? '99+' : totalUnreadCount}

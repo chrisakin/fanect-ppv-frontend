@@ -1,19 +1,53 @@
 import { getFCMToken, requestNotificationPermission, onMessageListener, registerServiceWorker } from '../lib/firebase';
 import axios from '../lib/axios';
 
+interface FCMNotification {
+  id: string;
+  title: string;
+  body: string;
+  timestamp: number;
+  isRead: boolean;
+}
+
 export class FCMService {
   private static instance: FCMService;
   private fcmToken: string | null = null;
   private isInitialized: boolean = false;
-  private unreadNotifications: Set<string> = new Set(); // Track unread FCM notifications
+  private fcmNotifications: Map<string, FCMNotification> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    // Load FCM notifications from localStorage on initialization
+    this.loadFCMNotifications();
+  }
 
   public static getInstance(): FCMService {
     if (!FCMService.instance) {
       FCMService.instance = new FCMService();
     }
     return FCMService.instance;
+  }
+
+  private loadFCMNotifications(): void {
+    try {
+      const stored = localStorage.getItem('fcm_notifications');
+      if (stored) {
+        const notifications = JSON.parse(stored);
+        this.fcmNotifications = new Map(notifications);
+        console.log(`Loaded ${this.fcmNotifications.size} FCM notifications from storage`);
+      }
+    } catch (error) {
+      console.error('Error loading FCM notifications:', error);
+      this.fcmNotifications = new Map();
+    }
+  }
+
+  private saveFCMNotifications(): void {
+    try {
+      const notifications = Array.from(this.fcmNotifications.entries());
+      localStorage.setItem('fcm_notifications', JSON.stringify(notifications));
+    } catch (error) {
+      console.error('Error saving FCM notifications:', error);
+    }
   }
 
   public async initializeFCM(): Promise<void> {
@@ -52,7 +86,6 @@ export class FCMService {
       const registration = await registerServiceWorker();
       if (!registration && !isLocalhost) {
         console.warn('Service Worker registration not available, FCM functionality will be limited');
-        // Don't return here for localhost - we can still try to initialize other parts
       }
 
       // Request notification permission
@@ -70,14 +103,10 @@ export class FCMService {
           // Listen for foreground messages
           this.setupForegroundMessageListener();
           
-          // Load existing unread notifications
-          await this.loadUnreadNotifications();
-          
           this.isInitialized = true;
           console.log('FCM initialized successfully');
         } else {
           console.warn('Failed to get FCM token (may be due to environment limitations)');
-          // Still mark as initialized for environments where FCM isn't fully supported
           this.isInitialized = true;
         }
       } else {
@@ -86,27 +115,7 @@ export class FCMService {
       }
     } catch (error) {
       console.error('Error initializing FCM:', error);
-      // Mark as initialized even on error to prevent repeated attempts
       this.isInitialized = true;
-    }
-  }
-
-  private async loadUnreadNotifications(): Promise<void> {
-    try {
-      // Import notification store dynamically to avoid circular dependency
-      const { useNotificationStore } = await import('../store/notificationStore');
-      const unreadNotifications = await useNotificationStore.getState().fetchUnreadNotifications();
-      
-      // Add unread notification IDs to our set
-      unreadNotifications.forEach(notification => {
-        if (!notification.isRead) {
-          this.unreadNotifications.add(notification._id);
-        }
-      });
-      
-      console.log(`Loaded ${this.unreadNotifications.size} unread FCM notifications`);
-    } catch (error) {
-      console.error('Error loading unread notifications:', error);
     }
   }
 
@@ -116,7 +125,6 @@ export class FCMService {
       console.log('FCM token sent to server successfully');
     } catch (error) {
       console.error('Error sending FCM token to server:', error);
-      // Don't throw error - this shouldn't prevent FCM initialization
     }
   }
 
@@ -129,14 +137,23 @@ export class FCMService {
           // Generate a unique ID for this notification if not provided
           const notificationId = payload.data?.notificationId || `fcm_${Date.now()}_${Math.random()}`;
           
-          // Add to unread notifications set
-          this.unreadNotifications.add(notificationId);
+          // Create FCM notification object
+          const fcmNotification: FCMNotification = {
+            id: notificationId,
+            title: payload.notification?.title || 'FaNect Notification',
+            body: payload.notification?.body || 'You have a new notification',
+            timestamp: Date.now(),
+            isRead: false
+          };
           
-          // Only show browser notification if permission is granted and user wants in-app notifications
+          // Store FCM notification
+          this.fcmNotifications.set(notificationId, fcmNotification);
+          this.saveFCMNotifications();
+          
+          // Only show browser notification if permission is granted
           if (Notification.permission === 'granted') {
-            const notificationTitle = payload.notification?.title || 'FaNect Notification';
             const notificationOptions = {
-              body: payload.notification?.body || 'You have a new notification',
+              body: fcmNotification.body,
               icon: '/icon-192x192.png',
               badge: '/icon-192x192.png',
               tag: `fanect-notification-${notificationId}`,
@@ -149,7 +166,7 @@ export class FCMService {
               }
             };
 
-            const notification = new Notification(notificationTitle, notificationOptions);
+            const notification = new Notification(fcmNotification.title, notificationOptions);
             
             // Handle notification click
             notification.onclick = () => {
@@ -190,24 +207,40 @@ export class FCMService {
   }
 
   public markNotificationAsRead(notificationId: string): void {
-    this.unreadNotifications.delete(notificationId);
-    console.log(`Marked FCM notification ${notificationId} as read`);
-    
-    // Trigger notification count update
-    window.dispatchEvent(new CustomEvent('refresh-notifications'));
+    const notification = this.fcmNotifications.get(notificationId);
+    if (notification) {
+      notification.isRead = true;
+      this.fcmNotifications.set(notificationId, notification);
+      this.saveFCMNotifications();
+      console.log(`Marked FCM notification ${notificationId} as read`);
+      
+      // Trigger notification count update
+      window.dispatchEvent(new CustomEvent('refresh-notifications'));
+    }
   }
 
-  public getUnreadNotifications(): string[] {
-    return Array.from(this.unreadNotifications);
+  public getUnreadFCMNotifications(): FCMNotification[] {
+    return Array.from(this.fcmNotifications.values()).filter(n => !n.isRead);
   }
 
   public getUnreadCount(): number {
-    return this.unreadNotifications.size;
+    return this.getUnreadFCMNotifications().length;
+  }
+
+  public getAllFCMNotifications(): FCMNotification[] {
+    return Array.from(this.fcmNotifications.values()).sort((a, b) => b.timestamp - a.timestamp);
   }
 
   public clearAllUnreadNotifications(): void {
-    this.unreadNotifications.clear();
-    console.log('Cleared all unread FCM notifications');
+    // Mark all FCM notifications as read
+    for (const [id, notification] of this.fcmNotifications.entries()) {
+      if (!notification.isRead) {
+        notification.isRead = true;
+        this.fcmNotifications.set(id, notification);
+      }
+    }
+    this.saveFCMNotifications();
+    console.log('Marked all FCM notifications as read');
     
     // Trigger notification count update
     window.dispatchEvent(new CustomEvent('refresh-notifications'));

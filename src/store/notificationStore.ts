@@ -54,8 +54,19 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       const response = await axios.get(`/notifications?page=${page}&limit=20`);
       const { docs, ...paginationData } = response.data;
       
+      // Ensure we're working with the correct data structure
+      const notifications = docs.map((notification: any) => ({
+        _id: notification._id,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        isRead: Boolean(notification.isRead), // Ensure boolean type
+        createdAt: notification.createdAt,
+        updatedAt: notification.updatedAt,
+      }));
+      
       set({
-        notifications: docs,
+        notifications,
         pagination: paginationData,
         isLoading: false
       });
@@ -71,7 +82,9 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   fetchUnreadCount: async () => {
     try {
       const response = await axios.get('/notifications/unread-count');
-      set({ unreadCount: response.data.count || 0 });
+      const count = response.data.count || 0;
+      console.log('Fetched unread count from backend:', count);
+      set({ unreadCount: count });
     } catch (error) {
       console.error('Error fetching unread count:', error);
       set({ unreadCount: 0 });
@@ -81,10 +94,21 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   fetchUnreadNotifications: async () => {
     try {
       const response = await axios.get('/notifications?isRead=false&limit=50');
-      const unreadNotifications = response.data.docs || [];
+      const unreadNotifications = (response.data.docs || []).map((notification: any) => ({
+        _id: notification._id,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        isRead: Boolean(notification.isRead),
+        createdAt: notification.createdAt,
+        updatedAt: notification.updatedAt,
+      }));
       
-      // Update unread count
-      set({ unreadCount: unreadNotifications.length });
+      console.log('Fetched unread notifications:', unreadNotifications.length);
+      
+      // Update unread count based on actual unread notifications
+      const actualUnreadCount = unreadNotifications.filter((n: any )=> !n.isRead).length;
+      set({ unreadCount: actualUnreadCount });
       
       return unreadNotifications;
     } catch (error) {
@@ -98,14 +122,21 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       await axios.patch(`/notifications/${notificationId}/read`);
       
       // Update the notification in the store
-      set((state) => ({
-        notifications: state.notifications.map(notification =>
+      set((state) => {
+        const updatedNotifications = state.notifications.map(notification =>
           notification._id === notificationId
             ? { ...notification, isRead: true }
             : notification
-        ),
-        unreadCount: Math.max(0, state.unreadCount - 1)
-      }));
+        );
+        
+        // Calculate new unread count
+        const newUnreadCount = Math.max(0, state.unreadCount - 1);
+        
+        return {
+          notifications: updatedNotifications,
+          unreadCount: newUnreadCount
+        };
+      });
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -118,6 +149,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       // Call the backend endpoint to mark ALL notifications as read
       await axios.patch('/notifications/mark-all-read');
       
+      console.log('Successfully marked all notifications as read on backend');
+      
       // Update all notifications in the current store to read
       set((state) => ({
         notifications: state.notifications.map(notification => ({
@@ -127,6 +160,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         unreadCount: 0,
         isMarkingAllAsRead: false
       }));
+      
+      console.log('Updated local notification state - all marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       set({ isMarkingAllAsRead: false });
