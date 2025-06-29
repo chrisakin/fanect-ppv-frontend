@@ -39,9 +39,10 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if(error.response?.status === 402) {
-      redirectToLogin();
-    }
+    if (error.response?.status === 402) {
+  redirectToLogin();
+  return Promise.reject(error);
+}
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
