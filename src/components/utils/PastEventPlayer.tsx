@@ -251,8 +251,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
   }
 
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white dark:bg-[#062013] rounded-[10px] lg:p-4 p-0">
-      <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[350px] md:h-[400px] lg:h-[460px] bg-white dark:bg-[#062013] lg:rounded-[10px] rounded-none overflow-hidden border-0">
+    <div className=" w-full bg-white dark:bg-[#062013] rounded-[10px] lg:p-4 p-0">
+      <Card className="relative w-full bg-white dark:bg-[#062013] lg:rounded-[10px] rounded-none overflow-hidden border-0">
         <CardContent className="p-0">
           <div className="relative w-full h-full bg-black">
             {/* Replay indicator */}
@@ -342,9 +342,9 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
       </Card>
 
       {/* Chat section */}
-      <div className="w-full lg:w-[260px] lg:px-0 px-4">
+      {/* <div className="w-full lg:w-[260px] lg:px-0 px-4"> */}
         {/* Mobile Accordion */}
-        <div className="lg:hidden">
+        {/* <div className="lg:hidden">
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="messages" className="border-none">
               <AccordionTrigger className="py-2 px-4 bg-[#edf0f5] rounded-t-[10px]">
@@ -358,8 +358,6 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
                     <MessageList />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>
-                  
-                  {/* Message input - disabled for replays */}
                   <div className="flex h-[42px] items-center gap-2.5 p-2.5 mt-2 bg-gray-200 rounded-[10px] border border-solid border-[#828b8633]">
                     <Input
                       className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-gray-500 placeholder:text-gray-500 focus-visible:ring-0"
@@ -381,10 +379,10 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </div>
+        </div> */}
 
         {/* Desktop Chat */}
-        <Card className="relative h-[455px] bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block pb-4">
+        {/* <Card className="relative h-[455px] bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block pb-4">
           <CardContent className="p-0">
             <div className="flex flex-col w-full h-full p-4">
               <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] mb-[18px] [font-family:'Sofia_Pro-Medium',Helvetica]">
@@ -395,8 +393,6 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
                 <MessageList />
                 <ScrollBar orientation="vertical" />
               </ScrollArea>
-
-              {/* Message input - disabled for replays */}
               <div className="flex h-[42px] mb-4 items-center gap-2.5 p-2.5 mt-2 bg-gray-200 rounded-[10px] border border-solid border-[#828b8633]">
                 <Input
                   className="flex-1 border-0 p-0 h-auto text-xs [font-family:'Sofia_Pro-Regular',Helvetica] text-gray-500 placeholder:text-gray-500 focus-visible:ring-0"
@@ -416,8 +412,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
               </div>
             </div>
           </CardContent>
-        </Card>
-      </div>
+        </Card> */}
+      {/* </div> */}
     </div>
   );
 };

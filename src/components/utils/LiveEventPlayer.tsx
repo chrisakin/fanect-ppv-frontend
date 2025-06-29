@@ -24,19 +24,16 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const [streamError, setStreamError] = useState<string | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackShown, setFeedbackShown] = useState(false);
-  const [hasStreamStarted, setHasStreamStarted] = useState(false); // Track if stream has actually started
+  const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const { toast } = useToast();
 
-  // Define the callback before using it in useAWSIVSService
   const handlePlayerStateChange = useCallback((state: string) => {
     console.log('Player state changed to:', state);
     
-    // Track when stream actually starts playing
     if (state === "PLAYING") {
       setHasStreamStarted(true);
     }
     
-    // Only show feedback modal if stream has started and then ended
     if (state === "ENDED" && eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
       console.log('Stream ended via player state change, showing feedback modal');
       setFeedbackShown(true);
@@ -46,27 +43,17 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     }
   }, [eventId, eventType, feedbackShown, hasStreamStarted]);
 
-  // Handle chat message callback
   const handleChatMessage = useCallback((message: any) => {
     console.log('Chat message received:', message);
   }, []);
 
-  // Handle stream end callback - this is the primary method for detecting stream end
   const handleStreamEnd = useCallback(() => {
     console.log('Stream ended callback triggered');
     
-    // Only show feedback modal if stream has actually started and this is a live event
     if (eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
       console.log('Showing feedback modal for live stream end');
       setFeedbackShown(true);
       setShowFeedbackModal(true);
-    } else {
-      console.log('Not showing feedback modal:', {
-        eventId: !!eventId,
-        eventType,
-        hasStreamStarted,
-        feedbackShown
-      });
     }
   }, [eventId, eventType, feedbackShown, hasStreamStarted]);
 
@@ -78,10 +65,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     playerError,
     isPlayerLoaded,
     sendMessage,
-    play,
-    pause,
-    setMuted,
-    setVolume,
   } = useAWSIVSService({
     playbackUrl: streamingData?.playbackUrl || '',
     chatApiEndpoint: import.meta.env.VITE_CHAT_API_ENDPOINT || '',
@@ -93,9 +76,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   });
 
   const [messageInput, setMessageInput] = useState("");
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolumeState] = useState(1);
 
   // Fetch streaming data for live event
   useEffect(() => {
@@ -104,7 +84,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
         setIsLoadingStream(true);
         setStreamError(null);
         setFeedbackShown(false);
-        setHasStreamStarted(false); // Reset stream started state
+        setHasStreamStarted(false);
         
         const data = await eventStreamingService.getStreamingData(eventId, eventType);
         setStreamingData(data);
@@ -130,7 +110,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     }
   }, [eventId, eventType, toast]);
 
-  // Handle feedback modal close
   const handleFeedbackModalClose = useCallback(() => {
     setShowFeedbackModal(false);
   }, []);
@@ -147,38 +126,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSendMessage();
-    }
-  };
-
-  const togglePlayPause = () => {
-    if (isPlaying) {
-      pause();
-    } else {
-      play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const toggleMute = () => {
-    setMuted(!isMuted);
-    setIsMuted(!isMuted);
-  };
-
-  const handleVolumeChange = (newVolume: number) => {
-    setVolume(newVolume);
-    setVolumeState(newVolume);
-  };
-
-  const toggleFullscreen = () => {
-    if (videoContainerRef.current) {
-      const videoElement = videoContainerRef.current.querySelector('video');
-      if (videoElement) {
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        } else {
-          videoElement.requestFullscreen();
-        }
-      }
     }
   };
 
@@ -216,8 +163,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   // Show loading state while fetching streaming data
   if (isLoadingStream) {
     return (
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[300px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
+        <Card className="relative w-full lg:w-[70%] h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
@@ -234,8 +181,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   // Show error state if streaming data couldn't be loaded
   if (streamError) {
     return (
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[300px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
+        <Card className="relative w-full lg:w-[70%] h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black flex items-center justify-center">
               <div className="flex flex-col items-center gap-4 text-center p-4">
@@ -264,15 +211,16 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white dark:bg-[#062013] rounded-[10px] lg:p-4 p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[350px] md:h-[400px] lg:h-[460px] bg-white dark:bg-[#062013] lg:rounded-[10px] rounded-none overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
+        {/* Video Player - Full width on mobile/tablet, 70% on desktop */}
+        <Card className="relative w-full lg:w-[70%] h-[200px] sm:h-[200px] md:h-[400px] lg:h-[400px] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black">
               {/* Live indicator */}
               {eventType === 'live' && (
                 <div className="absolute top-4 left-4 z-10">
                   <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-lg">
-                    <div className="w-2 h-2 bg-white  rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     <span className="text-sm font-medium">LIVE</span>
                   </div>
                 </div>
@@ -327,8 +275,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
           </CardContent>
         </Card>
 
-        {/* Chat section */}
-        <div className="w-full lg:w-[260px] lg:px-0 px-4">
+        {/* Chat section - Full width on mobile/tablet, 30% on desktop */}
+        <div className="w-full lg:w-[30%]">
           {/* Mobile Accordion */}
           <div className="lg:hidden">
             <Accordion type="single" collapsible className="w-full">
@@ -374,14 +322,14 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
           </div>
 
           {/* Desktop Chat */}
-          <Card className="relative h-[455px] bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block pb-4">
+          <Card className="relative h-full bg-[#edf0f5] rounded-[10px] overflow-hidden border-0 hidden lg:block">
             <CardContent className="p-0">
               <div className="flex flex-col w-full h-full p-4">
                 <h3 className="font-medium text-[#111111] text-base tracking-[-0.32px] mb-[18px] [font-family:'Sofia_Pro-Medium',Helvetica]">
                   Messages {!isConnected && "(Disconnected)"}
                 </h3>
 
-                <ScrollArea className="h-[350px] pr-2">
+                <ScrollArea className="h-[260px] pr-2">
                   <MessageList />
                   <ScrollBar orientation="vertical" />
                 </ScrollArea>
@@ -401,11 +349,16 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                     onClick={handleSendMessage}
                     disabled={!isConnected || !messageInput.trim() || eventType === 'upcoming'}
                   >
-                    <img
+                    {/* <img
                       className="w-5 h-5"
                       alt="Send message"
                       src="/icon-video-audio-image-microphone-slash.svg"
-                    />
+                    /> */}
+                    <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="21" height="21" rx="4" fill="#158851"/>
+                      <path d="M9.04594 5.9677L14.0393 8.46437C16.2793 9.58437 16.2793 11.416 14.0393 12.536L9.04594 15.0327C5.68594 16.7127 4.31511 15.336 5.99511 11.9819L6.50261 10.9727C6.63094 10.716 6.63094 10.2902 6.50261 10.0335L5.99511 9.01853C4.31511 5.66437 5.69178 4.2877 9.04594 5.9677Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M6.67188 10.5H9.82187" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                   </Button>
                 </div>
               </div>
