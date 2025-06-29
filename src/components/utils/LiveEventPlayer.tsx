@@ -28,15 +28,18 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const { toast } = useToast();
 
   const handlePlayerStateChange = useCallback((state: string) => {
-    console.log('Player state changed to:', state);
+    console.log('🎬 Player state changed to:', state);
     
     if (state === "PLAYING") {
       setHasStreamStarted(true);
+      console.log('✅ Stream has started playing');
     }
     
+    // Show feedback modal when stream ends (only for live events)
     if (state === "ENDED" && eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
-      console.log('Stream ended via player state change, showing feedback modal');
+      console.log('🎯 Stream ended - showing feedback modal');
       setFeedbackShown(true);
+      // Small delay to ensure state is properly set
       setTimeout(() => {
         setShowFeedbackModal(true);
       }, 500);
@@ -44,16 +47,24 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   }, [eventId, eventType, feedbackShown, hasStreamStarted]);
 
   const handleChatMessage = useCallback((message: any) => {
-    console.log('Chat message received:', message);
+    console.log('💬 Chat message received:', message);
   }, []);
 
   const handleStreamEnd = useCallback(() => {
-    console.log('Stream ended callback triggered');
+    console.log('🔚 Stream ended callback triggered');
     
+    // Only show feedback modal for live events that have actually started
     if (eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
-      console.log('Showing feedback modal for live stream end');
+      console.log('🎯 Showing feedback modal for live stream end');
       setFeedbackShown(true);
       setShowFeedbackModal(true);
+    } else {
+      console.log('ℹ️ Not showing feedback modal:', {
+        eventId: !!eventId,
+        eventType,
+        hasStreamStarted,
+        feedbackShown
+      });
     }
   }, [eventId, eventType, feedbackShown, hasStreamStarted]);
 
@@ -86,14 +97,17 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
         setFeedbackShown(false);
         setHasStreamStarted(false);
         
+        console.log(`📡 Fetching streaming data for ${eventType} event:`, eventId);
         const data = await eventStreamingService.getStreamingData(eventId, eventType);
         setStreamingData(data);
         
         if (!data.playbackUrl) {
           setStreamError("Playback URL not available for this event");
+        } else {
+          console.log('✅ Streaming data loaded:', data);
         }
       } catch (error: any) {
-        console.error('Error fetching streaming data:', error);
+        console.error('❌ Error fetching streaming data:', error);
         setStreamError(error.message || "Failed to load event stream");
         toast({
           variant: "destructive",
@@ -268,6 +282,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                 <div className="absolute bottom-4 right-4 z-10">
                   <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
                     {playerState} • {eventType.toUpperCase()}
+                    {hasStreamStarted && <span className="ml-1">🎬</span>}
                   </div>
                 </div>
               )}
@@ -308,11 +323,11 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                         onClick={handleSendMessage}
                         disabled={!isConnected || !messageInput.trim() || eventType === 'upcoming'}
                       >
-                        <img
-                          className="w-5 h-5"
-                          alt="Send message"
-                          src="/icon-video-audio-image-microphone-slash.svg"
-                        />
+                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="21" height="21" rx="4" fill="#158851"/>
+                      <path d="M9.04594 5.9677L14.0393 8.46437C16.2793 9.58437 16.2793 11.416 14.0393 12.536L9.04594 15.0327C5.68594 16.7127 4.31511 15.336 5.99511 11.9819L6.50261 10.9727C6.63094 10.716 6.63094 10.2902 6.50261 10.0335L5.99511 9.01853C4.31511 5.66437 5.69178 4.2877 9.04594 5.9677Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M6.67188 10.5H9.82187" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                       </Button>
                     </div>
                   </div>

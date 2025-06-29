@@ -13,6 +13,7 @@ export interface Event {
   trailerUrl: string;
   price: {currency: string, amount: string};
   eventDateTime: string;
+  canWatchSavedStream: boolean;
   adminStatus: string;
   chatRoomArn: string;
   playbackUrl: string;

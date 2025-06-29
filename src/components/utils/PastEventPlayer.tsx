@@ -125,20 +125,20 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
   };
 
   // Video control icons
-  const videoControls = [
-    {
-      src: "/ico-play.svg",
-      alt: isPlaying ? "Pause" : "Play",
-      className: "relative w-[15.91px] h-[19.58px] mt-[-1.79px] mb-[-1.79px] ml-[-1.00px] cursor-pointer",
-      onClick: togglePlayPause,
-    },
-    {
-      src: "/ico-sound.svg",
-      alt: isMuted ? "Unmute" : "Mute",
-      className: "relative w-[15.25px] h-[20.83px] mt-[-2.41px] mb-[-2.41px] cursor-pointer",
-      onClick: toggleMute,
-    },
-  ];
+  // const videoControls = [
+  //   {
+  //     src: "/ico-play.svg",
+  //     alt: isPlaying ? "Pause" : "Play",
+  //     className: "relative w-[15.91px] h-[19.58px] mt-[-1.79px] mb-[-1.79px] ml-[-1.00px] cursor-pointer",
+  //     onClick: togglePlayPause,
+  //   },
+  //   {
+  //     src: "/ico-sound.svg",
+  //     alt: isMuted ? "Unmute" : "Mute",
+  //     className: "relative w-[15.25px] h-[20.83px] mt-[-2.41px] mb-[-2.41px] cursor-pointer",
+  //     onClick: toggleMute,
+  //   },
+  // ];
 
   // Video settings icons
   const videoSettings = [
@@ -259,7 +259,7 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
             <div className="absolute top-4 left-4 z-10">
               <div className="flex items-center gap-2 bg-black/70 text-white px-3 py-1 rounded-lg">
                 <PlayCircle className="h-4 w-4" />
-                <span className="text-sm font-medium">Event Replay</span>
+                <span className="text-sm font-medium"> Event Replay</span>
               </div>
             </div>
 
@@ -292,7 +292,7 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
             />
             
             {/* Video controls overlay */}
-            {isPlayerLoaded && !playerError && (
+            {/* {isPlayerLoaded && !playerError && (
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/50 rounded-lg p-2">
                 <div className="flex items-center gap-2">
                   {videoControls.map((control, index) => (
@@ -306,7 +306,7 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
                     </button>
                   ))}
                   
-                  {/* Volume control */}
+            
                   <div className="flex items-center gap-2 ml-2">
                     <input
                       type="range"
@@ -336,7 +336,7 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </CardContent>
       </Card>

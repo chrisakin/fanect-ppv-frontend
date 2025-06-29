@@ -53,7 +53,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
     } else {
       const diff = now.getTime() - eventDate.getTime();
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      return `${days} days ago`;
+      return `${days > 1 ? days : 1} ${days > 1 ? 'days' : 'day'} ago`;
     }
   };
 
@@ -115,10 +115,11 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
               <div className="flex flex-col gap-4 mt-4">
                 {type === 'past' && (
                   <>
-                    <p className="font-medium text-red-600">
+                    <p className={`font-medium text-red-600 ${!event.canWatchSavedStream ? "mb-12" : ""}`}>
                       {calculateTimeStatus(event.eventDateTime)}
                     </p>
-                    {isReplayAvailable(event.eventDateTime) ? (
+                    {event.canWatchSavedStream && <div>
+                      {isReplayAvailable(event.eventDateTime)  ? (
                       <Link to={`/dashboard/tickets/watch-event/past/${event._id}`}>
                         <Button
                           variant="outline"
@@ -131,13 +132,13 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                       </Link>
                     ) : (
                       <div className="space-y-2">
-                        <p className="text-red-600 text-sm font-medium">Replay no longer available</p>
-                        <div className="flex items-center gap-2">
+                        <p className="text-red-600 text-sm font-medium">Replay is not available</p>
+                        {!isReplayAvailable(event.eventDateTime) && (<div className="flex items-center gap-2" >
                           <InfoIcon className="w-4 h-4 text-[#828b86]" />
                           <span className="font-normal text-[#828b86] text-xs tracking-[-0.24px]">
                             Replay expired after 30 days
                           </span>
-                        </div>
+                        </div>)}
                       </div>
                     )}
                     {isReplayAvailable(event.eventDateTime) && (
@@ -148,6 +149,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                         </span>
                       </div>
                     )}
+                    </div>}
                   </>
                 )}
                 
