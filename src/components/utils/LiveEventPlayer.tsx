@@ -264,15 +264,15 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white rounded-[10px] lg:p-4 p-0">
-        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[350px] md:h-[400px] lg:h-[460px] bg-white lg:rounded-[10px] rounded-none overflow-hidden border-0">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-2.5 w-full bg-white dark:bg-[#062013] rounded-[10px] lg:p-4 p-0">
+        <Card className="relative w-full lg:w-[calc(100%-280px)] h-[250px] sm:h-[350px] md:h-[400px] lg:h-[460px] bg-white dark:bg-[#062013] lg:rounded-[10px] rounded-none overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black">
               {/* Live indicator */}
               {eventType === 'live' && (
                 <div className="absolute top-4 left-4 z-10">
                   <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-lg">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-white  rounded-full animate-pulse"></div>
                     <span className="text-sm font-medium">LIVE</span>
                   </div>
                 </div>
