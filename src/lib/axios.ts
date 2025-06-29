@@ -39,7 +39,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if(error.response?.status === 405) {
+    if(error.response?.status === 402) {
       redirectToLogin();
     }
     const originalRequest = error.config;
