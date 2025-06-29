@@ -7,9 +7,10 @@ interface DecodedToken {
   exp: number;
 }
 
-export const setTokens = (accessToken: string, refreshToken: string) => {
+export const setTokens = (accessToken: string, refreshToken: string, sessionToken: string) => {
   localStorage.setItem('accessToken', accessToken);
   sessionStorage.setItem('refreshToken', refreshToken);
+  sessionStorage.setItem('sessionToken', sessionToken)
 };
 
 export const setLoggedinUser = (user: {
@@ -27,10 +28,12 @@ export const getUser = () => {
 
 export const getAccessToken = () => localStorage.getItem('accessToken');
 export const getRefreshToken = () => sessionStorage.getItem('refreshToken');
+export const getSessionToken = () => sessionStorage.getItem('sessionToken');
 
 export const clearTokens = () => {
   localStorage.removeItem('accessToken');
   sessionStorage.removeItem('refreshToken');
+  sessionStorage.removeItem('sessionToken')
 };
 
 export const isAuthenticated = () => {

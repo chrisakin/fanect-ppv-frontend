@@ -170,8 +170,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     try {
       const redirectUrl = sessionStorage.getItem('redirectUrl')
       const response = await axios.post('/auth/login', data);
-      const { accessToken, refreshToken } = response.data?.data;
-      setTokens(accessToken, refreshToken);
+      const { accessToken, refreshToken, sessionToken } = response.data?.data;
+      setTokens(accessToken, refreshToken, sessionToken);
       await fetchUserProfile();
       setAuth(true);
       onClose();
@@ -228,8 +228,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     setIsLoading(true);
     try {
             const redirectUrl = sessionStorage.getItem('redirectUrl')
-      const { accessToken, refreshToken } = (await axios.post('/auth/verify', { code, email: userEmail })).data?.data;
-      setTokens(accessToken, refreshToken);
+      const { accessToken, refreshToken, sessionToken } = (await axios.post('/auth/verify', { code, email: userEmail })).data?.data;
+      setTokens(accessToken, refreshToken, sessionToken);
       await fetchUserProfile();
       setAuth(true);
       onClose();
@@ -280,8 +280,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           code: response.code,
           path: isSignup ? "signup": "login",
         });
-        const { accessToken, refreshToken } = data.data;
-        setTokens(accessToken, refreshToken);
+        const { accessToken, refreshToken, sessionToken } = data.data;
+        setTokens(accessToken, refreshToken, sessionToken);
         await fetchUserProfile();
         setAuth(true);
         onClose();

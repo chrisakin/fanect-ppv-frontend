@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth';
+import { getAccessToken, getRefreshToken, setTokens, clearTokens, getSessionToken } from './auth';
 import { locationService } from '../services/locationService';
 import { redirectToLogin } from '@/services/redirectService';
 
@@ -18,6 +18,10 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    const sessionToken = getSessionToken()
+    if(sessionToken) {
+      config.headers["x-session-token"] = sessionToken
+    }
 
     // Add country header from location data
     const location = locationService.getCurrentLocation();
@@ -35,6 +39,9 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if(error.response?.status === 405) {
+      redirectToLogin();
+    }
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -52,7 +59,7 @@ axiosInstance.interceptors.response.use(
           refreshToken,
         });
         const { accessToken } = response.data
-        setTokens(accessToken, refreshToken);
+        setTokens(accessToken, refreshToken, sessionStorage.getItem('sessionToken') as string);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
