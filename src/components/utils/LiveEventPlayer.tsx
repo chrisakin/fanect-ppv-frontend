@@ -11,6 +11,7 @@ import { eventStreamingService, StreamingData } from "../../services/eventStream
 import { useToast } from "../ui/use-toast";
 import { FeedbackModal } from "../modals/FeedbackModal";
 import { getUser } from "@/lib/auth";
+import { useEventStatus, EventStatus } from "../../hooks/useEventStatus";
 
 interface LiveEventPlayerProps {
   eventId: string;
@@ -27,6 +28,27 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const { toast } = useToast();
 
+  // SSE connection for reliable event status monitoring
+  const { status: eventStatus, isConnected: sseConnected, error: sseError } = useEventStatus({
+    eventId,
+    onEventEnd: () => {
+      console.log('🎯 SSE detected event end - showing feedback modal');
+      if (eventType === 'live' && hasStreamStarted && !feedbackShown) {
+        setFeedbackShown(true);
+        setTimeout(() => {
+          setShowFeedbackModal(true);
+        }, 500);
+      }
+    },
+    onStatusChange: (status, message) => {
+      console.log('📊 Event status changed:', { status, message });
+      if (status === EventStatus.PAST) {
+        console.log('🔚 Event status is now PAST');
+      }
+    },
+    enabled: eventType === 'live' // Only monitor live events
+  });
+
   const handlePlayerStateChange = useCallback((state: string) => {
     console.log('🎬 Player state changed to:', state);
     
@@ -35,16 +57,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
       console.log('✅ Stream has started playing');
     }
     
-    // Show feedback modal when stream ends (only for live events)
-    if (state === "ENDED" && eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
-      console.log('🎯 Stream ended - showing feedback modal');
-      setFeedbackShown(true);
-      // Small delay to ensure state is properly set
-      setTimeout(() => {
-        setShowFeedbackModal(true);
-      }, 500);
-    }
-  }, [eventId, eventType, feedbackShown, hasStreamStarted]);
+    // Note: Feedback modal is ONLY triggered by SSE event end, not player state
+  }, [hasStreamStarted]);
 
   const handleChatMessage = useCallback((message: any) => {
     console.log('💬 Chat message received:', message);
@@ -52,21 +66,9 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
 
   const handleStreamEnd = useCallback(() => {
     console.log('🔚 Stream ended callback triggered');
-    
-    // Only show feedback modal for live events that have actually started
-    if (eventId && eventType === 'live' && hasStreamStarted && !feedbackShown) {
-      console.log('🎯 Showing feedback modal for live stream end');
-      setFeedbackShown(true);
-      setShowFeedbackModal(true);
-    } else {
-      console.log('ℹ️ Not showing feedback modal:', {
-        eventId: !!eventId,
-        eventType,
-        hasStreamStarted,
-        feedbackShown
-      });
-    }
-  }, [eventId, eventType, feedbackShown, hasStreamStarted]);
+    // Note: Feedback modal is ONLY triggered by SSE event end, not stream end
+    console.log('ℹ️ Stream end detected via player (feedback modal only triggered by SSE)');
+  }, []);
 
   const {
     videoContainerRef,
@@ -233,9 +235,15 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
               {/* Live indicator */}
               {eventType === 'live' && (
                 <div className="absolute top-4 left-4 z-10">
-                  <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-lg">
+                  <div className={`flex items-center gap-2 text-white px-3 py-1 rounded-lg ${
+                    eventStatus === EventStatus.LIVE ? 'bg-red-600' : 
+                    eventStatus === EventStatus.PAST ? 'bg-gray-600' : 'bg-blue-600'
+                  }`}>
                     <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium">LIVE</span>
+                    <span className="text-sm font-medium">
+                      {eventStatus === EventStatus.LIVE ? 'LIVE' : 
+                       eventStatus === EventStatus.PAST ? 'ENDED' : 'LIVE'}
+                    </span>
                   </div>
                 </div>
               )}
@@ -280,9 +288,11 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
               {/* Player state indicator */}
               {isPlayerLoaded && !playerError && (
                 <div className="absolute bottom-4 right-4 z-10">
-                  <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
-                    {playerState} • {eventType.toUpperCase()}
+                  <div className="text-white text-xs bg-black/50 px-2 py-1 rounded flex items-center gap-2">
+                    <span>{playerState} • {eventType.toUpperCase()}</span>
                     {hasStreamStarted && <span className="ml-1">🎬</span>}
+                    {sseConnected && <span className="text-green-400">●</span>}
+                    {sseError && <span className="text-red-400" title={sseError}>⚠</span>}
                   </div>
                 </div>
               )}

@@ -29,6 +29,11 @@ axiosInstance.interceptors.request.use(
       config.headers['X-User-Country'] = location.country;
     }
 
+    // For SSE requests, ensure proper headers
+    if (config.url?.includes('/stream-status')) {
+      config.headers['Accept'] = 'text/event-stream';
+      config.headers['Cache-Control'] = 'no-cache';
+    }
     return config;
   },
   (error) => {
