@@ -335,8 +335,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                       >
                         <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect width="21" height="21" rx="4" fill="#158851"/>
-                      <path d="M9.04594 5.9677L14.0393 8.46437C16.2793 9.58437 16.2793 11.416 14.0393 12.536L9.04594 15.0327C5.68594 16.7127 4.31511 15.336 5.99511 11.9819L6.50261 10.9727C6.63094 10.716 6.63094 10.2902 6.50261 10.0335L5.99511 9.01853C4.31511 5.66437 5.69178 4.2877 9.04594 5.9677Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M6.67188 10.5H9.82187" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M9.04594 5.9677L14.0393 8.46437C16.2793 9.58437 16.2793 11.416 14.0393 12.536L9.04594 15.0327C5.68594 16.7127 4.31511 15.336 5.99511 11.9819L6.50261 10.9727C6.63094 10.716 6.63094 10.2902 6.50261 10.0335L5.99511 9.01853C4.31511 5.66437 5.69178 4.2877 9.04594 5.9677Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6.67188 10.5H9.82187" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                       </Button>
                     </div>
@@ -381,8 +381,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                     /> */}
                     <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect width="21" height="21" rx="4" fill="#158851"/>
-                      <path d="M9.04594 5.9677L14.0393 8.46437C16.2793 9.58437 16.2793 11.416 14.0393 12.536L9.04594 15.0327C5.68594 16.7127 4.31511 15.336 5.99511 11.9819L6.50261 10.9727C6.63094 10.716 6.63094 10.2902 6.50261 10.0335L5.99511 9.01853C4.31511 5.66437 5.69178 4.2877 9.04594 5.9677Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M6.67188 10.5H9.82187" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M9.04594 5.9677L14.0393 8.46437C16.2793 9.58437 16.2793 11.416 14.0393 12.536L9.04594 15.0327C5.68594 16.7127 4.31511 15.336 5.99511 11.9819L6.50261 10.9727C6.63094 10.716 6.63094 10.2902 6.50261 10.0335L5.99511 9.01853C4.31511 5.66437 5.69178 4.2877 9.04594 5.9677Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6.67188 10.5H9.82187" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </Button>
                 </div>

@@ -64,9 +64,6 @@ export const useEventStatus = ({
       // Create the SSE connection
       const eventSource = new EventSource(
         `${import.meta.env.VITE_BASE_URL}/streampass/events/${eventId}/stream-status`,
-        {
-          withCredentials: true // Include cookies/auth headers
-        }
       );
 
       eventSourceRef.current = eventSource;
