@@ -1,17 +1,139 @@
-export const HeroSection = () => {
-    return (
-        <section className="flex flex-col items-center justify-center gap-4 pb-6 w-full">
-            <img
-              className="w-full max-w-[1400px] h-[250px] md:h-[300px] object-cover rounded-lg"
-              alt="Hero Banner"
-              src="/image.png"
-            />
+import { useState, useEffect } from 'react';
 
-            <div className="flex items-center gap-2">
-              <div className="bg-green-600 w-3 h-3 rounded-full" />
-              <div className="bg-gray-300 dark:bg-gray-700 w-3 h-3 rounded-full" />
-              <div className="bg-gray-300 dark:bg-gray-700 w-3 h-3 rounded-full" />
+interface HeroSlide {
+  id: number;
+  image: string;
+  title?: string;
+  description?: string;
+}
+
+const heroSlides: HeroSlide[] = [
+  {
+    id: 1,
+    image: "/image.png",
+    title: "Experience Live Contents Like Never Before",
+    description: "Stream exclusive concerts and festivals from anywhere in the world"
+  },
+  {
+    id: 2,
+    image: "/image 2.png", 
+    title: "Connect with Artists Globally",
+    description: "Get front-row access to your favorite performers in real-time"
+  },
+  {
+    id: 3,
+    image: "/hd.svg",
+    title: "Premium Streaming Quality",
+    description: "Enjoy crystal-clear HD streaming with immersive audio"
+  }
+];
+
+export const HeroSection = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Auto-advance slides every 5 seconds
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+    setIsAutoPlaying(false);
+    
+    // Resume auto-play after 10 seconds of inactivity
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  return (
+    <section className="flex flex-col items-center justify-center gap-4 pb-6 w-full relative">
+      {/* Carousel Container */}
+      <div className="relative w-full max-w-[1400px] h-[250px] md:h-[300px] rounded-lg overflow-hidden group">
+        {/* Slides */}
+        <div 
+          className="flex transition-transform duration-500 ease-in-out h-full"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
+          {heroSlides.map((slide) => (
+            <div key={slide.id} className="relative w-full h-full flex-shrink-0">
+              <img
+                className="w-full h-full object-cover"
+                alt={slide.title || `Hero slide ${slide.id}`}
+                src={slide.image}
+              />
+              
+              {/* Overlay with content */}
+              {(slide.title || slide.description) && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <div className="text-center text-white px-4 max-w-2xl">
+                    {slide.title && (
+                      <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                        {slide.title}
+                      </h2>
+                    )}
+                    {slide.description && (
+                      <p className="text-lg md:text-xl opacity-90">
+                        {slide.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </section>
-    );
-    }
+          ))}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          aria-label="Previous slide"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          aria-label="Next slide"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Navigation Dots */}
+      <div className="flex items-center gap-2">
+        {heroSlides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToSlide(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              currentSlide === index 
+                ? 'bg-green-600 scale-110' 
+                : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
