@@ -1,4 +1,3 @@
-import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -25,8 +24,12 @@ export const EarningsChart = ({
     const currentDate = new Date();
     
     for (let i = 0; i < 12; i++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const monthKey = date.toISOString().slice(0, 7);
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() - i;
+      const date = new Date(year, month, 1);
+      
+      // Format as YYYY-MM
+      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
       const monthLabel = date.toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long' 
@@ -41,23 +44,37 @@ export const EarningsChart = ({
   const currentMonthLabel = monthOptions.find(m => m.key === selectedMonth)?.label || 'Select Month';
 
   // Available currencies - default to common currencies if not provided
-  const availableCurrencies = ['USD', 'NGN', 'EUR', 'GBP'];
+  const availableCurrencies = ['USD', 'NGN', 'EUR', 'GBP', 'CAD', 'GHS'];
   
-  // Get total revenue - handle both old and new data structure
+  // Get earnings data from stats
   const totalRevenue = stats?.earnings?.totalRevenue || 0;
+  const totalTransactions = stats?.earnings?.totalTransactions || 0;
+  const transactions = stats?.earnings?.transactions || [];
   
-  // Generate sample drop-off data for demonstration
-  const dropOffData = [
-    { time: '0:00', viewers: 100 },
-    { time: '0:15', viewers: 95 },
-    { time: '0:30', viewers: 88 },
-    { time: '0:45', viewers: 82 },
-    { time: '1:00', viewers: 75 },
-    { time: '1:15', viewers: 70 },
-    { time: '1:30', viewers: 65 },
-  ];
+  // Process transactions for chart display
+  const processTransactionsForChart = () => {
+    if (!transactions || transactions.length === 0) return [];
+    
+    // Group transactions by date and sum amounts
+    const groupedByDate = transactions.reduce((acc: any, transaction: any) => {
+      const date = transaction.date;
+      if (!acc[date]) {
+        acc[date] = { date, amount: 0, count: 0 };
+      }
+      acc[date].amount += transaction.amount;
+      acc[date].count += 1;
+      return acc;
+    }, {});
+    
+    // Convert to array and sort by date
+    return Object.values(groupedByDate).sort((a: any, b: any) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+  };
 
-  const textColor = 'dark:#828b86 #333333';
+  const chartData = processTransactionsForChart();
+
+  const textColor = 'dark:#FFFFFF #333333';
   const chartColor = 'dark:#1aaa65 #22c55e';
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -70,7 +87,7 @@ export const EarningsChart = ({
   };
 
   // Check if there's any earnings data
-  const hasEarningsData = totalRevenue > 0;
+  const hasEarningsData = totalRevenue > 0 || transactions.length > 0;
 
   return (
     <div className="flex flex-wrap gap-4 w-full">
@@ -134,9 +151,35 @@ export const EarningsChart = ({
                     Total Transactions
                   </div>
                   <div className="[font-family:'Sofia_Pro-Medium',Helvetica] font-medium dark:text-[#828b86] text-gray-700 text-sm tracking-[0.01px] leading-5 whitespace-nowrap">
-                    {stats?.earnings?.totalTransactions || 0}
+                    {totalTransactions}
                   </div>
                 </div>
+
+                {/* Transaction Breakdown */}
+                {transactions.length > 0 && (
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal dark:text-[#828b86] text-gray-600 text-sm tracking-[-0.28px] leading-5">
+                      Recent Transactions
+                    </div>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {transactions.slice(0, 5).map((transaction: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between text-xs">
+                          <span className="dark:text-[#828b86] text-gray-500">
+                            {new Date(transaction.date).toLocaleDateString()}
+                          </span>
+                          <span className="dark:text-[#828b86] text-gray-700 font-medium">
+                            {formatCurrency(transaction.amount, selectedCurrency)}
+                          </span>
+                        </div>
+                      ))}
+                      {transactions.length > 5 && (
+                        <div className="text-xs dark:text-[#828b86] text-gray-500 text-center pt-1">
+                          +{transactions.length - 5} more transactions
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -163,30 +206,32 @@ export const EarningsChart = ({
           <div className="flex items-center px-5 py-2.5 w-full">
             <div className="inline-flex items-center gap-1.5">
               <span className="font-text-lg-semibold dark:text-[#828b86] text-gray-700 whitespace-nowrap">
-                Drop Off
+                Revenue Over Time
               </span>
             </div>
           </div>
 
-          {hasEarningsData ? (
+          {hasEarningsData && chartData.length > 0 ? (
             <>
               <div className="w-full h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={dropOffData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorViewers" x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={chartColor} stopOpacity={0.8}/>
                         <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <XAxis 
-                      dataKey="time" 
+                      dataKey="date" 
                       stroke={textColor}
                       tick={{ fill: textColor, fontSize: 12 }}
+                      tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     />
                     <YAxis 
                       stroke={textColor}
                       tick={{ fill: textColor, fontSize: 12 }}
+                      tickFormatter={(value) => formatCurrency(value, selectedCurrency)}
                     />
                     <Tooltip
                       contentStyle={{
@@ -195,13 +240,15 @@ export const EarningsChart = ({
                         borderRadius: '8px',
                         color: textColor,
                       }}
+                      formatter={(value: any) => [formatCurrency(value, selectedCurrency), 'Revenue']}
+                      labelFormatter={(label) => new Date(label).toLocaleDateString()}
                     />
                     <Area 
                       type="monotone" 
-                      dataKey="viewers" 
+                      dataKey="amount" 
                       stroke={chartColor}
                       fillOpacity={1}
-                      fill="url(#colorViewers)"
+                      fill="url(#colorRevenue)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -211,7 +258,7 @@ export const EarningsChart = ({
                 <div className="flex items-center justify-center gap-2.5 px-4 py-2.5 dark:bg-[#062013] border-[#828b86] bg-white border-gray-200 rounded-[100px] border border-solid">
                   <div className="w-1.5 h-1.5 bg-[#ff8642] rounded-[3px]" />
                   <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-xs tracking-[-0.24px] leading-4 dark:text-[#828b86] text-gray-600 whitespace-nowrap">
-                    Lowest point: {Math.min(...dropOffData.map(d => d.viewers))} viewers
+                    Total transactions: {totalTransactions}
                   </div>
                 </div>
               </div>
@@ -224,9 +271,9 @@ export const EarningsChart = ({
                 </svg>
               </div>
               <div className="text-center">
-                <h3 className="text-lg font-medium dark:text-[#828b86] text-gray-700 mb-2">No Drop-off Data</h3>
+                <h3 className="text-lg font-medium dark:text-[#828b86] text-gray-700 mb-2">No Revenue Data</h3>
                 <p className="text-sm dark:text-[#828b86] text-gray-500">
-                  Viewer drop-off analytics will appear after your event
+                  Revenue analytics will appear after your event generates income
                 </p>
               </div>
             </div>

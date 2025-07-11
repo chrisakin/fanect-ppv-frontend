@@ -9,7 +9,12 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
   // Handle both old and new data structure
   const totalViewers = stats?.viewers?.total || 0;
   const replayViews = stats?.viewers?.replay || 0;
-  const ratings = stats?.ratings || [];
+  
+  // Get ratings data from the new backend structure
+  const ratingsData = stats?.ratings[0] || {};
+  const averageRating = ratingsData.avg || 0;
+  const totalRatings = ratingsData.count || 1;
+  const ratingBreakdown = ratingsData.breakdown || { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 };
   
   // Calculate viewer progress percentages
   const viewerData = [
@@ -25,27 +30,10 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
     },
   ];
 
-  // Calculate rating breakdown from ratings array
-  const ratingBreakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-  let totalRatings = 0;
-  let totalRatingSum = 0;
-
-  if (ratings && Array.isArray(ratings)) {
-    ratings.forEach((rating: any) => {
-      const ratingValue = rating.rating || rating.stars || 0;
-      if (ratingValue >= 1 && ratingValue <= 5) {
-        ratingBreakdown[ratingValue as keyof typeof ratingBreakdown]++;
-        totalRatings++;
-        totalRatingSum += ratingValue;
-      }
-    });
-  }
-
-  const averageRating = totalRatings > 0 ? totalRatingSum / totalRatings : 0;
-
+  // Convert rating breakdown to array format for display
   const ratingData = [5, 4, 3, 2, 1].map(stars => ({
     stars,
-    count: ratingBreakdown[stars as keyof typeof ratingBreakdown] || 0
+    count: parseInt(ratingBreakdown[stars.toString()]) || 0
   }));
 
   const hasData = totalViewers > 0 || totalRatings > 0;
@@ -130,6 +118,18 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Summary */}
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 w-full">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-[#828b86]">Total Ratings:</span>
+                      <span className="font-medium text-[#828b86]">{totalRatings}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm mt-1">
+                      <span className="text-[#828b86]">Average:</span>
+                      <span className="font-medium text-[#828b86]">{averageRating.toFixed(1)} ⭐</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>

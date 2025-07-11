@@ -9,7 +9,7 @@ interface FeedbackChartProps {
 }
 
 export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
-  // Use feedback data from stats - handle both old and new structure
+  // Use feedback data from stats - handle the new backend structure
   const feedbackData = stats?.feedback || [];
 
   const hasFeedback = feedbackData && feedbackData.length > 0;
@@ -36,10 +36,10 @@ export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
                       <CardContent className="p-4 flex flex-col gap-2.5 h-full">
                         <div className="flex flex-col items-start justify-center gap-[5px]">
                           <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal dark:text-[#828b86] text-gray-700 text-sm tracking-[-0.28px] leading-5 line-clamp-2">
-                            "{feedback.comment || feedback.message || 'Great event!'}"
+                            "{feedback.comment || 'Great event!'}"
                           </div>
                           <div className="[font-family:'Sofia_Pro-MediumItalic',Helvetica] italic font-medium dark:text-[#828b86] text-gray-600 text-sm tracking-[0.01px] leading-5">
-                            - {feedback.author || feedback.user || 'Anonymous'}
+                            - {feedback.userName || 'Anonymous'}
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
@@ -48,7 +48,7 @@ export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
                               key={starIndex}
                               size={12}
                               className={
-                                starIndex < (feedback.rating || feedback.stars || 5)
+                                starIndex < (feedback.rating || 5)
                                   ? "fill-[#CDA61B] text-[#CDA61B]"
                                   : "text-[#828b86]"
                               }

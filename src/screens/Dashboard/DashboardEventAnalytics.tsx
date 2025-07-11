@@ -10,48 +10,36 @@ import axios from "@/lib/axios";
 import { useToast } from "@/components/ui/use-toast";
 
 interface EventStats {
+  _id: string;
+  name: string;
   earnings: {
-    totalRevenue: { [currency: string]: number };
-    monthlyRevenue: { [currency: string]: { [month: string]: number } };
+    totalRevenue: number;
+    totalTransactions: number;
     transactions: Array<{
       date: string;
       amount: number;
-      currency: string;
     }>;
   };
   viewers: {
-    totalViewers: number;
-    watchReplayViews: number;
-    concurrentViewers: Array<{
-      time: string;
-      viewers: number;
-    }>;
-    dropOff: Array<{
-      time: string;
-      viewers: number;
-    }>;
-    peakViewers: {
-      count: number;
-      time: string;
+    total: number;
+    replay: number;
+    peak: number;
+  };
+  ratings: {
+    avg: number;
+    count: number;
+    breakdown: {
+      [key: string]: number;
     };
   };
   chat: {
-    totalMessages: number;
-    chatActivity: Array<{
-      time: string;
-      messages: number;
-    }>;
-  };
-  ratings: {
-    averageRating: number;
-    totalRatings: number;
-    ratingBreakdown: { [stars: number]: number };
+    count: number;
   };
   feedback: Array<{
     id: string;
     comment: string;
-    author: string;
     rating: number;
+    userName: string;
     createdAt: string;
   }>;
 }
@@ -60,10 +48,14 @@ export const DashboardEventAnalytics = (): JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const [stats, setStats] = useState<EventStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState<string>(
-    new Date().toISOString().slice(0, 7) // Current month in YYYY-MM format
-  );
-  const [selectedCurrency, setSelectedCurrency] = useState<string>('NGN');
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    // Get current month correctly (getMonth() returns 0-11, so we need to add 1)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Add 1 and pad with zero
+    return `${year}-${month}`;
+  });
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const { toast } = useToast();
 
   // Breadcrumb items
@@ -110,6 +102,18 @@ export const DashboardEventAnalytics = (): JSX.Element => {
     fetchEventStats();
   }, [id, selectedMonth, selectedCurrency]);
 
+  // Handle month change with proper formatting
+  const handleMonthChange = (month: string) => {
+    console.log('Month changed to:', month); // Debug log
+    setSelectedMonth(month);
+  };
+
+  // Handle currency change
+  const handleCurrencyChange = (currency: string) => {
+    console.log('Currency changed to:', currency); // Debug log
+    setSelectedCurrency(currency);
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6">
@@ -137,15 +141,25 @@ export const DashboardEventAnalytics = (): JSX.Element => {
       <div className="flex flex-col w-full mx-auto p-4 items-start gap-6">
         <BreadcrumbNavigation items={breadcrumbItems} />
         
+        {/* Event Name */}
+        <div className="w-full">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+            {stats.name}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Event Analytics Dashboard
+          </p>
+        </div>
+        
         <div className="w-full gap-6 md:gap-8 flex flex-col items-start justify-center relative">
           <EarningsChart 
             stats={stats}
             selectedMonth={selectedMonth}
             selectedCurrency={selectedCurrency}
-            onMonthChange={setSelectedMonth}
-            onCurrencyChange={setSelectedCurrency}
+            onMonthChange={handleMonthChange}
+            onCurrencyChange={handleCurrencyChange}
           />
-          <ViewersChart stats={stats} />
+          {/* <ViewersChart stats={stats} /> */}
           <RatingChart stats={stats} />
           <FeedbackChart stats={stats} />
         </div>
