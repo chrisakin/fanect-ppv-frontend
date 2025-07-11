@@ -74,7 +74,7 @@ export const EarningsChart = ({
 
   const chartData = processTransactionsForChart();
 
-  const textColor = 'dark:#FFFFFF #333333';
+  const textColor = '#828b86'; // Use a consistent color that works in both modes
   const chartColor = 'dark:#1aaa65 #22c55e';
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -225,20 +225,20 @@ export const EarningsChart = ({
                     <XAxis 
                       dataKey="date" 
                       stroke={textColor}
-                      tick={{ fill: textColor, fontSize: 12 }}
+                      tick={{ fill: '#828b86', fontSize: 12 }}
                       tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     />
                     <YAxis 
                       stroke={textColor}
-                      tick={{ fill: textColor, fontSize: 12 }}
+                      tick={{ fill: '#828b86', fontSize: 12 }}
                       tickFormatter={(value) => formatCurrency(value, selectedCurrency)}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: 'dark:#062013 #fff',
-                        border: `1px solid dark:#2e483a #e5e7eb`,
+                        backgroundColor: 'var(--popover)',
+                        border: `1px solid var(--border)`,
                         borderRadius: '8px',
-                        color: textColor,
+                        color: 'var(--foreground)',
                       }}
                       formatter={(value: any) => [formatCurrency(value, selectedCurrency), 'Revenue']}
                       labelFormatter={(label) => new Date(label).toLocaleDateString()}
