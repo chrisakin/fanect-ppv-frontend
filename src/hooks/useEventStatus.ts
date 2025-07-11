@@ -32,10 +32,13 @@ export const useEventStatus = ({
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
   const baseReconnectDelay = 1000;
+  const mountedRef = useRef(true);
 
+  // Cleanup function
   const cleanup = useCallback(() => {
+    console.log('🧹 Cleaning up SSE connection for event:', eventId);
+    
     if (eventSourceRef.current) {
-      console.log('🔌 Closing SSE connection for event:', eventId);
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
@@ -49,97 +52,147 @@ export const useEventStatus = ({
     setError(null);
   }, [eventId]);
 
-  const connect = useCallback(() => {
+  // Manual reconnect function
+  const reconnect = useCallback(() => {
+    if (!mountedRef.current) return;
+    
+    reconnectAttempts.current = 0;
+    cleanup();
+    
+    // Small delay before reconnecting
+    setTimeout(() => {
+      if (mountedRef.current && enabled && eventId) {
+        console.log('🔄 Manual reconnect triggered for event:', eventId);
+        // The effect will handle creating the new connection
+      }
+    }, 1000);
+  }, [enabled, eventId, cleanup]);
+
+  // Main effect for SSE connection
+  useEffect(() => {
+    // Reset mounted ref
+    mountedRef.current = true;
+    
     if (!enabled || !eventId) {
       console.log('⚠️ SSE connection disabled or no eventId provided');
+      cleanup();
       return;
     }
 
-    // Clean up existing connection
-    cleanup();
+    // Prevent multiple connections
+    if (eventSourceRef.current) {
+      console.log('⚠️ SSE connection already exists for event:', eventId);
+      return;
+    }
 
-    try {
-      console.log('🔗 Establishing SSE connection for event:', eventId);
+    let eventSource: EventSource | null = null;
+
+    const createConnection = () => {
+      if (!mountedRef.current) return;
       
-      // Create the SSE connection
-      const eventSource = new EventSource(
-        `${import.meta.env.VITE_BASE_URL}/streampass/events/${eventId}/stream-status`,
-      );
-
-      eventSourceRef.current = eventSource;
-
-      eventSource.onopen = () => {
-        console.log('✅ SSE connection established for event:', eventId);
-        setIsConnected(true);
-        setError(null);
-        reconnectAttempts.current = 0;
-      };
-
-      eventSource.onmessage = (event) => {
-        try {
-          console.log('📨 SSE message received:', event.data);
-          
-          const data: EventStatusMessage = JSON.parse(event.data);
-          const { message, status: newStatus } = data;
-          
-          console.log('📊 Event status update:', { message, status: newStatus });
-          
-          setStatus(newStatus);
-          onStatusChange?.(newStatus, message);
-          
-          // Trigger event end callback when status changes to PAST
-          if (newStatus === EventStatus.PAST) {
-            console.log('🎬 Event ended - triggering callback');
-            onEventEnd?.();
-          }
-        } catch (parseError) {
-          console.error('❌ Error parsing SSE message:', parseError, event.data);
-        }
-      };
-
-      eventSource.onerror = (error) => {
-        console.error('❌ SSE connection error:', error);
-        setIsConnected(false);
+      try {
+        console.log('🔗 Creating SSE connection for event:', eventId, 'at', new Date().toISOString());
         
-        // Only attempt reconnection if we haven't exceeded max attempts
-        if (reconnectAttempts.current < maxReconnectAttempts) {
-          const delay = baseReconnectDelay * Math.pow(2, reconnectAttempts.current);
-          reconnectAttempts.current++;
-          
-          console.log(`🔄 Attempting to reconnect SSE in ${delay}ms (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`);
-          
-          setError(`Connection lost. Reconnecting... (${reconnectAttempts.current}/${maxReconnectAttempts})`);
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            connect();
-          }, delay);
-        } else {
-          console.error('❌ Max SSE reconnection attempts reached');
-          setError('Connection failed. Please refresh the page.');
-          cleanup();
-        }
-      };
+        const url = `${import.meta.env.VITE_BASE_URL}/streampass/events/${eventId}/stream-status`;
+        eventSource = new EventSource(url);
+        eventSourceRef.current = eventSource;
 
-    } catch (error) {
-      console.error('❌ Failed to create SSE connection:', error);
-      setError('Failed to establish connection');
-    }
-  }, [eventId, enabled, onEventEnd, onStatusChange, cleanup]);
+        eventSource.onopen = () => {
+          if (!mountedRef.current) return;
+          
+          console.log('✅ SSE connection established for event:', eventId);
+          setIsConnected(true);
+          setError(null);
+          reconnectAttempts.current = 0;
+        };
 
-  // Initialize connection
+        eventSource.onmessage = (event) => {
+          if (!mountedRef.current) return;
+          
+          try {
+            console.log('📨 SSE message received:', event.data);
+            
+            const data: EventStatusMessage = JSON.parse(event.data).data;
+            const { message, status: newStatus } = data;
+            
+            console.log('📊 Event status update:', { message, status: newStatus });
+            
+            setStatus(newStatus);
+            onStatusChange?.(newStatus, message);
+            
+            // Trigger event end callback when status changes to PAST
+            if (newStatus === EventStatus.PAST) {
+              console.log('🎬 Event ended - triggering callback');
+              onEventEnd?.();
+            }
+          } catch (parseError) {
+            console.error('❌ Error parsing SSE message:', parseError, event.data);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          if (!mountedRef.current) return;
+          
+          console.error('❌ SSE connection error for event:', eventId, error);
+          setIsConnected(false);
+          
+          // Check if we should attempt reconnection
+          if (eventSource?.readyState === EventSource.CLOSED && reconnectAttempts.current < maxReconnectAttempts) {
+            const delay = baseReconnectDelay * Math.pow(2, reconnectAttempts.current);
+            reconnectAttempts.current++;
+            
+            console.log(`🔄 Attempting to reconnect SSE in ${delay}ms (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`);
+            
+            setError(`Connection lost. Reconnecting... (${reconnectAttempts.current}/${maxReconnectAttempts})`);
+            
+            reconnectTimeoutRef.current = setTimeout(() => {
+              if (mountedRef.current && enabled && eventId) {
+                cleanup();
+                createConnection();
+              }
+            }, delay);
+          } else if (reconnectAttempts.current >= maxReconnectAttempts) {
+            console.error('❌ Max SSE reconnection attempts reached for event:', eventId);
+            setError('Connection failed. Please refresh the page.');
+          }
+        };
+
+      } catch (error) {
+        console.error('❌ Failed to create SSE connection:', error);
+        setError('Failed to establish connection');
+      }
+    };
+
+    // Create the initial connection
+    createConnection();
+
+    // Cleanup function
+    return () => {
+      console.log('🧹 Effect cleanup for event:', eventId);
+      mountedRef.current = false;
+      
+      if (eventSource) {
+        eventSource.close();
+        eventSourceRef.current = null;
+      }
+      
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      
+      setIsConnected(false);
+      setError(null);
+    };
+  }, [eventId, enabled]); // Only depend on primitive values
+
+  // Cleanup on unmount
   useEffect(() => {
-    if (enabled && eventId) {
-      connect();
-    }
-
-    return cleanup;
-  }, [eventId, enabled, connect, cleanup]);
-
-  // Manual reconnect function
-  const reconnect = useCallback(() => {
-    reconnectAttempts.current = 0;
-    connect();
-  }, [connect]);
+    return () => {
+      mountedRef.current = false;
+      cleanup();
+    };
+  }, [cleanup]);
 
   return {
     status,

@@ -8,10 +8,15 @@ import { InfoIcon, XCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEventStore } from "@/store/eventStore";
 import { useEffect, useState } from "react";
+import { fcmService } from "@/services/fcmService";
+import { useNavigate } from "react-router-dom";
 
 export const DashboardHome = (): JSX.Element => {
   const [eventType, setEventType] = useState<'upcoming' | 'live'>('upcoming');
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const [fcmStreamNotification, setFcmStreamNotification] = useState<any>(null);
   const { events, isLoading, pagination, fetchUpcomingEvents, fetchLiveEvents } = useEventStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (eventType === 'upcoming') {
@@ -21,11 +26,99 @@ export const DashboardHome = (): JSX.Element => {
     }
   }, [eventType, fetchUpcomingEvents, fetchLiveEvents]);
 
+  // Listen for FCM notifications
+  useEffect(() => {
+    const handleFCMMessage = (event: CustomEvent) => {
+      const notification = event.detail;
+      console.log('FCM notification received in DashboardHome:', notification);
+      
+      // Check if this is a "Live Stream Started" notification
+      if (notification.notification?.title === 'Live Stream Started' || 
+          notification.title === 'Live Stream Started') {
+        console.log('Stream started notification detected:', notification);
+        
+        // Extract eventId from notification data
+        const eventId = notification.data?.eventId || notification.eventId;
+        
+        if (eventId && !dismissedAlerts.has(notification.notificationId || notification.id)) {
+          setFcmStreamNotification({
+            id: notification.notificationId || notification.id || Date.now().toString(),
+            title: notification.notification?.title || notification.title,
+            message: notification.notification?.body || notification.body || notification.message,
+            eventId: eventId
+          });
+        }
+      }
+    };
+
+    // Listen for FCM messages
+    window.addEventListener('fcm-message', handleFCMMessage as EventListener);
+
+    // Check for existing unread FCM notifications on mount
+    if (fcmService.isReady()) {
+      const unreadFCMNotifications = fcmService.getUnreadFCMNotifications();
+      const streamNotification = unreadFCMNotifications.find(notification => 
+        notification.title === 'Live Stream Started' && 
+        !dismissedAlerts.has(notification.id)
+      );
+      
+      if (streamNotification) {
+        // Try to extract eventId from the notification body/title
+        // Since FCM notifications might not have the data field, we need to parse it
+        console.log('Found existing stream notification:', streamNotification);
+        setFcmStreamNotification({
+          id: streamNotification.id,
+          title: streamNotification.title,
+          message: streamNotification.body,
+          eventId: null // We'll need to handle this case
+        });
+      }
+    }
+
+    return () => {
+      window.removeEventListener('fcm-message', handleFCMMessage as EventListener);
+    };
+  }, [dismissedAlerts]);
+
   const handlePageChange = (page: number) => {
     if (eventType === 'upcoming') {
       fetchUpcomingEvents(page);
     } else {
       fetchLiveEvents(page);
+    }
+  };
+
+  const handleStartStreaming = () => {
+    if (fcmStreamNotification) {
+      const eventId = fcmStreamNotification.eventId;
+      
+      if (eventId) {
+        console.log('Navigating to live event:', eventId);
+        navigate(`/dashboard/tickets/watch-event/live/${eventId}`);
+      } else {
+        console.log('No eventId found, switching to live events tab');
+        setEventType('live');
+      }
+      
+      // Mark FCM notification as read
+      if (fcmService.isReady()) {
+        fcmService.markNotificationAsRead(fcmStreamNotification.id);
+      }
+      
+      // Dismiss the alert
+      handleDismissAlert();
+    }
+  };
+
+  const handleDismissAlert = () => {
+    if (fcmStreamNotification) {
+      setDismissedAlerts(prev => new Set([...prev, fcmStreamNotification.id]));
+      setFcmStreamNotification(null);
+      
+      // Mark FCM notification as read
+      if (fcmService.isReady()) {
+        fcmService.markNotificationAsRead(fcmStreamNotification.id);
+      }
     }
   };
 
@@ -81,27 +174,33 @@ export const DashboardHome = (): JSX.Element => {
           </ToggleGroupItem>
         </ToggleGroup>
 
-        <Alert className="relative w-full md:h-[72px] h-[100px] bg-green-900 rounded overflow-hidden p-0 mt-5">
-          <div className="w-full flex items-start gap-2.5 p-4">
-            <div className="flex items-center gap-2.5 w-full">
-              <InfoIcon className="w-7 h-7 text-gray-100" />
-              <div className="flex w-full items-center  gap-3 justify-between">
-                <div className="flex items-center gap-[15px]">
-                  <AlertDescription className="text-gray-100 font-text-sm-regular">
-                    Fido live in lagos live streaming has begun
-                  </AlertDescription>
-                  <Button
-                    variant="outline"
-                    className="h-9 bg-gray-50 rounded text-green-600 [font-family:'Sofia_Pro-Medium',Helvetica] font-medium text-base tracking-[-0.32px]"
-                  >
-                    Start Streaming
-                  </Button>
+        {/* FCM Stream Started Alert */}
+        {fcmStreamNotification && (
+          <Alert className="relative w-full md:h-[72px] h-[100px] bg-green-900 rounded overflow-hidden p-0 mt-5">
+            <div className="w-full flex items-start gap-2.5 p-4">
+              <div className="flex items-center gap-2.5 w-full">
+                <InfoIcon className="w-7 h-7 text-gray-100" />
+                <div className="flex w-full items-center gap-3 justify-between">
+                  <div className="flex items-center gap-[15px]">
+                    <AlertDescription className="text-gray-100 font-text-sm-regular">
+                      {fcmStreamNotification.message}
+                    </AlertDescription>
+                    <Button
+                      variant="outline"
+                      className="h-9 bg-gray-50 rounded text-green-600 [font-family:'Sofia_Pro-Medium',Helvetica] font-medium text-base tracking-[-0.32px]"
+                      onClick={handleStartStreaming}
+                    >
+                      Start Streaming
+                    </Button>
+                  </div>
+                  <button onClick={handleDismissAlert}>
+                    <XCircleIcon className="w-[18px] h-[18px] text-gray-100 cursor-pointer hover:text-gray-300" />
+                  </button>
                 </div>
-                <XCircleIcon className="w-[18px] h-[18px] text-gray-100" />
               </div>
             </div>
-          </div>
-        </Alert>
+          </Alert>
+        )}
 
         <div className="mt-5">
           {isLoading ? (

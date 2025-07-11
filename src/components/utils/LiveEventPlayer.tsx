@@ -33,8 +33,9 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     eventId,
     onEventEnd: () => {
       console.log('🎯 SSE detected event end - showing feedback modal');
-      if (eventType === 'live' && hasStreamStarted && !feedbackShown) {
+      if (eventType === 'live' && hasStreamStarted && !feedbackShown && eventId) {
         setFeedbackShown(true);
+        setHasStreamStarted(true)
         setTimeout(() => {
           setShowFeedbackModal(true);
         }, 500);
@@ -43,6 +44,10 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     onStatusChange: (status, message) => {
       console.log('📊 Event status changed:', { status, message });
       if (status === EventStatus.PAST) {
+        setHasStreamStarted(true);
+        setTimeout(() => {
+          setShowFeedbackModal(true);
+        }, 500);
         console.log('🔚 Event status is now PAST');
       }
     },

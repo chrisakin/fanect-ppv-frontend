@@ -193,6 +193,7 @@ export class FCMService {
             detail: { 
               ...payload, 
               notificationId,
+              eventId: payload.data?.eventId, // Include eventId in the event detail
               isUnread: true
             } 
           }));

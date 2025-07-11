@@ -19,7 +19,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
     const eventDate = new Date(dateString);
     const now = new Date();
     const diff = eventDate.getTime() - now.getTime();
-    if (diff <= 0) return "Event started";
+    if (diff <= 0) return "Waiting for event to start...";
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -70,11 +70,11 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
       {events.map((event) => (
         <Card
           key={event._id}
-          className="w-full lg:h-[230px] dark:bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] border-[#D5D7DA] relative flex flex-col"
+          className="w-full lg:h-[255px] dark:bg-[#062013] rounded-lg overflow-hidden border border-solid dark:border-[#2e483a] border-[#D5D7DA] relative flex flex-col"
         >
           <div className="flex flex-col md:flex-row flex-1">
             <img
-              className="w-full md:w-[246px] h-[200px] md:h-[240px] object-cover"
+              className="w-full md:w-[246px] h-[200px] md:h-[255px] object-cover"
               alt="Event Image"
               src={event.bannerUrl}
             />
@@ -142,7 +142,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                       </div>
                     )}
                     {isReplayAvailable(event.eventDateTime) && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mt-2">
                         <InfoIcon className="w-5 h-5 text-[#828b86]" />
                         <span className="font-normal text-[#828b86] text-xs tracking-[-0.24px]">
                           Replay becomes unavailable after 30 days
