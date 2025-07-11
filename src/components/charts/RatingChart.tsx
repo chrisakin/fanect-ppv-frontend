@@ -13,7 +13,7 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
   // Get ratings data from the new backend structure
   const ratingsData = stats?.ratings[0] || {};
   const averageRating = ratingsData.avg || 0;
-  const totalRatings = ratingsData.count || 1;
+  const totalRatings = ratingsData.count || 0;
   const ratingBreakdown = ratingsData.breakdown || { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 };
   
   // Calculate viewer progress percentages

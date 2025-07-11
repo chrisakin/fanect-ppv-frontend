@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens, getSessionToken } from './auth';
 import { locationService } from '../services/locationService';
-import { redirectToLogin } from '@/services/redirectService';
+import { redirectToLogin } from '../services/redirectService';
 
 const baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -12,6 +12,24 @@ export const axiosInstance = axios.create({
   },
 });
 
+// Queue to store failed requests while token is being refreshed
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (error?: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
@@ -44,36 +62,78 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 402) {
-  redirectToLogin();
-  clearTokens();
-  return Promise.reject(error);
-}
     const originalRequest = error.config;
+
+
+    
+    // Handle 402 status (payment required or subscription expired)
+    if (error.response?.status === 402) {
+      console.log('Payment required or subscription expired');
+      clearTokens();
+      redirectToLogin();
+      return Promise.reject(error);
+    }
+
+    // Handle 401 status (unauthorized - token expired or invalid)
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If token is already being refreshed, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return axiosInstance(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = getRefreshToken();
+      
+      if (!refreshToken) {
+        console.log('No refresh token available');
+        processQueue(error, null);
+        isRefreshing = false;
+        clearTokens();
+        redirectToLogin();
+        return Promise.reject(error);
+      }
 
       try {
-        const refreshToken = getRefreshToken();
-        
-        if (!refreshToken) {
-          redirectToLogin();
-          clearTokens();
-          return Promise.reject(error);
-        }
-
+        console.log('Attempting to refresh token...');
         const response = await axios.post(`${baseURL}/auth/refresh-token`, {
           refreshToken,
         });
-        const { accessToken } = response.data
+        
+        const { accessToken } = response.data;
+        console.log('Token refreshed successfully');
+        
+        // Update tokens
         setTokens(accessToken, refreshToken, sessionStorage.getItem('sessionToken') as string);
+        
+        // Process queued requests
+        processQueue(null, accessToken);
+        
+        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        
         return axiosInstance(originalRequest);
-      } catch (refreshError) {
+      } catch (refreshError: any) {
         console.error('Token refresh failed:', refreshError);
+        
+        // Process queued requests with error
+        processQueue(refreshError, null);
+        
+        // Clear tokens and redirect to login
         clearTokens();
-        redirectToLogin(); 
+        redirectToLogin();
+        
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

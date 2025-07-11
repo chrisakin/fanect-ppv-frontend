@@ -1,4 +1,3 @@
-// redirectService.ts
 let navigateFn: (path: string) => void;
 
 export const setRedirectNavigate = (navigate: (path: string) => void) => {
@@ -7,9 +6,8 @@ export const setRedirectNavigate = (navigate: (path: string) => void) => {
 
 export const redirectToLogin = () => {
   if (navigateFn) {
-    navigateFn('/'); // Navigate to home page where login modal can be triggered
+    navigateFn('/');
   } else {
-    // Fallback: redirect to home page using window.location
-    window.location.href = '/';
+    window.location.replace('/');
   }
 };
