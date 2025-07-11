@@ -12,7 +12,7 @@ export const RegisteredCard = ({ event }: GiftFriendProps): JSX.Element => {
   const barcodeValue = ticketUrl.replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center py-4 md:px-4">
       <Card className="relative w-[515px] h-[693px] bg-[#d6ece1] rounded-[30px] overflow-hidden border-2 border-dashed border-[#1aaa65]">
         <CardContent className="w-full gap-[31px] pt-[53px] flex flex-col items-center px-4">
           {/* Success Message */}

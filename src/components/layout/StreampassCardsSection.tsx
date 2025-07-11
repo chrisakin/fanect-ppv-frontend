@@ -81,7 +81,21 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
             <CardContent className="flex flex-col h-full justify-between py-[20px] px-4 md:pl-6 md:pr-0 flex-1">
               <div className="flex flex-col w-full md:w-[250px] items-start">
                 <h3 className="text-xl md:text-2xl font-medium dark:text-[#828b86] mb-2">
+                  {(type === 'live' || type === 'upcoming') ? (
+                  <Link
+                    to={
+                    type === 'live'
+                  ? `/dashboard/tickets/watch-event/live/${event._id}`
+                  : `/dashboard/tickets/event/paid/${event._id}`
+                  }
+                >
                   {event.name}
+                </Link>
+                ) : (
+                <span className="cursor-not-allowed">
+                  {event.name}
+                </span>
+                  )}
                 </h3>
                 <p className="text-base md:text-lg text-[#828b86]">
                   {new Date(event.eventDateTime).toLocaleDateString('en-US', {

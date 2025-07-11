@@ -207,7 +207,7 @@ export const DashboardHome = (): JSX.Element => {
             <div className="text-center py-8">Loading...</div>
           ) : transformedEvents.length > 0 ? (
             <div>
-              <EventCardsSection events={transformedEvents} />
+              <EventCardsSection events={transformedEvents}  eventType={eventType}/>
               <PaginationIndex 
                 currentPage={pagination.currentPage}
                 totalPages={pagination.totalPages}

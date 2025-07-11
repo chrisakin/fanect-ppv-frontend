@@ -2,10 +2,10 @@ import { StreampassPurchaseCard } from "@/components/layout/StreampassPurchase";
 import { GiftFriend } from "@/components/layout/GiftFriendForm";
 import { RegisteredCard } from "@/components/layout/RegisteredCard";
 import { BreadcrumbNavigation } from "@/components/layout/BreadcrumbNavigation";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEventStore } from "@/store/eventStore";
 import { useEffect, useState } from "react";
-import { Loader2, PlayCircle } from "lucide-react";
+import { GiftIcon, Loader2, PlayCircle } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GiftCard } from "@/components/layout/GiftCard";
@@ -14,12 +14,17 @@ export const DashboardSingleEvent = (): JSX.Element => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const { singleEvent, isLoading, fetchSingleEvent } = useEventStore();
   const [showTrailer, setShowTrailer] = useState(false);
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     if (id) {
       fetchSingleEvent(id);
     }
   }, [id, fetchSingleEvent]);
+
+   const handleActionClick = (type: string) => {
+      navigate(`/dashboard/tickets/event/${type}/${id}`);
+  };
 
   // Generate breadcrumb items based on event type
   const getBreadcrumbItems = () => {
@@ -146,12 +151,30 @@ export const DashboardSingleEvent = (): JSX.Element => {
           <div className="flex flex-col items-start gap-[30px] flex-1 w-full lg:w-auto">
             {/* Event title and price */}
             <div className="flex flex-col items-start gap-2 w-full">
-              <h1 className="font-display-lg-semibold text-gray-900 dark:text-[#FFFFFF] text-2xl md:text-3xl lg:text-4xl">
+                <h1 className="font-display-lg-semibold text-gray-900 dark:text-[#FFFFFF] text-2xl md:text-3xl lg:text-4xl">
                 {singleEvent.name}
               </h1>
+             {type == 'paid' ? (
+               <div className="flex flex-col gap-4">
               <h2 className="font-display-sm-medium  text-gray-900 dark:text-[#FFFFFF] text-xl md:text-2xl">
                {singleEvent.price?.currency} {Number(singleEvent.price?.amount).toLocaleString()}
               </h2>
+              <Button
+                  variant="outline"
+                  className="w-full sm:flex-1  h-[45px] md:h-[50px] rounded-[10px] border border-solid border-green-600 text-green-600 hover:bg-green-600/10"
+                  onClick={() => handleActionClick('gift')}
+                >
+                  <GiftIcon className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                  <span className="text-sm md:text-base font-semibold">
+                    Gift a friend
+                  </span>
+                </Button>
+              </div>
+             ) : (
+               <h2 className="font-display-sm-medium  text-gray-900 dark:text-[#FFFFFF] text-xl md:text-2xl">
+               {singleEvent.price?.currency} {Number(singleEvent.price?.amount).toLocaleString()}
+              </h2>
+             )}
             </div>
 
             <div className="md:hidden block w-full lg:w-auto">
