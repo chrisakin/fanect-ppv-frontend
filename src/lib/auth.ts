@@ -36,13 +36,21 @@ export const clearTokens = () => {
   sessionStorage.removeItem('sessionToken')
 };
 
+interface DecodedToken {
+  exp: number; // expiration time (UNIX timestamp in seconds)
+  [key: string]: any;
+}
+
 export const isAuthenticated = () => {
   const token = getAccessToken();
   if (!token) return false;
 
   try {
     const decoded = jwtDecode<DecodedToken>(token);
-    return decoded;
+    if (!decoded?.exp) return false;
+
+    const now = Math.floor(Date.now() / 1000); // current UNIX time in seconds
+    return decoded.exp > now;
   } catch {
     return false;
   }
