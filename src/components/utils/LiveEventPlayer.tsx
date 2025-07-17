@@ -234,7 +234,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
     <>
       <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
         {/* Video Player - Full width on mobile/tablet, 70% on desktop */}
-        <Card className="relative w-full lg:w-[70%] h-[200px] sm:h-[200px] md:h-[400px] lg:h-[400px] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
+        <Card className="relative w-full lg:w-[70%] h-full bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
             <div className="relative w-full h-full bg-black">
               {/* Live indicator */}
@@ -359,7 +359,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                   Messages {!isConnected && "(Disconnected)"}
                 </h3>
 
-                <ScrollArea className="h-[260px] pr-2">
+                <ScrollArea className="h-[300px] pr-2">
                   <MessageList />
                   <ScrollBar orientation="vertical" />
                 </ScrollArea>
