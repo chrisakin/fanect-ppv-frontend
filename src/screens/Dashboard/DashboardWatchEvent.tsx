@@ -5,11 +5,18 @@ import { useEventStore } from "@/store/eventStore";
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { useStreampassSession } from "@/hooks/useStreampassSession";
 
 export const DashboardWatchEvent = (): JSX.Element => {
   const { type, id } = useParams();
   const navigate = useNavigate();
-  const { singleEvent, isLoading, fetchPurchasedEvent } = useEventStore();
+  const { singleEvent, singleStreampass, isLoading, fetchPurchasedEvent } = useEventStore();
+
+  // Initialize streampass session tracking
+  const { isSessionActive } = useStreampassSession({
+    streampassId: singleStreampass,
+    enabled: type === 'live' || type === 'upcoming' // Only track sessions for live/upcoming events
+  });
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -90,6 +97,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
             eventType={eventType}
             eventId={singleEvent._id}
             eventName={singleEvent.name}
+            streampassId={singleStreampass}
           />
           <div className="lg:px-0 md:px-0 px-4">
             <WatchEventDetails event={singleEvent} />

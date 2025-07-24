@@ -17,6 +17,7 @@ interface StreamingProviderProps {
   eventName?: string;
   enableRecordingProtection?: boolean;
   strictRecordingProtection?: boolean;
+  streampassId?: string | null;
 }
 
 export const StreamingProvider = ({ 
@@ -25,7 +26,8 @@ export const StreamingProvider = ({
   eventId,
   eventName,
   enableRecordingProtection = true,
-  strictRecordingProtection = false
+  strictRecordingProtection = false,
+  streampassId
 }: StreamingProviderProps): JSX.Element => {
   // Get streaming provider from environment variable
   const streamingProvider = import.meta.env.VITE_STREAMING_PROVIDER?.toLowerCase() || 'aws-ivs';
@@ -54,6 +56,7 @@ export const StreamingProvider = ({
               eventId={eventId}
               eventName={eventName}
               eventType={eventType}
+              streampassId={streampassId}
             />
           </ErrorBoundary>
         );

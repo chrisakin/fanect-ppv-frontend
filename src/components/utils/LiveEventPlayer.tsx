@@ -12,14 +12,16 @@ import { useToast } from "../ui/use-toast";
 import { FeedbackModal } from "../modals/FeedbackModal";
 import { getUser } from "@/lib/auth";
 import { useEventStatus, EventStatus } from "../../hooks/useEventStatus";
+import { useStreampassSession } from "../../hooks/useStreampassSession";
 
 interface LiveEventPlayerProps {
   eventId: string;
   eventName?: string;
   eventType: 'live' | 'upcoming';
+  streampassId?: string | null;
 }
 
-export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlayerProps): JSX.Element => {
+export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }: LiveEventPlayerProps): JSX.Element => {
   const [streamingData, setStreamingData] = useState<StreamingData | null>(null);
   const [isLoadingStream, setIsLoadingStream] = useState(true);
   const [streamError, setStreamError] = useState<string | null>(null);
@@ -27,6 +29,12 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
   const [feedbackShown, setFeedbackShown] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const { toast } = useToast();
+
+  // Initialize streampass session tracking
+  const { isSessionActive } = useStreampassSession({
+    streampassId,
+    enabled: eventType === 'live' || eventType === 'upcoming'
+  });
 
   // SSE connection for reliable event status monitoring
   const { status: eventStatus, isConnected: sseConnected, error: sseError } = useEventStatus({
@@ -298,6 +306,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType }: LiveEventPlay
                     {hasStreamStarted && <span className="ml-1">🎬</span>}
                     {sseConnected && <span className="text-green-400">●</span>}
                     {sseError && <span className="text-red-400" title={sseError}>⚠</span>}
+                    {isSessionActive && <span className="text-blue-400" title="Session Active">🔒</span>}
                   </div>
                 </div>
               )}
