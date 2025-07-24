@@ -38,6 +38,7 @@ interface EventState {
   pagination: PaginationData;
   selectedEvent: Event | null;
   singleEvent: Event | null;
+  singleStreampass: string | null;
   fetchUpcomingEvents: (page?: number) => Promise<void>;
   fetchLiveEvents: (page?: number) => Promise<void>;
   fetchMyEvents: (page?: number) => Promise<void>;
@@ -57,6 +58,7 @@ export const useEventStore = create<EventState>((set) => ({
   isUpdateLoading: false,
   selectedEvent: null,
   singleEvent: null,
+  singleStreampass: null,
   pagination: {
     totalDocs: 0,
     totalPages: 1,
@@ -150,7 +152,7 @@ export const useEventStore = create<EventState>((set) => ({
     try {
       set({ isLoading: true });
       const response = await axios.get(`/streampass/get-one-event/${id}`);
-      set({ singleEvent: response.data.streampass.event, isLoading: false });
+      set({ singleEvent: response.data.streampass.event, isLoading: false, singleStreampass: response.data.streampass.id });
     } catch (error) {
       console.error('Error fetching purchased event:', error);
       set({ singleEvent: null, isLoading: false });
