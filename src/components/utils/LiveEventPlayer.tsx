@@ -12,7 +12,6 @@ import { useToast } from "../ui/use-toast";
 import { FeedbackModal } from "../modals/FeedbackModal";
 import { getUser } from "@/lib/auth";
 import { useEventStatus, EventStatus } from "../../hooks/useEventStatus";
-import { useStreampassSession } from "../../hooks/useStreampassSession";
 
 interface LiveEventPlayerProps {
   eventId: string;

@@ -16,7 +16,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
   // Initialize streampass session tracking
   useStreampassSession({
   streampassId: singleStreampass,
-  enabled: !!singleStreampass
+  enabled: !!singleStreampass && type === 'live'
 });
 
   useEffect(() => {
