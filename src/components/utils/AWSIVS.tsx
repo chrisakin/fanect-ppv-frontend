@@ -45,17 +45,14 @@ export function useAWSIVSService({
   // Centralized stream end handler
   const handleStreamEnd = useCallback(() => {
     if (streamEndedRef.current) {
-      console.log('🔄 Stream end already handled, skipping duplicate call');
       return;
     }
     
     if (!hasStartedPlayingRef.current) {
-      console.log('⚠️ Stream has not started playing yet, ignoring end event');
       return;
     }
     
     streamEndedRef.current = true;
-    console.log('🎬 STREAM ENDED - Triggering feedback modal');
     setPlayerState("ENDED");
     onPlayerStateChange?.("ENDED");
     onStreamEnd?.();

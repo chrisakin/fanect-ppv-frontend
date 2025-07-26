@@ -5,30 +5,40 @@ import { useEventStore } from "@/store/eventStore";
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 import { useStreampassSession } from "@/hooks/useStreampassSession";
+// import { useStreampassSession } from "@/hooks/useStreampassSession";
 
 export const DashboardWatchEvent = (): JSX.Element => {
   const { type, id } = useParams();
   const navigate = useNavigate();
   const { singleEvent, singleStreampass, isLoading, fetchPurchasedEvent } = useEventStore();
-
   // Initialize streampass session tracking
-  const { isSessionActive } = useStreampassSession({
+  useStreampassSession({
   streampassId: singleStreampass,
-  enabled: !!singleStreampass && (type === 'live' || type === 'upcoming')
+  enabled: !!singleStreampass
 });
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (!id || !type) {
-        navigate('/not-found');
+         toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load event stream. Please try again later.",
+        });
         return;
       }
 
       try {
         await fetchPurchasedEvent(id);
-      } catch (error) {
-        navigate('/not-found');
+        console.log(singleStreampass, 'Single Streampass ID fetched:', singleStreampass);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.response.data.message || "Failed to load event stream. Please try again later.",
+        });
       }
     };
 

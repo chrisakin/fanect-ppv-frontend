@@ -63,12 +63,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
-
-    
-    // Handle 402 status (payment required or subscription expired)
     if (error.response?.status === 402) {
-      console.log('Payment required or subscription expired');
       clearTokens();
       redirectToLogin();
       return Promise.reject(error);
@@ -107,10 +102,7 @@ axiosInstance.interceptors.response.use(
         const response = await axios.post(`${baseURL}/auth/refresh-token`, {
           refreshToken,
         });
-        
         const { accessToken } = response.data;
-        console.log('Token refreshed successfully');
-        
         // Update tokens
         setTokens(accessToken, refreshToken, sessionStorage.getItem('sessionToken') as string);
         

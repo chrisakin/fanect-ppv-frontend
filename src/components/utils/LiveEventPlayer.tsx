@@ -18,7 +18,7 @@ interface LiveEventPlayerProps {
   eventId: string;
   eventName?: string;
   eventType: 'live' | 'upcoming';
-  streampassId?: string | null;
+  streampassId: string | null;
 }
 
 export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }: LiveEventPlayerProps): JSX.Element => {
@@ -29,12 +29,12 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
   const [feedbackShown, setFeedbackShown] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const { toast } = useToast();
-
+console.log(streampassId, "Streampass ID in LiveEventPlayer");
   // Initialize streampass session tracking
-  const { isSessionActive } = useStreampassSession({
-    streampassId,
-    enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming') 
-  });
+  // const { isSessionActive } = useStreampassSession({
+  //   streampassId,
+  //   enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming') 
+  // });
 
   // SSE connection for reliable event status monitoring
   const { status: eventStatus, isConnected: sseConnected, error: sseError } = useEventStatus({
@@ -50,27 +50,20 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
       }
     },
     onStatusChange: (status, message) => {
-      console.log('📊 Event status changed:', { status, message });
       if (status === EventStatus.PAST) {
         setHasStreamStarted(true);
         setTimeout(() => {
           setShowFeedbackModal(true);
         }, 500);
-        console.log('🔚 Event status is now PAST');
       }
     },
-    enabled: eventType === 'live' // Only monitor live events
+    enabled: eventType === 'live'
   });
 
   const handlePlayerStateChange = useCallback((state: string) => {
-    console.log('🎬 Player state changed to:', state);
-    
     if (state === "PLAYING") {
       setHasStreamStarted(true);
-      console.log('✅ Stream has started playing');
     }
-    
-    // Note: Feedback modal is ONLY triggered by SSE event end, not player state
   }, [hasStreamStarted]);
 
   const handleChatMessage = useCallback((message: any) => {
@@ -78,9 +71,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
   }, []);
 
   const handleStreamEnd = useCallback(() => {
-    console.log('🔚 Stream ended callback triggered');
-    // Note: Feedback modal is ONLY triggered by SSE event end, not stream end
-    console.log('ℹ️ Stream end detected via player (feedback modal only triggered by SSE)');
   }, []);
 
   const {
@@ -111,8 +101,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
         setStreamError(null);
         setFeedbackShown(false);
         setHasStreamStarted(false);
-        
-        console.log(`📡 Fetching streaming data for ${eventType} event:`, eventId);
         const data = await eventStreamingService.getStreamingData(eventId, eventType);
         setStreamingData(data);
         
@@ -122,7 +110,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
           console.log('✅ Streaming data loaded:', data);
         }
       } catch (error: any) {
-        console.error('❌ Error fetching streaming data:', error);
         setStreamError(error.message || "Failed to load event stream");
         toast({
           variant: "destructive",
@@ -306,7 +293,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
                     {hasStreamStarted && <span className="ml-1">🎬</span>}
                     {sseConnected && <span className="text-green-400">●</span>}
                     {sseError && <span className="text-red-400" title={sseError}>⚠</span>}
-                    {isSessionActive && <span className="text-blue-400" title="Session Active">🔒</span>}
+                    {/* {isSessionActive && <span className="text-blue-400" title="Session Active">🔒</span>} */}
                   </div>
                 </div>
               )}

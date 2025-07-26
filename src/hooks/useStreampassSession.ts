@@ -18,13 +18,11 @@ export const useStreampassSession = ({ streampassId, enabled = true }: UseStream
   // Function to start session
   const startSession = async (id: string) => {
     try {
-      console.log('🎬 Starting streampass session for:', id);
       await axios.post('/streampass/stream-session', {
         streampassId: id,
         inSession: true
       });
       sessionActiveRef.current = true;
-      console.log('✅ Streampass session started successfully');
     } catch (error) {
       console.error('❌ Failed to start streampass session:', error);
       throw error;
@@ -34,11 +32,11 @@ export const useStreampassSession = ({ streampassId, enabled = true }: UseStream
   // Function to end session
   const endSession = async (id: string) => {
     try {
-      console.log('🛑 Ending streampass session for:', id);
       await axios.post('/streampass/stream-session', {
         streampassId: id,
         inSession: false
       });
+      console.log('✅ Streampass session ended successfully');
       sessionActiveRef.current = false;
       console.log('✅ Streampass session ended successfully');
     } catch (error) {
@@ -68,6 +66,7 @@ export const useStreampassSession = ({ streampassId, enabled = true }: UseStream
 
     // Cleanup function to end session
     const cleanup = async () => {
+      console.log('Cleaning up streampass session...');
       const currentStreampassId = streampassIdRef.current;
       if (sessionActiveRef.current && currentStreampassId) {
         await endSession(currentStreampassId);

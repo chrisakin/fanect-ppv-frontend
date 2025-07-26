@@ -17,7 +17,7 @@ interface StreamingProviderProps {
   eventName?: string;
   enableRecordingProtection?: boolean;
   strictRecordingProtection?: boolean;
-  streampassId?: string | null;
+  streampassId: string | null;
 }
 
 export const StreamingProvider = ({ 
@@ -25,13 +25,13 @@ export const StreamingProvider = ({
   eventType = 'live',
   eventId,
   eventName,
+  streampassId,
   enableRecordingProtection = true,
   strictRecordingProtection = false,
-  streampassId
 }: StreamingProviderProps): JSX.Element => {
   // Get streaming provider from environment variable
   const streamingProvider = import.meta.env.VITE_STREAMING_PROVIDER?.toLowerCase() || 'aws-ivs';
-  
+  console.log(streampassId, "Streampass ID in StreamingProvider2");
   // Default to AWS IVS if not specified or invalid provider
   const useAWSIVS = streamingProvider !== 'agora';
 

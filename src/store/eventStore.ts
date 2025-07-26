@@ -152,7 +152,7 @@ export const useEventStore = create<EventState>((set) => ({
     try {
       set({ isLoading: true });
       const response = await axios.get(`/streampass/get-one-event/${id}`);
-      set({ singleEvent: response.data.streampass.event, isLoading: false, singleStreampass: response.data.streampass.id });
+      set({ singleEvent: response.data.streampass.event, isLoading: false, singleStreampass: response.data.streampass._id });
     } catch (error) {
       console.error('Error fetching purchased event:', error);
       set({ singleEvent: null, isLoading: false });
