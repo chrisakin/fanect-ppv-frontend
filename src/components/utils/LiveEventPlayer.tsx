@@ -33,7 +33,7 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
   // Initialize streampass session tracking
   const { isSessionActive } = useStreampassSession({
     streampassId,
-    enabled: eventType === 'live' || eventType === 'upcoming'
+    enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming') 
   });
 
   // SSE connection for reliable event status monitoring
