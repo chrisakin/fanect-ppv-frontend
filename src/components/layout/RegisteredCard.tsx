@@ -54,7 +54,7 @@ export const RegisteredCard = ({ event }: GiftFriendProps): JSX.Element => {
 
                   {/* Artist Image Placeholder */}
                   <div className="w-[120px] h-[120px] bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <div className="text-white text-3xl font-bold"><img src={event.bannerUrl} className="cover" alt="" /></div>
+                    <div className="text-white text-3xl font-bold"><img src={event.bannerUrl} className="cover max-h-[120px]" alt="" /></div>
                   </div>
                 </CardContent>
               </Card>
