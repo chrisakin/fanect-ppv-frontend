@@ -12,6 +12,7 @@ import { useToast } from "../ui/use-toast";
 import { FeedbackModal } from "../modals/FeedbackModal";
 import { getUser } from "@/lib/auth";
 import { useEventStatus, EventStatus } from "../../hooks/useEventStatus";
+import { useStreampassSession } from "@/hooks/useStreampassSession";
 
 interface LiveEventPlayerProps {
   eventId: string;
@@ -30,10 +31,10 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
   const { toast } = useToast();
 console.log(streampassId, "Streampass ID in LiveEventPlayer");
   // Initialize streampass session tracking
-  // const { isSessionActive } = useStreampassSession({
-  //   streampassId,
-  //   enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming') 
-  // });
+  const { isSessionActive } = useStreampassSession({
+    streampassId,
+    enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming') 
+  });
 
   // SSE connection for reliable event status monitoring
   const { status: eventStatus, isConnected: sseConnected, error: sseError } = useEventStatus({
@@ -292,7 +293,7 @@ console.log(streampassId, "Streampass ID in LiveEventPlayer");
                     {hasStreamStarted && <span className="ml-1">🎬</span>}
                     {sseConnected && <span className="text-green-400">●</span>}
                     {sseError && <span className="text-red-400" title={sseError}>⚠</span>}
-                    {/* {isSessionActive && <span className="text-blue-400" title="Session Active">🔒</span>} */}
+                    {isSessionActive && <span className="text-blue-400" title="Session Active">🔒</span>}
                   </div>
                 </div>
               )}
