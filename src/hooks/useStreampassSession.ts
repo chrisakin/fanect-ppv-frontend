@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from '../lib/axios';
 
 interface UseStreampassSessionOptions {
@@ -7,198 +7,84 @@ interface UseStreampassSessionOptions {
 }
 
 export const useStreampassSession = ({ streampassId, enabled = true }: UseStreampassSessionOptions) => {
-  const sessionActiveRef = useRef(false);
+  const [isSessionActive, setIsSessionActive] = useState(false);
   const streampassIdRef = useRef<string | null>(null);
+  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Update refs when props change
   useEffect(() => {
     streampassIdRef.current = streampassId;
   }, [streampassId]);
 
-  // Function to start session
   const startSession = async (id: string) => {
     try {
-      await axios.post('/streampass/stream-session', {
-        streampassId: id,
-        inSession: true
-      });
-      sessionActiveRef.current = true;
+      await axios.post('/streampass/stream-session', { streampassId: id, inSession: true });
+      setIsSessionActive(true);
     } catch (error) {
       console.error('❌ Failed to start streampass session:', error);
-      throw error;
     }
   };
 
-  // Function to end session
   const endSession = async (id: string) => {
     try {
-      await axios.post('/streampass/stream-session', {
-        streampassId: id,
-        inSession: false
-      });
-      console.log('✅ Streampass session ended successfully');
-      sessionActiveRef.current = false;
-      console.log('✅ Streampass session ended successfully');
+      await axios.post('/streampass/stream-session', { streampassId: id, inSession: false });
+      setIsSessionActive(false);
     } catch (error) {
       console.error('❌ Failed to end streampass session:', error);
-      // Don't throw error on session end to avoid blocking navigation
     }
   };
 
-  // Main effect to manage session lifecycle
-  useEffect(() => {
-    if (!enabled || !streampassId) {
-      return;
+  const sendHeartbeat = async (id: string) => {
+    try {
+      await axios.post('/streampass/heartbeat', { streampassId: id });
+    } catch (error) {
+      console.error('❌ Heartbeat failed:', error);
     }
+  };
 
-    let mounted = true;
+  useEffect(() => {
+    if (!enabled || !streampassId) return;
 
-    // Start session when component mounts
-    const initializeSession = async () => {
-      try {
-        await startSession(streampassId);
-      } catch (error) {
-        console.error('Failed to initialize streampass session:', error);
+    const id = streampassId;
+
+    // Start session immediately
+    startSession(id);
+
+      heartbeatRef.current = setInterval(() => {
+        if (!document.hidden) sendHeartbeat(id);
+      }, 15000);
+
+    const handleBeforeUnload = () => {
+      if (streampassIdRef.current) {
+        navigator.sendBeacon(
+          '/streampass/stream-session',
+          JSON.stringify({ streampassId: streampassIdRef.current, inSession: false })
+        );
       }
     };
 
-    initializeSession();
-
-    // Cleanup function to end session
-    const cleanup = async () => {
-      console.log('Cleaning up streampass session...');
-      const currentStreampassId = streampassIdRef.current;
-      if (sessionActiveRef.current && currentStreampassId) {
-        await endSession(currentStreampassId);
-      }
-    };
-
-    // Handle page visibility changes (tab switching, minimizing)
     const handleVisibilityChange = async () => {
-      const currentStreampassId = streampassIdRef.current;
-      if (!currentStreampassId) return;
+      const currentId = streampassIdRef.current;
+      if (!currentId) return;
 
       if (document.hidden) {
-        // Page is hidden - end session
-        if (sessionActiveRef.current) {
-          await endSession(currentStreampassId);
-        }
+        await endSession(currentId);
       } else {
-        // Page is visible again - restart session
-        if (!sessionActiveRef.current && mounted) {
-          try {
-            await startSession(currentStreampassId);
-          } catch (error) {
-            console.error('Failed to restart session on visibility change:', error);
-          }
-        }
+        await startSession(currentId);
       }
     };
 
-    // Handle beforeunload (page refresh, close, navigation)
-    const handleBeforeUnload = () => {
-      const currentStreampassId = streampassIdRef.current;
-      if (sessionActiveRef.current && currentStreampassId) {
-        // Use sendBeacon for reliable delivery during page unload
-        const data = JSON.stringify({
-          streampassId: currentStreampassId,
-          inSession: false
-        });
-        
-        navigator.sendBeacon('/streampass/stream-session', data);
-        sessionActiveRef.current = false;
-      }
-    };
-
-    // Handle pagehide (more reliable than beforeunload on mobile)
-    const handlePageHide = () => {
-      const currentStreampassId = streampassIdRef.current;
-      if (sessionActiveRef.current && currentStreampassId) {
-        const data = JSON.stringify({
-          streampassId: currentStreampassId,
-          inSession: false
-        });
-        
-        navigator.sendBeacon('/streampass/stream-session', data);
-        sessionActiveRef.current = false;
-      }
-    };
-
-    // Handle focus/blur events as additional protection
-    const handleFocus = async () => {
-      const currentStreampassId = streampassIdRef.current;
-      if (!sessionActiveRef.current && currentStreampassId && mounted && !document.hidden) {
-        try {
-          await startSession(currentStreampassId);
-        } catch (error) {
-          console.error('Failed to restart session on focus:', error);
-        }
-      }
-    };
-
-    const handleBlur = async () => {
-      // Optional: You can choose to end session on blur for stricter control
-      // Uncomment the lines below if you want to end session when user switches tabs/apps
-      /*
-      const currentStreampassId = streampassIdRef.current;
-      if (sessionActiveRef.current && currentStreampassId) {
-        await endSession(currentStreampassId);
-      }
-      */
-    };
-
-    // Add event listeners
-    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', handlePageHide);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    //document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Cleanup function
     return () => {
-      mounted = false;
-      
-      // Remove event listeners
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pagehide', handlePageHide);
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
-      
-      // End session
-      cleanup();
+      window.removeEventListener('pagehide', handleBeforeUnload);
+      //document.removeEventListener('visibilitychange', handleVisibilityChange);
+      endSession(id);
     };
   }, [streampassId, enabled]);
 
-  // Heartbeat to maintain session (optional - sends periodic updates)
-  // useEffect(() => {
-  //   if (!enabled || !streampassId || !sessionActiveRef.current) {
-  //     return;
-  //   }
-
-  //   const heartbeatInterval = setInterval(async () => {
-  //     const currentStreampassId = streampassIdRef.current;
-  //     if (sessionActiveRef.current && currentStreampassId && !document.hidden) {
-  //       try {
-  //         await axios.post('/streampass/stream-session', {
-  //           streampassId: currentStreampassId,
-  //           inSession: true
-  //         });
-  //         console.log('💓 Streampass session heartbeat sent');
-  //       } catch (error) {
-  //         console.error('❌ Streampass session heartbeat failed:', error);
-  //       }
-  //     }
-  //   }, 30000); // Send heartbeat every 30 seconds
-
-  //   return () => {
-  //     clearInterval(heartbeatInterval);
-  //   };
-  // }, [streampassId, enabled]);
-
-  return {
-    isSessionActive: sessionActiveRef.current,
-    startSession: () => streampassId && startSession(streampassId),
-    endSession: () => streampassId && endSession(streampassId)
-  };
+  return { isSessionActive };
 };

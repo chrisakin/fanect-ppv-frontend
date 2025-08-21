@@ -29,7 +29,6 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
   const [feedbackShown, setFeedbackShown] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const { toast } = useToast();
-console.log(streampassId, "Streampass ID in LiveEventPlayer");
   // Initialize streampass session tracking
   const { isSessionActive } = useStreampassSession({
     streampassId,
@@ -110,11 +109,11 @@ console.log(streampassId, "Streampass ID in LiveEventPlayer");
           console.log('✅ Streaming data loaded:', data);
         }
       } catch (error: any) {
-        setStreamError(error.message || "Failed to load event stream");
+        setStreamError(error.message || "Streaming data not currently available due to network issues, try again later.");
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load event stream. Please try again later.",
+          description: "Streaming data not currently available due to network issues, try again later.",
         });
       } finally {
         setIsLoadingStream(false);

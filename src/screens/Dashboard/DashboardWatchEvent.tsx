@@ -22,11 +22,6 @@ export const DashboardWatchEvent = (): JSX.Element => {
   useEffect(() => {
     const fetchEvent = async () => {
       if (!id || !type) {
-         toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load event stream. Please try again later.",
-        });
         return;
       }
 
@@ -37,7 +32,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
         toast({
           variant: "destructive",
           title: "Error",
-          description: error.response.data.message || "Failed to load event stream. Please try again later.",
+          description: error.response.data.message,
         });
       }
     };
@@ -77,7 +72,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
     );
   }
 
-  if (!singleEvent) {
+  if (!singleEvent || !singleStreampass) {
     return <></>;
   }
 

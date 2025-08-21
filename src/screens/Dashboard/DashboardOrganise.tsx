@@ -112,7 +112,7 @@ export const DashboardOrganise = () => {
               primaryText="No Event yet" 
               secondaryText="When you create an event ticket, it will show up here" 
               hasButton={true} 
-              buttonText="Organize Event" 
+              buttonText="Create Event" 
               onClickButton={() => setIsCreateModalOpen(true)} 
             />
           )}
