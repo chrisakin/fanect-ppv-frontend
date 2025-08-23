@@ -6,6 +6,7 @@ import { Textarea } from "../ui/textarea";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { useToast } from "../ui/use-toast";
 import axios from "../../lib/axios";
+import { useNavigate } from "react-router-dom";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const FeedbackModal = ({ isOpen, onClose, eventId, eventName }: FeedbackM
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+   const navigate = useNavigate();
 
   const handleRatingClick = (selectedRating: number) => {
     setRating(selectedRating);
@@ -47,7 +49,7 @@ export const FeedbackModal = ({ isOpen, onClose, eventId, eventName }: FeedbackM
         title: "Thank you!",
         description: "Your feedback has been submitted successfully.",
       });
-
+      navigate(`/dashboard/tickets`)
       // Reset form and close modal
       setRating(null);
       setComment("");
