@@ -15,6 +15,8 @@ interface StreamingProviderProps {
   eventType?: 'live' | 'past' | 'upcoming';
   eventId?: string;
   eventName?: string;
+  sessionToken?: string | null;
+  isSessionActive?: boolean;
   enableRecordingProtection?: boolean;
   strictRecordingProtection?: boolean;
   streampassId: string | null;
@@ -26,6 +28,8 @@ export const StreamingProvider = ({
   eventId,
   eventName,
   streampassId,
+  sessionToken,
+  isSessionActive,
   enableRecordingProtection = true,
   strictRecordingProtection = false,
 }: StreamingProviderProps): JSX.Element => {
@@ -57,6 +61,8 @@ export const StreamingProvider = ({
               eventName={eventName}
               eventType={eventType}
               streampassId={streampassId}
+              sessionToken={sessionToken}
+              isSessionActive={isSessionActive}
             />
           </ErrorBoundary>
         );
@@ -66,6 +72,8 @@ export const StreamingProvider = ({
             <VideoPlayer 
               eventId={eventId}
               eventName={eventName}
+              sessionToken={sessionToken}
+              isSessionActive={isSessionActive}
             />
           </ErrorBoundary>
         );
@@ -81,6 +89,8 @@ export const StreamingProvider = ({
           chatToken={eventData?.chatToken}
           eventId={eventId}
           eventName={eventName}
+          sessionToken={sessionToken}
+          isSessionActive={isSessionActive}
         />
       );
     } else {
@@ -88,6 +98,8 @@ export const StreamingProvider = ({
         <VideoPlayer 
           eventId={eventId}
           eventName={eventName}
+          sessionToken={sessionToken}
+          isSessionActive={isSessionActive}
         />
       );
     }

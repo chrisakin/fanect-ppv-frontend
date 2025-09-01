@@ -7,6 +7,7 @@ import { clearTokens } from '../../lib/auth';
 import { Header } from './Header';
 import axios from '@/lib/axios';
 import { toast } from '../ui/use-toast';
+import { streampassSessionService } from '../../services/streampassSessionService';
 import HomeIcon from '../icons/HomeIcon';
 import CardPosIcon from '../icons/CardPosIcon';
 import MusicIcon from '../icons/MusicIcon';
@@ -74,6 +75,9 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
 
   const handleLogout = async () => {
     try {
+      // Clean up all streampass sessions before logout
+      streampassSessionService.cleanupAllSessions();
+      
       // Call logout endpoint
       await axios.post('/auth/logout');
     } catch (error) {

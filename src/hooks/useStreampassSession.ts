@@ -6,85 +6,239 @@ interface UseStreampassSessionOptions {
   enabled?: boolean;
 }
 
+interface SessionData {
+  sessionToken: string | null;
+  isActive: boolean;
+}
+
 export const useStreampassSession = ({ streampassId, enabled = true }: UseStreampassSessionOptions) => {
-  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [sessionData, setSessionData] = useState<SessionData>({
+    sessionToken: null,
+    isActive: false
+  });
+  const [sessionError, setSessionError] = useState<string | null>(null);
   const streampassIdRef = useRef<string | null>(null);
+  const sessionTokenRef = useRef<string | null>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
+  const isStartingSessionRef = useRef(false);
 
   useEffect(() => {
     streampassIdRef.current = streampassId;
   }, [streampassId]);
 
-  const startSession = async (id: string) => {
+  const startSession = async (id: string): Promise<string | null> => {
+    if (isStartingSessionRef.current) {
+      console.log('Session start already in progress, skipping...');
+      return sessionTokenRef.current;
+    }
+
     try {
-      await axios.post('/streampass/stream-session', { streampassId: id, inSession: true });
-      setIsSessionActive(true);
-    } catch (error) {
+      isStartingSessionRef.current = true;
+      setSessionError(null);
+      
+      console.log('🔐 Starting streampass session for:', id);
+      const response = await axios.post('/streampass/stream-session', { 
+        streampassId: id, 
+        startSession: true 
+      });
+      
+      const { sessionToken } = response.data;
+      sessionTokenRef.current = sessionToken;
+      
+      setSessionData({
+        sessionToken,
+        isActive: true
+      });
+      
+      console.log('✅ Session started successfully with token:', sessionToken);
+      return sessionToken;
+    } catch (error: any) {
       console.error('❌ Failed to start streampass session:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to start session';
+      setSessionError(errorMessage);
+      
+      setSessionData({
+        sessionToken: null,
+        isActive: false
+      });
+      
+      throw new Error(errorMessage);
+    } finally {
+      isStartingSessionRef.current = false;
     }
   };
 
-  const endSession = async (id: string) => {
+  const endSession = async (id: string, sessionToken: string | null) => {
+    if (!sessionToken) {
+      console.log('No session token available, skipping end session');
+      return;
+    }
+
     try {
-      await axios.post('/streampass/stream-session', { streampassId: id, inSession: false });
-      setIsSessionActive(false);
-    } catch (error) {
+      console.log('🔒 Ending streampass session for:', id);
+      await axios.post('/streampass/stream-session', { 
+        streampassId: id, 
+        startSession: false,
+        clientSessionToken: sessionToken
+      });
+      
+      sessionTokenRef.current = null;
+      setSessionData({
+        sessionToken: null,
+        isActive: false
+      });
+      
+      console.log('✅ Session ended successfully');
+    } catch (error: any) {
       console.error('❌ Failed to end streampass session:', error);
+      // Don't throw error for end session failures to avoid blocking cleanup
     }
   };
 
-  const sendHeartbeat = async (id: string) => {
+  const sendHeartbeat = async (id: string, sessionToken: string | null) => {
+    if (!sessionToken) {
+      console.log('No session token available for heartbeat');
+      return;
+    }
+
     try {
-      await axios.post('/streampass/heartbeat', { streampassId: id });
-    } catch (error) {
+      await axios.post('/streampass/heartbeat', { 
+        streampassId: id,
+        clientSessionToken: sessionToken
+      });
+      console.log('💓 Heartbeat sent successfully');
+    } catch (error: any) {
       console.error('❌ Heartbeat failed:', error);
+      
+      // If heartbeat fails due to invalid session, clear local session
+      if (error.response?.status === 403) {
+        console.log('Session invalidated by server, clearing local session');
+        sessionTokenRef.current = null;
+        setSessionData({
+          sessionToken: null,
+          isActive: false
+        });
+        setSessionError('Session expired or invalid');
+      }
     }
   };
 
   useEffect(() => {
-    if (!enabled || !streampassId) return;
+    if (!enabled || !streampassId) {
+      console.log('Session management disabled or no streampass ID');
+      return;
+    }
 
     const id = streampassId;
+    let sessionToken: string | null = null;
 
     // Start session immediately
-    startSession(id);
+    const initializeSession = async () => {
+      try {
+        sessionToken = await startSession(id);
+        
+        // Set up heartbeat interval only if session started successfully
+        if (sessionToken) {
+          heartbeatRef.current = setInterval(() => {
+            if (!document.hidden && sessionTokenRef.current) {
+              sendHeartbeat(id, sessionTokenRef.current);
+            }
+          }, 15000); // Send heartbeat every 15 seconds
+        }
+      } catch (error) {
+        console.error('Failed to initialize session:', error);
+      }
+    };
 
-      heartbeatRef.current = setInterval(() => {
-        if (!document.hidden) sendHeartbeat(id);
-      }, 15000);
+    initializeSession();
 
+    // Handle page unload/close
     const handleBeforeUnload = () => {
-      if (streampassIdRef.current) {
+      const currentId = streampassIdRef.current;
+      const currentToken = sessionTokenRef.current;
+      
+      if (currentId && currentToken) {
+        // Use sendBeacon for reliable cleanup on page unload
+        const payload = JSON.stringify({ 
+          streampassId: currentId, 
+          startSession: false,
+          clientSessionToken: currentToken
+        });
+        
         navigator.sendBeacon(
-          '/streampass/stream-session',
-          JSON.stringify({ streampassId: streampassIdRef.current, inSession: false })
+          `${axios.defaults.baseURL}/streampass/stream-session`,
+          new Blob([payload], { type: 'application/json' })
         );
       }
     };
 
+    // Handle visibility change (tab switching, minimizing)
     const handleVisibilityChange = async () => {
       const currentId = streampassIdRef.current;
-      if (!currentId) return;
+      const currentToken = sessionTokenRef.current;
+      
+      if (!currentId || !currentToken) return;
 
       if (document.hidden) {
-        await endSession(currentId);
+        console.log('Page hidden, ending session');
+        await endSession(currentId, currentToken);
       } else {
-        await startSession(currentId);
+        console.log('Page visible, restarting session');
+        try {
+          const newToken = await startSession(currentId);
+          if (newToken && heartbeatRef.current) {
+            // Restart heartbeat with new token
+            clearInterval(heartbeatRef.current);
+            heartbeatRef.current = setInterval(() => {
+              if (!document.hidden && sessionTokenRef.current) {
+                sendHeartbeat(currentId, sessionTokenRef.current);
+              }
+            }, 15000);
+          }
+        } catch (error) {
+          console.error('Failed to restart session:', error);
+        }
       }
     };
 
+    // Set up event listeners
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('pagehide', handleBeforeUnload);
-    //document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Cleanup function
     return () => {
-      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      console.log('🧹 Cleaning up streampass session');
+      
+      // Clear heartbeat interval
+      if (heartbeatRef.current) {
+        clearInterval(heartbeatRef.current);
+        heartbeatRef.current = null;
+      }
+      
+      // Remove event listeners
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('pagehide', handleBeforeUnload);
-      //document.removeEventListener('visibilitychange', handleVisibilityChange);
-      endSession(id);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      // End session
+      const currentId = streampassIdRef.current;
+      const currentToken = sessionTokenRef.current;
+      if (currentId && currentToken) {
+        endSession(currentId, currentToken);
+      }
     };
   }, [streampassId, enabled]);
 
-  return { isSessionActive };
+  // Return session data and utilities
+  return { 
+    sessionData,
+    sessionError,
+    isSessionActive: sessionData.isActive,
+    sessionToken: sessionData.sessionToken,
+    // Manual session control methods
+    startSession: (id: string) => startSession(id),
+    endSession: (id: string, token: string) => endSession(id, token),
+    clearError: () => setSessionError(null)
+  };
 };

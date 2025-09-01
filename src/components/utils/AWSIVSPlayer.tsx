@@ -17,6 +17,8 @@ interface AWSIVSPlayerProps {
   username?: string;
   eventId?: string;
   eventName?: string;
+  sessionToken?: string | null;
+  isSessionActive?: boolean;
 }
 
 export const AWSIVSPlayer = ({
@@ -26,7 +28,9 @@ export const AWSIVSPlayer = ({
   chatToken,
   username = "viewer",
   eventId,
-  eventName
+  eventName,
+  sessionToken,
+  isSessionActive
 }: AWSIVSPlayerProps): JSX.Element => {
   const {
     videoContainerRef,
@@ -248,6 +252,9 @@ export const AWSIVSPlayer = ({
                   <div className="flex items-center gap-2">
                     <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
                       {playerState}
+                      {isSessionActive && sessionToken && (
+                        <span className="ml-2 text-green-400">🔒 Secured</span>
+                      )}
                     </div>
                     {videoSettings.map((setting, index) => (
                       <button

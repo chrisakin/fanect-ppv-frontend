@@ -13,15 +13,26 @@ import { FeedbackModal } from "../modals/FeedbackModal";
 import { getUser } from "@/lib/auth";
 import { useEventStatus, EventStatus } from "../../hooks/useEventStatus";
 import { useStreampassSession } from "@/hooks/useStreampassSession";
+import { Alert, AlertDescription } from "../ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface LiveEventPlayerProps {
   eventId: string;
   eventName?: string;
   eventType: 'live' | 'upcoming';
   streampassId: string | null;
+  sessionToken?: string | null;
+  isSessionActive?: boolean;
 }
 
-export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }: LiveEventPlayerProps): JSX.Element => {
+export const LiveEventPlayer = ({ 
+  eventId, 
+  eventName, 
+  eventType, 
+  streampassId,
+  // sessionToken,
+  // isSessionActive 
+}: LiveEventPlayerProps): JSX.Element => {
   const [streamingData, setStreamingData] = useState<StreamingData | null>(null);
   const [isLoadingStream, setIsLoadingStream] = useState(true);
   const [streamError, setStreamError] = useState<string | null>(null);
@@ -29,11 +40,29 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
   const [feedbackShown, setFeedbackShown] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const { toast } = useToast();
-  // Initialize streampass session tracking
-  const { isSessionActive } = useStreampassSession({
+  
+  // Initialize streampass session tracking with error handling
+  const { 
+    sessionData, 
+    sessionError, 
+    isSessionActive, 
+    sessionToken,
+    clearError 
+  } = useStreampassSession({
     streampassId,
     enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming') 
   });
+
+  // Show session error if it occurs
+  useEffect(() => {
+    if (sessionError) {
+      toast({
+        variant: "destructive",
+        title: "Session Error",
+        description: sessionError,
+      });
+    }
+  }, [sessionError, toast]);
 
   // SSE connection for reliable event status monitoring
   const { status: eventStatus, isConnected: sseConnected, error: sseError } = useEventStatus({
@@ -226,6 +255,24 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
 
   return (
     <>
+      {/* Session Error Alert */}
+      {sessionError && (
+        <Alert className="mb-4 border-red-200 bg-red-50 dark:bg-red-900/20">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800 dark:text-red-200">
+            {sessionError}
+            <Button
+              variant="link"
+              size="sm"
+              onClick={clearError}
+              className="ml-2 p-0 h-auto text-red-600 hover:text-red-700"
+            >
+              Dismiss
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
         {/* Video Player - Full width on mobile/tablet, 70% on desktop */}
         <Card className="relative w-full lg:w-[70%] h-full bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
@@ -292,7 +339,8 @@ export const LiveEventPlayer = ({ eventId, eventName, eventType, streampassId }:
                     {hasStreamStarted && <span className="ml-1">🎬</span>}
                     {sseConnected && <span className="text-green-400">●</span>}
                     {sseError && <span className="text-red-400" title={sseError}>⚠</span>}
-                    {isSessionActive && <span className="text-blue-400" title="Session Active">🔒</span>}
+                    {isSessionActive && sessionToken && <span className="text-blue-400" title={`Session Active: ${sessionToken.substring(0, 8)}...`}>🔒</span>}
+                    {sessionError && <span className="text-red-400" title="Session Error">❌</span>}
                   </div>
                 </div>
               )}

@@ -41,6 +41,12 @@ axiosInstance.interceptors.request.use(
       config.headers["x-session-token"] = sessionToken
     }
 
+    // Add streampass session token if available
+    const streampassSessionToken = sessionStorage.getItem('streampass_session_token');
+    if (streampassSessionToken) {
+      config.headers["x-streampass-session-token"] = streampassSessionToken;
+    }
+
     // Add country header from location data
     const location = locationService.getCurrentLocation();
     if (location?.country) {
