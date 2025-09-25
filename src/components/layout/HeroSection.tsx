@@ -10,21 +10,21 @@ interface HeroSlide {
 const heroSlides: HeroSlide[] = [
   {
     id: 1,
-    image: "/image.png",
-    title: "Experience Live Contents Like Never Before",
-    description: "Stream exclusive concerts and festivals from anywhere in the world"
+    image: "/Banner 1.png",
+    title: "",
+    description: ""
   },
   {
     id: 2,
-    image: "/image 2.png", 
-    title: "Connect with Artists Globally",
-    description: "Get front-row access to your favorite performers in real-time"
+    image: "/Banner 2.png", 
+    title: "",
+    description: ""
   },
   {
     id: 3,
-    image: "/hd.svg",
-    title: "Premium Streaming Quality",
-    description: "Enjoy crystal-clear HD streaming with immersive audio"
+    image: "/Banner 3.png",
+    title: "",
+    description: ""
   }
 ];
 

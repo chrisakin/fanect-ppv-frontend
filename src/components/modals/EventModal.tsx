@@ -54,7 +54,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
     date: null,
     time: "",
     description: "",
-    prices: [{ currency: Currency.NONE, amount: 0 }],
+    prices: [{ currency: Currency.USD, amount: 0 }],
     haveBroadcastRoom: "",
     broadcastSoftware: "",
     scheduledTestDate: null,
@@ -547,7 +547,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                                 disabled
                                 className="w-full h-full border-0 bg-transparent text-center font-medium"
                               /> */}
-                              <Select value={price.currency} onValueChange={(value) => handlePriceChange(index, "currency", value)}>
+                              <Select disabled value={price.currency} onValueChange={(value) => handlePriceChange(index, "currency", value)}>
                               <SelectTrigger className="w-full h-full border-0 bg-transparent cursor-pointer">
                                 <SelectValue />
                               </SelectTrigger>
@@ -588,12 +588,12 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                                   placeholder="Enter amount"
                                   value={price.amount|| ''}
                                   onChange={(e) => handlePriceChange(index, 'amount', e.target.value)}
-                                  disabled={isSubmitting}
+                                  disabled={isSubmitting || price.currency != "USD" }
                                   />
                               </div>
                             </div>
 
-                            {formData.prices.length > 1 && (
+                            {/* {formData.prices.length > 1 && (
                               <Button
                                 type="button"
                                 onClick={() => removePrice(index)}
@@ -603,7 +603,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                               >
                                 <TrashIcon className="w-4 h-4" />
                               </Button>
-                            )}
+                            )} */}
                           </div>
                         ))}
                         
