@@ -21,7 +21,7 @@ export const EventCardsSection = ( { events, eventType }: EventCardsSectionProps
                     {events.map((event, index) => (
                       <Link to={event.hasStreamPass && isAuthenticated() && eventType == 'live' ? `/dashboard/tickets/watch-event/live/${event.id}` : event.hasStreamPass && isAuthenticated() && eventType == 'upcoming' ? `/dashboard/tickets/event/paid/${event.id}` : `/event/${event.id}`} key={index}>
                         <Card
-                          className="w-full h-[250px] rounded-lg overflow-hidden border border-solid border-[#d5d7da] hover:shadow-lg transition-shadow"
+                          className="w-full h-[300px] lg:h-[270px] rounded-lg overflow-hidden border border-solid border-[#d5d7da] hover:shadow-lg transition-shadow"
                         >
                           <img
                             className="w-full h-[160px] object-cover"

@@ -97,12 +97,15 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                 </span>
                   )}
                 </h3>
-                <p className="text-base md:text-lg text-[#828b86]">
+                <p className="text-base md:text-md text-[#828b86]">
                   {new Date(event.eventDateTime).toLocaleDateString('en-US', {
                     weekday: 'long',
-                    year: 'numeric',
+                    day: 'numeric',
                     month: 'long',
-                    day: 'numeric'
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
                   })}
                 </p>
               </div>

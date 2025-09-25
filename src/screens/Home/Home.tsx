@@ -32,13 +32,16 @@ export const Home = (): JSX.Element => {
   const transformedEvents = events.map(event => ({
     id: event._id,
     title: event.name,
-    date: new Date(event.eventDateTime).toLocaleDateString('en-US', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+    date: new Date(event.eventDateTime).toLocaleString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true // set false if you want 24-hour format
     }),
-    image: event.bannerUrl
+    image: event.bannerUrl,
   }));
 
   return (
