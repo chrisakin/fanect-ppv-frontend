@@ -255,7 +255,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
 
   const validateStep2 = (): boolean => {
     const newErrors: FormErrors = {};
-
+    console.log(formData.prices)
     if (formData.prices.length === 0 || formData.prices.some(p => p.amount <= 0)) {
       newErrors.prices = "At least one valid price is required";
     }

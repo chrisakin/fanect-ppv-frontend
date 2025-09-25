@@ -50,7 +50,7 @@ const [screenType, setScreenType] = useState<string>('')
 
                   {/* Date/Time - mobile only */}
                   <div className="md:hidden mt-1 font-text-lg-regular text-base text-gray-600 dark:text-[#828b86]">
-                    {`${formatInputDate(new Date(event.date))} ${formatTime(event.time)}`}
+                    {`${formatInputDate(new Date(event.date))} ${event.time && formatTime(event.time)}`}
                   </div>
 
                   {/* Badge + Dropdown - mobile only */}
@@ -107,7 +107,7 @@ const [screenType, setScreenType] = useState<string>('')
 
                 {/* Date/Time - desktop */}
                 <div className="hidden md:block font-text-lg-regular text-base text-gray-600 dark:text-[#828b86] truncate mt-2">
-                  {`${formatInputDate(new Date(event.date))} ${formatTime(event.time)}`}
+                  {`${formatInputDate(new Date(event.date))} ${event.time ?? formatTime(event.time)}`}
                 </div>
 
                 {/* Badge - desktop */}
