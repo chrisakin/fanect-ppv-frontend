@@ -10,19 +10,19 @@ interface HeroSlide {
 const heroSlides: HeroSlide[] = [
   {
     id: 1,
-    image: "/Banner 1.png",
+    image: "/Banner1.png",
     title: "",
     description: ""
   },
   {
     id: 2,
-    image: "/Banner 2.png", 
+    image: "/Banner2.png", 
     title: "",
     description: ""
   },
   {
     id: 3,
-    image: "/Banner 3.png",
+    image: "/Banner3.png",
     title: "",
     description: ""
   }
