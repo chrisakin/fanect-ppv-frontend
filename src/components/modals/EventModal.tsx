@@ -12,6 +12,7 @@ import { useEventStore } from "@/store/eventStore";
 import { CustomDatePicker } from "../ui/custom-date-picker";
 import { CustomTimePicker } from "../ui/custom-time-picker";
 import { Currency, IPrice } from "../../types/event";
+import { formatTime } from "@/lib/utils";
 
 interface EventModalProps {
   open: boolean;
@@ -307,7 +308,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
           formDataToSend.append('date', formData.date as unknown as string);
         }
         
-        formDataToSend.append('time', formData.time);
+        formDataToSend.append('time', formatTime(formData.time as unknown as string) as string);
         formDataToSend.append('description', formData.description);
         formDataToSend.append('prices', JSON.stringify(formData.prices));
         formDataToSend.append('haveBroadcastRoom', formData.haveBroadcastRoom);
