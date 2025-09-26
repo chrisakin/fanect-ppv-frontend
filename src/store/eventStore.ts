@@ -19,6 +19,7 @@ export interface Event {
   playbackUrl: string;
   chatToken: string;
   hasStreamPass: boolean;
+  timezone?: string;
 }
 
 interface PaginationData {

@@ -1,5 +1,5 @@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
-import { MoveVertical as MoreVerticalIcon } from "lucide-react";
+import { MoreVerticalIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Link } from "react-router-dom";
 import { Event } from "../../store/eventStore"
@@ -23,6 +23,14 @@ const getStatusClass = (status: string) => {
       return 'dark:bg-[#294435] bg-[#f5dbd9] text-[#d6675f] hover:!bg-[#f5dbd9] dark:hover:!bg-[#294435]';
   }
 };
+
+const dateFormat = (date: string) => {
+  return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+}
 
 export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSectionProps) => {
 const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -50,7 +58,7 @@ const [screenType, setScreenType] = useState<string>('')
 
                   {/* Date/Time - mobile only */}
                   <div className="md:hidden mt-1 font-text-lg-regular text-base text-gray-600 dark:text-[#828b86]">
-                    {`${formatInputDate(event.date)} ${event.time ? formatTime(event.time) : ''}`}
+                    {`${dateFormat((event.date))} ${event.time && formatTime(event.time)}`}
                   </div>
 
                   {/* Badge + Dropdown - mobile only */}
@@ -107,7 +115,7 @@ const [screenType, setScreenType] = useState<string>('')
 
                 {/* Date/Time - desktop */}
                 <div className="hidden md:block font-text-lg-regular text-base text-gray-600 dark:text-[#828b86] truncate mt-2">
-                  {`${formatInputDate(event.date)} ${event.time ? formatTime(event.time) : ''}`}
+                  {`${dateFormat(event.date)} ${event.time ?? formatTime(event.time)}`}
                 </div>
 
                 {/* Badge - desktop */}

@@ -133,7 +133,7 @@ export const DashboardHome = (): JSX.Element => {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    hour12: true // set false if you want 24-hour format
+    hour12: true,
   }),
     image: event.bannerUrl,
     hasStreamPass: event.hasStreamPass

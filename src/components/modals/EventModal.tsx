@@ -46,6 +46,7 @@ interface FormErrors {
   bannerUrl?: string;
   watermarkUrl?: string;
   eventTrailer?: string;
+  timezone?: string;
 }
 
 export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.Element => {
@@ -271,7 +272,6 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
 
   const validateStep2 = (): boolean => {
     const newErrors: FormErrors = {};
-    console.log(formData.prices)
     if (formData.prices.length === 0 || formData.prices.some(p => p.amount <= 0)) {
       newErrors.prices = "At least one valid price is required";
     }
@@ -322,13 +322,12 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
         if (formData.date) {
           formDataToSend.append('date', formData.date);
         }
-        
         formDataToSend.append('time', formData.time);
         formDataToSend.append('description', formData.description);
         formDataToSend.append('prices', JSON.stringify(formData.prices));
         formDataToSend.append('haveBroadcastRoom', formData.haveBroadcastRoom);
         formDataToSend.append('broadcastSoftware', formData.broadcastSoftware);
-        
+        formDataToSend.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
         if (formData.scheduledTestDate) {
           formDataToSend.append('scheduledTestDate', formData.scheduledTestDate);
         }

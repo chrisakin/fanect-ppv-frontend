@@ -110,7 +110,10 @@ export const Search = (): JSX.Element => {
                           weekday: 'long',
                           day: 'numeric',
                           month: 'long',
-                          year: 'numeric'
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true,                          
                         })}
                       </div>
                     </div>
