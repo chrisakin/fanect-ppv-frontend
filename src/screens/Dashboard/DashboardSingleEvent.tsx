@@ -5,7 +5,7 @@ import { BreadcrumbNavigation } from "@/components/layout/BreadcrumbNavigation";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEventStore } from "@/store/eventStore";
 import { useEffect, useState } from "react";
-import { GiftIcon, Loader2, PlayCircle } from "lucide-react";
+import { Gift as GiftIcon, Loader as Loader2, CirclePlay as PlayCircle } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GiftCard } from "@/components/layout/GiftCard";
@@ -202,7 +202,7 @@ export const DashboardSingleEvent = (): JSX.Element => {
               })}
               </p>
               <p className="font-text-lg-regular text-black dark:text-white">
-                Time: {formatTime(singleEvent.time)}
+                Time: {singleEvent.time ? formatTime(singleEvent.time) : 'Time not set'}
               </p>
               </div>
             </div>

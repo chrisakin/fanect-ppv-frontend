@@ -1,5 +1,5 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "../ui/dialog";
-import { X, UploadIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { X, Upload as UploadIcon, Plus as PlusIcon, Trash as TrashIcon } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -22,13 +22,13 @@ interface EventModalProps {
 
 interface FormData {
   name: string;
-  date: Date | null;
+  date: string | null;
   time: string;
   description: string;
   prices: IPrice[];
   haveBroadcastRoom: string;
   broadcastSoftware: string;
-  scheduledTestDate: Date | null;
+  scheduledTestDate: string | null;
   bannerUrl: File | null;
   watermarkUrl: File | null;
   eventTrailer: File | null;
@@ -75,8 +75,23 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
   useEffect(() => {
     if (event) {
       try {
-        const eventDate = event.date ? new Date(event.date) : null;
-        const scheduledDate = event.scheduledTestDate ? new Date(event.scheduledTestDate) : null;
+        // Convert dates to local timezone strings for the form
+        const eventDate = event.date ? (() => {
+          const date = new Date(event.date);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        })() : null;
+        
+        const scheduledDate = event.scheduledTestDate ? (() => {
+          const date = new Date(event.scheduledTestDate);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        })() : null;
+        
         setFormData({
           name: event.name || "",
           date: eventDate,
@@ -305,17 +320,17 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
         formDataToSend.append('name', formData.name);
         
         if (formData.date) {
-          formDataToSend.append('date', formData.date as unknown as string);
+          formDataToSend.append('date', formData.date);
         }
         
-        formDataToSend.append('time', formatTime(formData.time as unknown as string) as string);
+        formDataToSend.append('time', formData.time);
         formDataToSend.append('description', formData.description);
         formDataToSend.append('prices', JSON.stringify(formData.prices));
         formDataToSend.append('haveBroadcastRoom', formData.haveBroadcastRoom);
         formDataToSend.append('broadcastSoftware', formData.broadcastSoftware);
         
         if (formData.scheduledTestDate) {
-          formDataToSend.append('scheduledTestDate', formData.scheduledTestDate as unknown as string);
+          formDataToSend.append('scheduledTestDate', formData.scheduledTestDate);
         }
         
         if (formData.bannerUrl) {
@@ -453,7 +468,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </label>
                         <CustomDatePicker
                           value={formData.date}
-                          onChange={(date) => handleDateChange('date', date as unknown as string)}
+                         onChange={(date) => handleDateChange('date', date)}
                           placeholder="Select event date"
                           disabled={isSubmitting}
                           className="h-[50px] w-full px-3.5 py-2.5 bg-gray-50 dark:!bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
@@ -660,7 +675,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
 
                         <CustomDatePicker
                           value={formData.scheduledTestDate}
-                          onChange={(date) => handleDateChange('scheduledTestDate', date as unknown as string)}
+                         onChange={(date) => handleDateChange('scheduledTestDate', date)}
                           placeholder="Select test stream date"
                           disabled={isSubmitting}
                           className="h-[50px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"

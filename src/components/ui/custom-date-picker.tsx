@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from 'lucide-react';
+import { ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
 import { cn } from '../../lib/utils';

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ClockIcon } from 'lucide-react';
+import { Clock as ClockIcon } from 'lucide-react';
 import { Input } from './input';
 import { cn } from '../../lib/utils';
 
