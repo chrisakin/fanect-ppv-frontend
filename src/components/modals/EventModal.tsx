@@ -467,8 +467,8 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                           Event Date
                         </label>
                         <CustomDatePicker
-                          value={formData.date}
-                         onChange={(date) => handleDateChange('date', date)}
+                          value={formData.date as any}
+                         onChange={(date) => handleDateChange('date', date as any)}
                           placeholder="Select event date"
                           disabled={isSubmitting}
                           className="h-[50px] w-full px-3.5 py-2.5 bg-gray-50 dark:!bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
@@ -674,8 +674,8 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         </h3>
 
                         <CustomDatePicker
-                          value={formData.scheduledTestDate}
-                         onChange={(date) => handleDateChange('scheduledTestDate', date)}
+                          value={formData.scheduledTestDate as any}
+                         onChange={(date) => handleDateChange('scheduledTestDate', date as any)}
                           placeholder="Select test stream date"
                           disabled={isSubmitting}
                           className="h-[50px] w-full px-3.5 py-2.5 bg-gray-50 dark:bg-[#13201A] rounded-lg border border-solid border-[#d5d7da] dark:border-gray-600 [font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-gray-700 dark:text-gray-200 text-base tracking-[-0.32px]"
