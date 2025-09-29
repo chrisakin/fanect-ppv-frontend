@@ -66,7 +66,6 @@ export const HeroSection = () => {
 
   return (
     <section className="flex flex-col items-center justify-center gap-4 pb-6 w-full relative">
-      {/* Carousel Container */}
       <div className="relative w-full max-w-[1400px] h-[250px] md:h-[300px] rounded-lg overflow-hidden group">
         {/* Slides */}
         <div
@@ -144,7 +143,6 @@ export const HeroSection = () => {
         </button>
       </div>
 
-      {/* Navigation Dots */}
       <div className="flex items-center gap-2">
         {slides.map((_, index) => (
           <button
@@ -162,3 +160,6 @@ export const HeroSection = () => {
     </section>
   );
 };
+
+
+

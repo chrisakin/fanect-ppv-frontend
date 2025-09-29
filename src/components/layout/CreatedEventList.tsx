@@ -26,9 +26,13 @@ const getStatusClass = (status: string) => {
 
 const dateFormat = (date: string) => {
   return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
     });
 }
 
@@ -58,7 +62,7 @@ const [screenType, setScreenType] = useState<string>('')
 
                   {/* Date/Time - mobile only */}
                   <div className="md:hidden mt-1 font-text-lg-regular text-base text-gray-600 dark:text-[#828b86]">
-                    {`${dateFormat((event.date))} ${event.time && formatTime(event.time)}`}
+                    {`${dateFormat((event.eventDateTime))}`}
                   </div>
 
                   {/* Badge + Dropdown - mobile only */}
@@ -114,12 +118,12 @@ const [screenType, setScreenType] = useState<string>('')
                 </div>
 
                 {/* Date/Time - desktop */}
-                <div className="hidden md:block font-text-lg-regular text-base text-gray-600 dark:text-[#828b86] truncate mt-2">
-                  {`${dateFormat(event.date)} ${event.time ?? formatTime(event.time)}`}
+                <div className="hidden md:block font-text-lg-regular text-base text-gray-600 dark:text-[#828b86] mt-2">
+                  {`${dateFormat(event.eventDateTime)}`}
                 </div>
 
                 {/* Badge - desktop */}
-                <div className="hidden md:block">
+                <div className="hidden md:block ml-12">
                   <Badge
                     className={`flex h-[30px] items-center justify-center gap-2 px-2 max-w-[170px]  rounded-[8px] font-medium text-sm tracking-[-0.32px] whitespace-nowrap border-none ${getStatusClass(event.adminStatus)}`}
                   >
