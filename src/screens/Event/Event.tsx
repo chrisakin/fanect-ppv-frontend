@@ -90,6 +90,17 @@ export const Event = (): JSX.Element => {
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
                 {singleEvent.name}
               </h1>
+              <h2>
+                {new Date(singleEvent.eventDateTime).toLocaleString('en-US', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })}
+              </h2>
               <h2 className="text-lg sm:text-xl md:text-2xl font-medium">
                 {singleEvent.price?.currency} {Number(singleEvent.price?.amount).toLocaleString()}
               </h2>

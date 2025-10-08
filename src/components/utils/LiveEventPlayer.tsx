@@ -138,11 +138,13 @@ export const LiveEventPlayer = ({
           console.log('✅ Streaming data loaded:', data);
         }
       } catch (error: any) {
-        setStreamError(error.message || "Streaming data not currently available due to network issues, try again later.");
+        setStreamError(error.message || `The live stream hasn't started yet.
+          You'll be notified once the host goes live.`);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Streaming data not currently available due to network issues, try again later.",
+          description: `The live stream hasn't started yet.
+          You'll be notified once the host goes live.`,
         });
       } finally {
         setIsLoadingStream(false);

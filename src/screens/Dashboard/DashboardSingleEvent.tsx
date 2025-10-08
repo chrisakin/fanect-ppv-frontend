@@ -154,6 +154,17 @@ export const DashboardSingleEvent = (): JSX.Element => {
                 <h1 className="font-display-lg-semibold text-gray-900 dark:text-[#FFFFFF] text-2xl md:text-3xl lg:text-4xl">
                 {singleEvent.name}
               </h1>
+               <p className="font-text-lg-regular text-black dark:text-white">
+              Date: {new Date(singleEvent.eventDateTime).toLocaleDateString('en-US', {
+               weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              })}
+              </p>
              {type == 'paid' ? (
                <div className="flex flex-col gap-4">
               <h2 className="font-display-sm-medium  text-gray-900 dark:text-[#FFFFFF] text-xl md:text-2xl">
@@ -193,17 +204,9 @@ export const DashboardSingleEvent = (): JSX.Element => {
                 <p className="font-text-lg-regular text-black dark:text-white whitespace-pre-line">
                   {singleEvent.description}
                 </p>
-               <p className="font-text-lg-regular text-black dark:text-white">
-              Date: {new Date(singleEvent.date).toLocaleDateString('en-US', {
-               weekday: 'long',
-               year: 'numeric',
-               month: 'long',
-               day: 'numeric'
-              })}
-              </p>
-              <p className="font-text-lg-regular text-black dark:text-white">
+              {/* <p className="font-text-lg-regular text-black dark:text-white">
                 Time: {singleEvent.time ? formatTime(singleEvent.time) : 'Time not set'}
-              </p>
+              </p> */}
               </div>
             </div>
           </div>
