@@ -210,12 +210,14 @@ export const LiveEventPlayer = ({
   if (isLoadingStream) {
     return (
       <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
-        <Card className="relative w-full lg:w-[70%] h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
+        <Card className="relative w-full lg:w-[70%] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
-            <div className="relative w-full h-full bg-black flex items-center justify-center">
-              <div className="flex flex-col items-center gap-4">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-                <p className="text-white text-sm">Loading live stream...</p>
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <div className="absolute inset-0 bg-black flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                  <p className="text-white text-sm">Loading live stream...</p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -224,28 +226,30 @@ export const LiveEventPlayer = ({
     );
   }
 
-  // Show error state if streaming data couldn't be loaded
+  // Show error state if streaming data couldn't be loaded - Waiting for host
   if (streamError) {
     return (
       <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
-        <Card className="relative w-full lg:w-[70%] h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
+        <Card className="relative w-full lg:w-[70%] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
-            <div className="relative w-full h-full bg-black flex items-center justify-center">
-              <div className="flex flex-col items-center gap-4 text-center p-4">
-                <AlertCircle className="h-12 w-12 text-red-500" />
-                <div className="space-y-2">
-                  <p className="text-white text-lg font-medium">
-                    {eventType === 'upcoming' ? 'Event Not Started' : 'Stream Not Available'}
-                  </p>
-                  <p className="text-gray-400 text-sm max-w-md">
-                    {streamError}
-                  </p>
-                  {eventType === 'upcoming' && (
-                    <div className="flex items-center gap-2 text-gray-400 text-xs mt-4">
-                      <Wifi className="h-4 w-4" />
-                      <span>The live stream will be available when the event starts</span>
-                    </div>
-                  )}
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <div className="absolute inset-0 bg-black flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4 text-center p-4">
+                  <Loader2 className="h-12 w-12 animate-spin text-white" />
+                  <div className="space-y-2">
+                    <p className="text-white text-lg font-medium">
+                      Waiting for host to start the stream
+                    </p>
+                    <p className="text-gray-400 text-sm max-w-md">
+                      The stream will begin shortly. Please stay on this page.
+                    </p>
+                    {eventType === 'upcoming' && (
+                      <div className="flex items-center justify-center gap-2 text-gray-400 text-xs mt-4">
+                        <Wifi className="h-4 w-4" />
+                        <span>You'll be notified when the event starts</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -276,10 +280,12 @@ export const LiveEventPlayer = ({
       )}
 
       <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-6 w-full">
-        {/* Video Player - Full width on mobile/tablet, 70% on desktop */}
-        <Card className="relative w-full lg:w-[70%] h-full bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
+        {/* Video Player - Fixed 16:9 aspect ratio like YouTube */}
+        <Card className="relative w-full lg:w-[70%] bg-white dark:bg-[#062013] rounded-[10px] overflow-hidden border-0">
           <CardContent className="p-0">
-            <div className="relative w-full h-full bg-black">
+            {/* Fixed 16:9 aspect ratio container */}
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <div className="absolute inset-0 bg-black">
               {/* Live indicator */}
               {eventType === 'live' && (
                 <div className="absolute top-4 left-4 z-10">
@@ -316,13 +322,15 @@ export const LiveEventPlayer = ({
                 </div>
               )}
 
-              {/* Error state */}
+              {/* Error state - Waiting for host */}
               {playerError && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
                   <div className="flex flex-col items-center gap-4 text-center p-4">
-                    <AlertCircle className="h-8 w-8 text-red-500" />
-                    <p className="text-white text-sm">{playerError}</p>
-                    <p className="text-gray-400 text-xs">Please try refreshing the page</p>
+                    <Loader2 className="h-12 w-12 animate-spin text-white" />
+                    <div className="space-y-2">
+                      <p className="text-white text-lg font-medium">Waiting for host to start the stream</p>
+                      <p className="text-gray-400 text-sm">The stream will begin shortly...</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -330,22 +338,23 @@ export const LiveEventPlayer = ({
               {/* AWS IVS Player container */}
               <div
                 ref={videoContainerRef}
-                className="w-full h-full"
+                className="absolute inset-0 w-full h-full"
               />
               
-              {/* Player state indicator */}
-              {isPlayerLoaded && !playerError && (
-                <div className="absolute bottom-4 right-4 z-10">
-                  <div className="text-white text-xs bg-black/50 px-2 py-1 rounded flex items-center gap-2">
-                    <span>{playerState} • {eventType.toUpperCase()}</span>
-                    {hasStreamStarted && <span className="ml-1">🎬</span>}
-                    {sseConnected && <span className="text-green-400">●</span>}
-                    {sseError && <span className="text-red-400" title={sseError}>⚠</span>}
-                    {isSessionActive && sessionToken && <span className="text-blue-400" title={`Session Active: ${sessionToken.substring(0, 8)}...`}>🔒</span>}
-                    {sessionError && <span className="text-red-400" title="Session Error">❌</span>}
+                {/* Player state indicator */}
+                {isPlayerLoaded && !playerError && (
+                  <div className="absolute bottom-4 right-4 z-10">
+                    <div className="text-white text-xs bg-black/50 px-2 py-1 rounded flex items-center gap-2">
+                      <span>{playerState} • {eventType.toUpperCase()}</span>
+                      {hasStreamStarted && <span className="ml-1">🎬</span>}
+                      {sseConnected && <span className="text-green-400">●</span>}
+                      {sseError && <span className="text-red-400" title={sseError}>⚠</span>}
+                      {isSessionActive && sessionToken && <span className="text-blue-400" title={`Session Active: ${sessionToken.substring(0, 8)}...`}>🔒</span>}
+                      {sessionError && <span className="text-red-400" title="Session Error">❌</span>}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -54,7 +54,8 @@ export const useStreampassSession = ({ streampassId, enabled = true }: UseStream
       return sessionToken;
     } catch (error: any) {
       console.error('❌ Failed to start streampass session:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to start session';
+      const errorMessage = error.response?.data?.message || `The live stream hasn't started yet.
+You'll be notified once the host goes live.`;
       setSessionError(errorMessage);
       
       setSessionData({

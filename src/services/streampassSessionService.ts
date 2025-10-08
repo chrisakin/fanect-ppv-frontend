@@ -43,8 +43,9 @@ class StreampassSessionService {
       if (error.response?.status === 409) {
         throw new Error('MULTIPLE_DEVICE_ERROR: ' + error.response.data.message);
       }
-      
-      throw new Error(error.response?.data?.message || 'Failed to start session');
+
+      throw new Error(error.response?.data?.message || `The live stream hasn't started yet.
+You'll be notified once the host goes live.`);
     }
   }
 
