@@ -35,12 +35,15 @@ export function useAWSIVSService({
   const streamEndTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const stallCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastProgressTimeRef = useRef<number>(0);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef<number>(0);
 
   const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [playerState, setPlayerState] = useState<string>("IDLE");
   const [isConnected, setIsConnected] = useState(false);
   const [playerError, setPlayerError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   // Centralized stream end handler
   const handleStreamEnd = useCallback(() => {
@@ -203,8 +206,18 @@ export function useAWSIVSService({
           hasStartedPlayingRef.current = true;
           lastProgressTimeRef.current = videoElement.currentTime;
           setPlayerState("PLAYING");
+          setPlayerError(null);
+          setIsRetrying(false);
+          retryCountRef.current = 0;
+
+          // Clear retry timeout if stream starts playing
+          if (retryTimeoutRef.current) {
+            clearTimeout(retryTimeoutRef.current);
+            retryTimeoutRef.current = null;
+          }
+
           onPlayerStateChange?.("PLAYING");
-          
+
           // Start monitoring stream health
           startStreamMonitoring();
         });
@@ -228,19 +241,50 @@ export function useAWSIVSService({
 
         player.addEventListener(IVSPlayer.PlayerEventType.ERROR, (error: any) => {
           console.error("❌ IVS Player error:", error);
-          setPlayerError(`Player error: ${error.type || 'Unknown error'}`);
-          setPlayerState("ERROR");
-          onPlayerStateChange?.("ERROR");
-          
+
           // Treat certain errors as stream end if stream was playing
           if (hasStartedPlayingRef.current && (
-            error.type === 'ErrorNotAvailable' || 
+            error.type === 'ErrorNotAvailable' ||
             error.type === 'ErrorStreamOffline' ||
             error.type === 'ErrorNetwork' ||
             error.type === 'ErrorDecoder'
           )) {
             console.log("🔚 Stream error indicates stream ended:", error.type);
             handleStreamEnd();
+          } else if (!hasStartedPlayingRef.current) {
+            // If stream hasn't started yet, set up retry logic
+            console.log("⚠️ Player error before stream started:", error.type);
+            setPlayerError(`Waiting for stream to start...`);
+            setPlayerState("ERROR");
+            setIsRetrying(true);
+            onPlayerStateChange?.("ERROR");
+
+            // Set up retry after 15 seconds
+            if (!retryTimeoutRef.current && retryCountRef.current < 20) {
+              retryCountRef.current++;
+              console.log(`🔄 Scheduling retry attempt ${retryCountRef.current} in 15 seconds`);
+              retryTimeoutRef.current = setTimeout(() => {
+                console.log(`🔄 Retry attempt ${retryCountRef.current} - reloading player`);
+                retryTimeoutRef.current = null;
+
+                // Try to reload the stream
+                if (playerRef.current && playbackUrl) {
+                  try {
+                    setPlayerError(null);
+                    setIsRetrying(true);
+                    playerRef.current.load(playbackUrl);
+                    playerRef.current.setAutoplay(true);
+                  } catch (reloadError) {
+                    console.error("❌ Error reloading stream:", reloadError);
+                  }
+                }
+              }, 15000);
+            }
+          } else {
+            // For other errors during playback
+            setPlayerError(`Player error: ${error.type || 'Unknown error'}`);
+            setPlayerState("ERROR");
+            onPlayerStateChange?.("ERROR");
           }
         });
 
@@ -362,7 +406,7 @@ export function useAWSIVSService({
 
     return () => {
       mounted = false;
-      
+
       // Clear all timeouts
       if (streamEndTimeoutRef.current) {
         clearTimeout(streamEndTimeoutRef.current);
@@ -370,7 +414,11 @@ export function useAWSIVSService({
       if (stallCheckTimeoutRef.current) {
         clearTimeout(stallCheckTimeoutRef.current);
       }
-      
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+
       if (playerRef.current) {
         try {
           console.log("🧹 Cleaning up player");
@@ -380,11 +428,12 @@ export function useAWSIVSService({
           console.error("Error cleaning up player:", err);
         }
       }
-      
+
       setIsPlayerLoaded(false);
       streamEndedRef.current = false;
       hasStartedPlayingRef.current = false;
       lastProgressTimeRef.current = 0;
+      retryCountRef.current = 0;
     };
   }, [playbackUrl, loadIVSPlayer, onPlayerStateChange, handleStreamEnd, startStreamMonitoring]);
 
@@ -563,6 +612,7 @@ export function useAWSIVSService({
     playerState,
     playerError,
     isPlayerLoaded,
+    isRetrying,
     sendMessage,
     play,
     pause,

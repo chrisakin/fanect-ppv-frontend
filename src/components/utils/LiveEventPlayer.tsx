@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Avatar } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -40,29 +40,58 @@ export const LiveEventPlayer = ({
   const [feedbackShown, setFeedbackShown] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
   const { toast } = useToast();
+  const playbackCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Initialize streampass session tracking with error handling
-  const { 
-    sessionData, 
-    sessionError, 
-    isSessionActive, 
+  const {
+    sessionData,
+    sessionError,
+    isSessionActive,
     sessionToken,
-    clearError 
+    clearError,
+    startSession
   } = useStreampassSession({
     streampassId,
-    enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming') 
+    enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming')
   });
 
-  // Show session error if it occurs
+  // Handle session errors with automatic retry for session conflicts
   useEffect(() => {
     if (sessionError) {
-      toast({
-        variant: "destructive",
-        title: "Session Error",
-        description: sessionError,
-      });
+      // Check if this is a "already streaming" error
+      const isSessionConflict = sessionError.toLowerCase().includes('already streaming') ||
+                                sessionError.toLowerCase().includes('another session') ||
+                                sessionError.toLowerCase().includes('logged in from');
+
+      if (isSessionConflict) {
+        console.log('🔄 Session conflict detected, will retry in 15 seconds');
+        toast({
+          title: "Session Conflict",
+          description: "You're still logged in from another session. This may happen if you just refreshed the page. We'll automatically reconnect your stream in 15 seconds.",
+        });
+
+        // Retry starting the session after 15 seconds
+        const retryTimeout = setTimeout(() => {
+          console.log('🔄 Retrying session start after conflict...');
+          if (streampassId) {
+            clearError();
+            startSession(streampassId).catch(err => {
+              console.error('Failed to restart session:', err);
+            });
+          }
+        }, 15000);
+
+        return () => clearTimeout(retryTimeout);
+      } else {
+        // For other errors, just show the toast
+        toast({
+          variant: "destructive",
+          title: "Session Error",
+          description: sessionError,
+        });
+      }
     }
-  }, [sessionError, toast]);
+  }, [sessionError, toast, clearError, startSession, streampassId]);
 
   // SSE connection for reliable event status monitoring
   const { status: eventStatus, isConnected: sseConnected, error: sseError } = useEventStatus({
@@ -108,6 +137,7 @@ export const LiveEventPlayer = ({
     playerState,
     playerError,
     isPlayerLoaded,
+    isRetrying: isPlayerRetrying,
     sendMessage,
   } = useAWSIVSService({
     playbackUrl: streamingData?.playbackUrl || '',
@@ -131,13 +161,20 @@ export const LiveEventPlayer = ({
         setHasStreamStarted(false);
         const data = await eventStreamingService.getStreamingData(eventId, eventType);
         setStreamingData(data);
-        
+
         if (!data.playbackUrl) {
           setStreamError("Playback URL not available for this event");
         } else {
           console.log('✅ Streaming data loaded:', data);
+
+          // Clear any existing check interval
+          if (playbackCheckIntervalRef.current) {
+            clearInterval(playbackCheckIntervalRef.current);
+            playbackCheckIntervalRef.current = null;
+          }
         }
       } catch (error: any) {
+        console.log('⚠️ Error fetching streaming data:', error);
         setStreamError(error.message || `The live stream hasn't started yet.
           You'll be notified once the host goes live.`);
         toast({
@@ -146,6 +183,28 @@ export const LiveEventPlayer = ({
           description: `The live stream hasn't started yet.
           You'll be notified once the host goes live.`,
         });
+
+        // Start periodic checking for playback URL availability
+        if (!playbackCheckIntervalRef.current) {
+          console.log('🔍 Starting playback URL availability checks every 10 seconds');
+          playbackCheckIntervalRef.current = setInterval(async () => {
+            console.log('🔍 Checking if playback URL is now available...');
+            try {
+              const data = await eventStreamingService.getStreamingData(eventId, eventType);
+              if (data.playbackUrl) {
+                console.log('✅ Playback URL is now available!');
+                setStreamingData(data);
+                setStreamError(null);
+                if (playbackCheckIntervalRef.current) {
+                  clearInterval(playbackCheckIntervalRef.current);
+                  playbackCheckIntervalRef.current = null;
+                }
+              }
+            } catch (err) {
+              console.log('⚠️ Playback URL still not available');
+            }
+          }, 10000);
+        }
       } finally {
         setIsLoadingStream(false);
       }
@@ -154,6 +213,14 @@ export const LiveEventPlayer = ({
     if (eventId) {
       fetchStreamingData();
     }
+
+    // Cleanup interval on unmount
+    return () => {
+      if (playbackCheckIntervalRef.current) {
+        clearInterval(playbackCheckIntervalRef.current);
+        playbackCheckIntervalRef.current = null;
+      }
+    };
   }, [eventId, eventType, toast]);
 
   const handleFeedbackModalClose = useCallback(() => {
@@ -322,14 +389,21 @@ export const LiveEventPlayer = ({
                 </div>
               )}
 
-              {/* Error state - Waiting for host */}
+              {/* Error state - Waiting for host with retry indicator */}
               {playerError && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
                   <div className="flex flex-col items-center gap-4 text-center p-4">
                     <Loader2 className="h-12 w-12 animate-spin text-white" />
                     <div className="space-y-2">
-                      <p className="text-white text-lg font-medium">Waiting for host to start the stream</p>
+                      <p className="text-white text-lg font-medium">
+                        {isPlayerRetrying ? 'Connecting to stream...' : 'Waiting for host to start the stream'}
+                      </p>
                       <p className="text-gray-400 text-sm">The stream will begin shortly...</p>
+                      {isPlayerRetrying && (
+                        <p className="text-gray-500 text-xs">
+                          Automatically checking for stream availability...
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
