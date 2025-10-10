@@ -199,6 +199,8 @@ export function useAWSIVSService({
           console.log("🎬 Player ready");
           setPlayerState("READY");
           setIsPlayerLoaded(true);
+          setPlayerError(null);
+          setIsRetrying(false);
         });
 
         player.addEventListener(IVSPlayer.PlayerEventType.PLAYING, () => {
@@ -225,6 +227,8 @@ export function useAWSIVSService({
         player.addEventListener(IVSPlayer.PlayerEventType.BUFFERING, () => {
           console.log("⏳ Player buffering");
           setPlayerState("BUFFERING");
+          setPlayerError(null);
+          setIsRetrying(false);
           onPlayerStateChange?.("BUFFERING");
         });
 

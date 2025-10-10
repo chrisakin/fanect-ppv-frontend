@@ -118,10 +118,11 @@ export const LiveEventPlayer = ({
   });
 
   const handlePlayerStateChange = useCallback((state: string) => {
+    console.log('🎬 Player state changed to:', state);
     if (state === "PLAYING") {
       setHasStreamStarted(true);
     }
-  }, [hasStreamStarted]);
+  }, []);
 
   const handleChatMessage = useCallback((message: any) => {
     console.log('💬 Chat message received:', message);
@@ -379,8 +380,8 @@ export const LiveEventPlayer = ({
                 </div>
               )}
 
-              {/* Loading state */}
-              {!isPlayerLoaded && !playerError && (
+              {/* Loading state - only show if player not loaded and stream not started */}
+              {!isPlayerLoaded && !playerError && !hasStreamStarted && playerState !== "PLAYING" && playerState !== "BUFFERING" && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <div className="flex flex-col items-center gap-4">
                     <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -389,8 +390,8 @@ export const LiveEventPlayer = ({
                 </div>
               )}
 
-              {/* Error state - Waiting for host with retry indicator */}
-              {playerError && (
+              {/* Error state - Waiting for host (only show if stream hasn't started) */}
+              {playerError && !hasStreamStarted && playerState !== "PLAYING" && playerState !== "BUFFERING" && playerState !== "READY" && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
                   <div className="flex flex-col items-center gap-4 text-center p-4">
                     <Loader2 className="h-12 w-12 animate-spin text-white" />
