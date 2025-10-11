@@ -178,8 +178,9 @@ export function useAWSIVSService({
         videoElement.setAttribute("controls", "true");
         videoElement.style.width = "100%";
         videoElement.style.height = "100%";
-        videoElement.style.objectFit = "cover";
+        videoElement.style.objectFit = "contain";
         videoElement.style.backgroundColor = "#000";
+        videoElement.style.display = "block";
 
         if (videoContainerRef.current) {
           videoContainerRef.current.innerHTML = "";

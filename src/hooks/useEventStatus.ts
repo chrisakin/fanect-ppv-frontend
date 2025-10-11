@@ -72,10 +72,9 @@ export const useEventStatus = ({
   useEffect(() => {
     // Reset mounted ref
     mountedRef.current = true;
-    
+
     if (!enabled || !eventId) {
       console.log('⚠️ SSE connection disabled or no eventId provided');
-      cleanup();
       return;
     }
 

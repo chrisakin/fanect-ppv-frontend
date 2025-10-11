@@ -6,7 +6,7 @@ import { Input } from "../../components/ui/input";
 import { ScrollArea, ScrollBar } from "../../components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { useAWSIVSService } from "./AWSIVS";
-import { Loader2, AlertCircle, Wifi } from "lucide-react";
+import { Loader as Loader2, CircleAlert as AlertCircle, Wifi } from "lucide-react";
 import { eventStreamingService, StreamingData } from "../../services/eventStreamingService";
 import { useToast } from "../ui/use-toast";
 import { FeedbackModal } from "../modals/FeedbackModal";
@@ -14,7 +14,7 @@ import { getUser } from "@/lib/auth";
 import { useEventStatus, EventStatus } from "../../hooks/useEventStatus";
 import { useStreampassSession } from "@/hooks/useStreampassSession";
 import { Alert, AlertDescription } from "../ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { TriangleAlert as AlertTriangle } from "lucide-react";
 
 interface LiveEventPlayerProps {
   eventId: string;
@@ -154,13 +154,20 @@ export const LiveEventPlayer = ({
 
   // Fetch streaming data for live event
   useEffect(() => {
+    let isMounted = true;
+
     const fetchStreamingData = async () => {
+      if (!isMounted) return;
+
       try {
         setIsLoadingStream(true);
         setStreamError(null);
         setFeedbackShown(false);
         setHasStreamStarted(false);
         const data = await eventStreamingService.getStreamingData(eventId, eventType);
+
+        if (!isMounted) return;
+
         setStreamingData(data);
 
         if (!data.playbackUrl) {
@@ -175,6 +182,8 @@ export const LiveEventPlayer = ({
           }
         }
       } catch (error: any) {
+        if (!isMounted) return;
+
         console.log('⚠️ Error fetching streaming data:', error);
         setStreamError(error.message || `The live stream hasn't started yet.
           You'll be notified once the host goes live.`);
@@ -185,17 +194,21 @@ export const LiveEventPlayer = ({
           You'll be notified once the host goes live.`,
         });
 
-        // Start periodic checking for playback URL availability
+        // Start periodic checking for playback URL availability - only once
         if (!playbackCheckIntervalRef.current) {
-          console.log('🔍 Starting playback URL availability checks every 10 seconds');
+          console.log('🔍 Starting playback URL availability checks every 30 seconds');
           playbackCheckIntervalRef.current = setInterval(async () => {
+            if (!isMounted) return;
+
             console.log('🔍 Checking if playback URL is now available...');
             try {
               const data = await eventStreamingService.getStreamingData(eventId, eventType);
               if (data.playbackUrl) {
                 console.log('✅ Playback URL is now available!');
-                setStreamingData(data);
-                setStreamError(null);
+                if (isMounted) {
+                  setStreamingData(data);
+                  setStreamError(null);
+                }
                 if (playbackCheckIntervalRef.current) {
                   clearInterval(playbackCheckIntervalRef.current);
                   playbackCheckIntervalRef.current = null;
@@ -204,10 +217,12 @@ export const LiveEventPlayer = ({
             } catch (err) {
               console.log('⚠️ Playback URL still not available');
             }
-          }, 10000);
+          }, 30000);
         }
       } finally {
-        setIsLoadingStream(false);
+        if (isMounted) {
+          setIsLoadingStream(false);
+        }
       }
     };
 
@@ -217,6 +232,7 @@ export const LiveEventPlayer = ({
 
     // Cleanup interval on unmount
     return () => {
+      isMounted = false;
       if (playbackCheckIntervalRef.current) {
         clearInterval(playbackCheckIntervalRef.current);
         playbackCheckIntervalRef.current = null;

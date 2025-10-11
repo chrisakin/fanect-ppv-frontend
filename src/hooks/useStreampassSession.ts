@@ -144,7 +144,7 @@ You'll be notified once the host goes live.`;
             if (!document.hidden && sessionTokenRef.current) {
               sendHeartbeat(id, sessionTokenRef.current);
             }
-          }, 15000); // Send heartbeat every 15 seconds
+          }, 60000); // Send heartbeat every 60 seconds
         }
       } catch (error) {
         console.error('Failed to initialize session:', error);
@@ -194,7 +194,7 @@ You'll be notified once the host goes live.`;
               if (!document.hidden && sessionTokenRef.current) {
                 sendHeartbeat(currentId, sessionTokenRef.current);
               }
-            }, 15000);
+            }, 60000);
           }
         } catch (error) {
           console.error('Failed to restart session:', error);
