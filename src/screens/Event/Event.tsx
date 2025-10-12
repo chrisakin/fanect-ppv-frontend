@@ -22,7 +22,7 @@ export const Event = (): JSX.Element => {
     if (id) {
       fetchSingleEvent(id);
     }
-  }, [id, fetchSingleEvent]);
+  }, [id, fetchSingleEvent, isAuthenticated]);
 
   const handleActionClick = (type: string) => {
     if (!isAuthenticated) {
@@ -31,8 +31,7 @@ export const Event = (): JSX.Element => {
        if (eventType) {
         sessionStorage.setItem('redirectEventType', eventType);
       }
-      // Store both the redirect URL and event type for post-login logic
-        sessionStorage.setItem('redirectUrl', `/dashboard/tickets/event/${type}/${id}`);
+      sessionStorage.setItem('redirectUrl', `/dashboard/tickets/event/${type}/${id}`);
       sessionStorage.setItem('preRedirectUrl', `/event/${id}`);
       setIsLoginModalOpen(true);
     } else {
