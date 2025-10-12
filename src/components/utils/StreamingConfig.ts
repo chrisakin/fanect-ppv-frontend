@@ -1,12 +1,6 @@
 export interface StreamingConfig {
-  provider: 'agora' | 'aws-ivs';
-  agora?: {
-    appId: string;
-    channel: string;
-    token?: string;
-    uid?: string | number;
-  };
-  awsIvs?: {
+  provider: 'aws-ivs';
+  awsIvs: {
     playbackUrl: string;
     chatRoomArn: string;
     chatToken: string;
@@ -16,36 +10,20 @@ export interface StreamingConfig {
 }
 
 export const getStreamingConfig = (): StreamingConfig => {
-  const provider = (import.meta.env.VITE_STREAMING_PROVIDER?.toLowerCase() || 'aws-ivs') as 'agora' | 'aws-ivs';
-  
   const config: StreamingConfig = {
-    provider: provider === 'agora' ? 'agora' : 'aws-ivs',
-  };
-
-  if (config.provider === 'agora') {
-    config.agora = {
-      appId: import.meta.env.VITE_AGORA_APP_ID || '',
-      channel: 'default-channel', // This should come from your event data
-      token: '', // This should come from your backend
-      uid: undefined,
-    };
-  } else {
-    config.awsIvs = {
-      playbackUrl: '', // This should come from your event data
-      chatRoomArn: '', // This should come from your event data
-      chatToken: '', // This should come from your backend
+    provider: 'aws-ivs',
+    awsIvs: {
+      playbackUrl: '',
+      chatRoomArn: '',
+      chatToken: '',
       region: import.meta.env.VITE_AWS_IVS_REGION || 'eu-west-1',
       chatRegion: import.meta.env.VITE_AWS_IVS_CHAT_REGION || 'eu-west-1',
-    };
-  }
+    },
+  };
 
   return config;
 };
 
-export const isAgoraProvider = (): boolean => {
-  return getStreamingConfig().provider === 'agora';
-};
-
 export const isAWSIVSProvider = (): boolean => {
-  return getStreamingConfig().provider === 'aws-ivs';
+  return true;
 };
