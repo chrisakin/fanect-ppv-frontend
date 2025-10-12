@@ -19,7 +19,6 @@ export const useStreampassSession = ({ streampassId, enabled = true }: UseStream
   const [sessionError, setSessionError] = useState<string | null>(null);
   const streampassIdRef = useRef<string | null>(null);
   const sessionTokenRef = useRef<string | null>(null);
-  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const isStartingSessionRef = useRef(false);
 
   useEffect(() => {
@@ -96,34 +95,6 @@ You'll be notified once the host goes live.`;
     }
   };
 
-  const sendHeartbeat = async (id: string, sessionToken: string | null) => {
-    if (!sessionToken) {
-      console.log('No session token available for heartbeat');
-      return;
-    }
-
-    try {
-      await axios.post('/streampass/heartbeat', { 
-        streampassId: id,
-        clientSessionToken: sessionToken
-      });
-      console.log('💓 Heartbeat sent successfully');
-    } catch (error: any) {
-      console.error('❌ Heartbeat failed:', error);
-      
-      // If heartbeat fails due to invalid session, clear local session
-      if (error.response?.status === 403) {
-        console.log('Session invalidated by server, clearing local session');
-        sessionTokenRef.current = null;
-        setSessionData({
-          sessionToken: null,
-          isActive: false
-        });
-        setSessionError('Session expired or invalid');
-      }
-    }
-  };
-
   useEffect(() => {
     if (!enabled || !streampassId) {
       console.log('Session management disabled or no streampass ID');
@@ -131,21 +102,12 @@ You'll be notified once the host goes live.`;
     }
 
     const id = streampassId;
-    let sessionToken: string | null = null;
 
-    // Start session immediately
+    // Start session immediately when entering the page
     const initializeSession = async () => {
       try {
-        sessionToken = await startSession(id);
-        
-        // Set up heartbeat interval only if session started successfully
-        if (sessionToken) {
-          heartbeatRef.current = setInterval(() => {
-            if (!document.hidden && sessionTokenRef.current) {
-              sendHeartbeat(id, sessionTokenRef.current);
-            }
-          }, 60000); // Send heartbeat every 60 seconds
-        }
+        const token = await startSession(id);
+        console.log('✅ Session started on page entry');
       } catch (error) {
         console.error('Failed to initialize session:', error);
       }
@@ -153,19 +115,20 @@ You'll be notified once the host goes live.`;
 
     initializeSession();
 
-    // Handle page unload/close
+    // Handle page unload/close - send false
     const handleBeforeUnload = () => {
       const currentId = streampassIdRef.current;
       const currentToken = sessionTokenRef.current;
-      
+
       if (currentId && currentToken) {
+        console.log('🔒 Ending session on page unload');
         // Use sendBeacon for reliable cleanup on page unload
-        const payload = JSON.stringify({ 
-          streampassId: currentId, 
+        const payload = JSON.stringify({
+          streampassId: currentId,
           startSession: false,
           clientSessionToken: currentToken
         });
-        
+
         navigator.sendBeacon(
           `${axios.defaults.baseURL}/streampass/stream-session`,
           new Blob([payload], { type: 'application/json' })
@@ -173,59 +136,23 @@ You'll be notified once the host goes live.`;
       }
     };
 
-    // Handle visibility change (tab switching, minimizing)
-    const handleVisibilityChange = async () => {
-      const currentId = streampassIdRef.current;
-      const currentToken = sessionTokenRef.current;
-      
-      if (!currentId || !currentToken) return;
-
-      if (document.hidden) {
-        console.log('Page hidden, ending session');
-        await endSession(currentId, currentToken);
-      } else {
-        console.log('Page visible, restarting session');
-        try {
-          const newToken = await startSession(currentId);
-          if (newToken && heartbeatRef.current) {
-            // Restart heartbeat with new token
-            clearInterval(heartbeatRef.current);
-            heartbeatRef.current = setInterval(() => {
-              if (!document.hidden && sessionTokenRef.current) {
-                sendHeartbeat(currentId, sessionTokenRef.current);
-              }
-            }, 60000);
-          }
-        } catch (error) {
-          console.error('Failed to restart session:', error);
-        }
-      }
-    };
-
-    // Set up event listeners
+    // Set up event listeners for page close/navigation
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('pagehide', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Cleanup function
+    // Cleanup function - end session when component unmounts
     return () => {
-      console.log('🧹 Cleaning up streampass session');
-      
-      // Clear heartbeat interval
-      if (heartbeatRef.current) {
-        clearInterval(heartbeatRef.current);
-        heartbeatRef.current = null;
-      }
-      
+      console.log('🧹 Cleaning up streampass session on unmount');
+
       // Remove event listeners
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('pagehide', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      
-      // End session
+
+      // End session when leaving the page
       const currentId = streampassIdRef.current;
       const currentToken = sessionTokenRef.current;
       if (currentId && currentToken) {
+        console.log('🔒 Ending session on page leave');
         endSession(currentId, currentToken);
       }
     };

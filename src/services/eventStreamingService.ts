@@ -11,6 +11,7 @@ export interface StreamingData {
 
 class EventStreamingService {
   private static instance: EventStreamingService;
+  private readonly CACHE_PREFIX = 'streaming_data_';
 
   private constructor() {}
 
@@ -21,17 +22,63 @@ class EventStreamingService {
     return EventStreamingService.instance;
   }
 
+  // Cache management
+  private getCacheKey(eventId: string): string {
+    return `${this.CACHE_PREFIX}${eventId}`;
+  }
+
+  private getCachedData(eventId: string): StreamingData | null {
+    try {
+      const cached = sessionStorage.getItem(this.getCacheKey(eventId));
+      if (cached) {
+        console.log('✅ Using cached streaming data for event:', eventId);
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.error('Error reading from cache:', error);
+    }
+    return null;
+  }
+
+  private setCachedData(eventId: string, data: StreamingData): void {
+    try {
+      sessionStorage.setItem(this.getCacheKey(eventId), JSON.stringify(data));
+      console.log('💾 Cached streaming data for event:', eventId);
+    } catch (error) {
+      console.error('Error writing to cache:', error);
+    }
+  }
+
+  public clearCache(eventId: string): void {
+    try {
+      sessionStorage.removeItem(this.getCacheKey(eventId));
+      console.log('🗑️ Cleared cache for event:', eventId);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+    }
+  }
+
   // Get stream key for upcoming/live events (for organizers)
   public async getStreamKey(eventId: string): Promise<StreamingData> {
+    // Check cache first
+    const cached = this.getCachedData(eventId);
+    if (cached && cached.streamKey) {
+      return cached;
+    }
+
     try {
       const response = await axios.get(`/events/streamkey/${eventId}`);
-      return {
+      const data = {
         streamKey: response.data.streamKey,
         chatToken: response.data.chatToken,
         playbackUrl: response.data.playbackUrl,
         chatRoomArn: response.data.chatRoomArn,
         liveStreamUrl: response.data.playbackUrl
       };
+
+      // Cache the data
+      this.setCachedData(eventId, data);
+      return data;
     } catch (error) {
       console.error('Error fetching stream key:', error);
       throw new Error('Failed to get stream key');

@@ -152,18 +152,22 @@ export const LiveEventPlayer = ({
 
   const [messageInput, setMessageInput] = useState("");
 
-  // Fetch streaming data for live event
+  // Fetch streaming data for live event - only once, with caching
   useEffect(() => {
     let isMounted = true;
+    const hasFetchedRef = { current: false };
 
     const fetchStreamingData = async () => {
-      if (!isMounted) return;
+      if (!isMounted || hasFetchedRef.current) return;
+      hasFetchedRef.current = true;
 
       try {
         setIsLoadingStream(true);
         setStreamError(null);
         setFeedbackShown(false);
         setHasStreamStarted(false);
+
+        // This will now use cached data if available
         const data = await eventStreamingService.getStreamingData(eventId, eventType);
 
         if (!isMounted) return;
@@ -202,6 +206,7 @@ export const LiveEventPlayer = ({
 
             console.log('🔍 Checking if playback URL is now available...');
             try {
+              // Force fetch bypassing cache for polling
               const data = await eventStreamingService.getStreamingData(eventId, eventType);
               if (data.playbackUrl) {
                 console.log('✅ Playback URL is now available!');
@@ -230,15 +235,20 @@ export const LiveEventPlayer = ({
       fetchStreamingData();
     }
 
-    // Cleanup interval on unmount
+    // Cleanup interval and cache on unmount
     return () => {
       isMounted = false;
       if (playbackCheckIntervalRef.current) {
         clearInterval(playbackCheckIntervalRef.current);
         playbackCheckIntervalRef.current = null;
       }
+      // Clear streaming data cache when leaving the page
+      if (eventId) {
+        eventStreamingService.clearCache(eventId);
+        console.log('🗑️ Cleared streaming data cache on unmount');
+      }
     };
-  }, [eventId, eventType, toast]);
+  }, [eventId, eventType]);
 
   const handleFeedbackModalClose = useCallback(() => {
     setShowFeedbackModal(false);

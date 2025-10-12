@@ -59,13 +59,22 @@ export const DashboardWatchEvent = (): JSX.Element => {
         toast({
           variant: "destructive",
           title: "Error",
-          description: error.response.data.message,
+          description: error.response?.data?.message || 'Failed to fetch event',
         });
       }
     };
 
     fetchEvent();
-  }, [id, type, fetchPurchasedEvent, navigate]);
+
+    // Cleanup: clear cache when leaving the page
+    return () => {
+      if (id) {
+        const cacheKey = `purchased_event_${id}`;
+        sessionStorage.removeItem(cacheKey);
+        console.log('🗑️ Cleared purchased event cache on unmount');
+      }
+    };
+  }, [id, type]);
 
   // Generate breadcrumb items based on watch type
   const getBreadcrumbItems = () => {

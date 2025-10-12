@@ -153,9 +153,37 @@ export const useEventStore = create<EventState>((set) => ({
   },
   fetchPurchasedEvent: async (id: string) => {
     try {
+      // Check sessionStorage cache first
+      const cacheKey = `purchased_event_${id}`;
+      const cached = sessionStorage.getItem(cacheKey);
+
+      if (cached) {
+        console.log('✅ Using cached purchased event data for:', id);
+        const cachedData = JSON.parse(cached);
+        set({
+          singleEvent: cachedData.event,
+          isLoading: false,
+          singleStreampass: cachedData.streampassId
+        });
+        return;
+      }
+
       set({ isLoading: true });
       const response = await axios.get(`/streampass/get-one-event/${id}`);
-      set({ singleEvent: response.data.streampass.event, isLoading: false, singleStreampass: response.data.streampass._id });
+
+      // Cache the response
+      const cacheData = {
+        event: response.data.streampass.event,
+        streampassId: response.data.streampass._id
+      };
+      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      console.log('💾 Cached purchased event data for:', id);
+
+      set({
+        singleEvent: response.data.streampass.event,
+        isLoading: false,
+        singleStreampass: response.data.streampass._id
+      });
     } catch (error) {
       console.error('Error fetching purchased event:', error);
       set({ singleEvent: null, isLoading: false });

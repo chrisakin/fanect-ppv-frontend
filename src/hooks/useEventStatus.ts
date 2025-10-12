@@ -78,6 +78,12 @@ export const useEventStatus = ({
       return;
     }
 
+    // Only connect when page is visible
+    if (document.hidden) {
+      console.log('⚠️ Page is hidden, delaying SSE connection');
+      return;
+    }
+
     // Prevent multiple connections
     if (eventSourceRef.current) {
       console.log('⚠️ SSE connection already exists for event:', eventId);
@@ -87,11 +93,11 @@ export const useEventStatus = ({
     let eventSource: EventSource | null = null;
 
     const createConnection = () => {
-      if (!mountedRef.current) return;
-      
+      if (!mountedRef.current || document.hidden) return;
+
       try {
         console.log('🔗 Creating SSE connection for event:', eventId, 'at', new Date().toISOString());
-        
+
         const url = `${import.meta.env.VITE_BASE_URL}/streampass/events/${eventId}/stream-status`;
         eventSource = new EventSource(url);
         eventSourceRef.current = eventSource;
@@ -165,21 +171,42 @@ export const useEventStatus = ({
     // Create the initial connection
     createConnection();
 
+    // Handle page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('📴 Page hidden - closing SSE connection');
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+          eventSourceRef.current = null;
+          setIsConnected(false);
+        }
+      } else {
+        console.log('📱 Page visible - reconnecting SSE');
+        if (!eventSourceRef.current && mountedRef.current) {
+          createConnection();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // Cleanup function
     return () => {
       console.log('🧹 Effect cleanup for event:', eventId);
       mountedRef.current = false;
-      
+
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+
       if (eventSource) {
         eventSource.close();
         eventSourceRef.current = null;
       }
-      
+
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
       }
-      
+
       setIsConnected(false);
       setError(null);
     };
