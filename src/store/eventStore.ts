@@ -50,6 +50,7 @@ interface EventState {
   deleteEvent: (id: string) => Promise<void>;
   updateEvent: (id: string, data: FormData) => Promise<void>;
   setSelectedEvent: (event: Event | null) => void;
+  resetSingleEvent: () => void;
 }
 
 export const useEventStore = create<EventState>((set) => ({
@@ -87,9 +88,9 @@ export const useEventStore = create<EventState>((set) => ({
   fetchLiveEvents: async (page = 1) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/events/live?page=${page}&limit=12`);
+      const response = await axios.get(isAuthenticated() ? `/events/live?page=${page}&limit=12` : `/events/no-auth/live?page=${page}&limit=12`);
       const { docs, ...paginationData } = response.data;
-      
+
       set({
         events: docs,
         pagination: paginationData,
@@ -100,6 +101,7 @@ export const useEventStore = create<EventState>((set) => ({
       set({ events: [], isLoading: false });
     }
   },
+  resetSingleEvent: () => set({ singleEvent: null, isLoading: true}),
   fetchMyEvents: async (page = 1) => {
     try {
       set({ isLoading: true });

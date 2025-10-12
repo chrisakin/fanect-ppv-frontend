@@ -4,15 +4,17 @@ import { PaginationIndex } from "@/components/utils/Pagination";
 import { HeroSection } from "@/components/layout/HeroSection";
 import { EventCardsSection } from "@/components/layout/EventCardsSection";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { useEventStore } from "@/store/eventStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const Home = (): JSX.Element => {
   const navigate = useNavigate();
+  const [eventType, setEventType] = useState<'upcoming' | 'live'>('upcoming');
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const { events, isLoading, pagination, fetchUpcomingEvents } = useEventStore();
+  const { events, isLoading, pagination, fetchUpcomingEvents, fetchLiveEvents } = useEventStore();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -21,11 +23,20 @@ export const Home = (): JSX.Element => {
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    fetchUpcomingEvents();
-  }, [fetchUpcomingEvents]);
+    if (eventType === 'upcoming') {
+      
+      fetchUpcomingEvents();
+    } else {
+      fetchLiveEvents();
+    }
+  }, [eventType, fetchUpcomingEvents, fetchLiveEvents]);
 
   const handlePageChange = (page: number) => {
-    fetchUpcomingEvents(page);
+    if (eventType === 'upcoming') {
+      fetchUpcomingEvents(page);
+    } else {
+      fetchLiveEvents(page);
+    }
   };
 
   // Transform events for EventCardsSection
@@ -57,29 +68,55 @@ export const Home = (): JSX.Element => {
           <div className="flex flex-col w-full max-w-[1280px] items-center gap-16">
             {/* Events Section */}
             <section className="flex flex-col items-start gap-8 w-full">
+              <ToggleGroup
+                type="single"
+                value={eventType}
+                onValueChange={(value) => value && setEventType(value as 'upcoming' | 'live')}
+                className="flex w-[265px] items-center gap-[11px] px-2.5 py-1 dark:bg-[#062013] rounded-[20px] border dark:!border-[#2E483A] !border-[#1AAA6580]"
+              >
+                <ToggleGroupItem
+                  value="upcoming"
+                  className={`flex w-[117px] items-center justify-center gap-2.5 p-2.5 rounded-[20px] ${
+                    eventType === 'upcoming' ? "!bg-[#1AAA65]" : " dark:!bg-[#062013] hover:!bg-transparent"
+                  }`}
+                >
+                  <span className={`font-text-lg-regular ${
+                    eventType === 'upcoming' ? "!text-gray-50" : "dark:!text-[#828B86] !text-[#44D48F]"
+                  }`}>
+                    Upcoming
+                  </span>
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="live"
+                  className={`flex w-[117px] items-center justify-center gap-2.5 p-2.5 rounded-[20px] ${
+                    eventType === 'live' ? "!bg-[#1AAA65]" : " dark:!bg-[#062013] hover:!bg-transparent"
+                  }`}
+                >
+                  <span className={`font-text-lg-regular ${
+                    eventType === 'live' ? "!text-gray-50" : "dark:!text-[#828B86] !text-[#44D48F]"
+                  }`}>
+                    Live
+                  </span>
+                </ToggleGroupItem>
+              </ToggleGroup>
+
               {isLoading ? (
                 <div className="w-full text-center py-8">Loading...</div>
               ) : transformedEvents.length > 0 ? (
                 <div className="flex flex-col items-start gap-6 w-full">
-                  <div className="flex flex-col items-start gap-4 w-full">
-                    <h2 className="text-lg font-medium text-foreground">
-                      Upcoming Events
-                    </h2>
-
-                    <EventCardsSection events={transformedEvents} />
-                  </div>
+                  <EventCardsSection events={transformedEvents} eventType={eventType} />
 
                   {/* Pagination */}
-                  <PaginationIndex 
+                  <PaginationIndex
                     currentPage={pagination.currentPage}
                     totalPages={pagination.totalPages}
                     onPageChange={handlePageChange}
                   />
                 </div>
               ) : (
-                <EmptyState 
-                  primaryText="No upcoming event yet" 
-                  secondaryText="When there is a future event, you will see it here" 
+                <EmptyState
+                  primaryText={`No ${eventType} event yet`}
+                  secondaryText={`When an event is ${eventType}, you will see it here`}
                 />
               )}
             </section>

@@ -13,6 +13,7 @@ import axios from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { setLoggedinUser, setTokens } from "@/lib/auth";
+import { useEventStore } from "@/store/eventStore";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -57,6 +58,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { setAuth, setUser } = useAuthStore();
+  const { resetSingleEvent } = useEventStore();
+
 
   const {
     register: registerLogin,
@@ -168,7 +171,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const onLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const redirectUrl = sessionStorage.getItem('redirectUrl')
+      const redirectUrl = sessionStorage.getItem('preRedirectUrl')
       const response = await axios.post('/auth/login', data);
       const { accessToken, refreshToken, sessionToken } = response.data?.data;
       setTokens(accessToken, refreshToken, sessionToken);
@@ -176,7 +179,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       setAuth(true);
       onClose();
       if(redirectUrl) {
-        sessionStorage.removeItem('redirectUrl')
+        sessionStorage.removeItem('preRedirectUrl')
+        resetSingleEvent()
         navigate(redirectUrl)
       }else {
         navigate('/dashboard');
@@ -227,14 +231,15 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true);
     try {
-            const redirectUrl = sessionStorage.getItem('redirectUrl')
+            const redirectUrl = sessionStorage.getItem('preRedirectUrl')
       const { accessToken, refreshToken, sessionToken } = (await axios.post('/auth/verify', { code, email: userEmail })).data?.data;
       setTokens(accessToken, refreshToken, sessionToken);
       await fetchUserProfile();
       setAuth(true);
       onClose();
      if(redirectUrl) {
-        sessionStorage.removeItem('redirectUrl')
+        sessionStorage.removeItem('preRedirectUrl')
+        resetSingleEvent()
         navigate(redirectUrl)
       }else {
         navigate('/dashboard');
@@ -275,7 +280,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     onSuccess: async (response) => {
       setIsLoading(true);
       try {
-        const redirectUrl = sessionStorage.getItem('redirectUrl')
+        const redirectUrl = sessionStorage.getItem('preRedirectUrl')
         const { data } = await axios.post('/auth/google', {
           code: response.code,
           path: isSignup ? "signup": "login",
@@ -286,7 +291,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
         setAuth(true);
         onClose();
         if(redirectUrl) {
-        sessionStorage.removeItem('redirectUrl')
+        sessionStorage.removeItem('preRedirectUrl')
+        resetSingleEvent()
         navigate(redirectUrl)
       }else {
         navigate('/dashboard');

@@ -26,12 +26,41 @@ export const Event = (): JSX.Element => {
 
   const handleActionClick = (type: string) => {
     if (!isAuthenticated) {
-      sessionStorage.setItem('redirectUrl', `/dashboard/tickets/event/${type}/${id}`)
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventType = urlParams.get('eventType');
+       if (eventType) {
+        sessionStorage.setItem('redirectEventType', eventType);
+      }
+      // Store both the redirect URL and event type for post-login logic
+        sessionStorage.setItem('redirectUrl', `/dashboard/tickets/event/${type}/${id}`);
+      sessionStorage.setItem('preRedirectUrl', `/event/${id}`);
       setIsLoginModalOpen(true);
     } else {
       navigate(`/dashboard/tickets/event/${type}/${id}`);
     }
   };
+
+  // Handle redirect for users after login
+  useEffect(() => {
+    if (isAuthenticated && singleEvent) {
+      const redirectUrl = sessionStorage.getItem('redirectUrl') as string;
+      const eventType = sessionStorage.getItem('redirectEventType');
+
+      if (redirectUrl && eventType) {
+        if (singleEvent.hasStreamPass) {
+          if(eventType === 'upcoming') {
+            navigate(`/dashboard/tickets/event/paid/${id}`, { replace: true });
+          } else if(eventType === 'live') {
+            navigate(`/dashboard/tickets/watch-event/live/${id}`, { replace: true });
+          } else {
+            navigate(`/dashboard/tickets/event/paid/${id}`, { replace: true });
+          }
+        } else {
+          navigate(redirectUrl, { replace: true });
+          }
+        }
+      }
+    }, [isAuthenticated, singleEvent, id, navigate]);
 
   // Breadcrumb items for authenticated users
   const breadcrumbItems = [
