@@ -192,8 +192,8 @@ export const LiveEventPlayer = ({
         setStreamError(error.message || `The live stream hasn't started yet.
           You'll be notified once the host goes live.`);
         toast({
-          variant: "destructive",
-          title: "Error",
+          variant: "warning",
+          title: "Note",
           description: `The live stream hasn't started yet.
           You'll be notified once the host goes live.`,
         });
