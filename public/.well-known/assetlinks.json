@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.fanect.ppv",
+      "sha256_cert_fingerprints": [
+        "8B:DA:5F:F6:0E:42:0A:C5:7B:59:66:D2:DA:FC:E0:26:4A:43:D3:BC:C2:C9:3C:BB:42:5D:66:26:35:7B:EB:B2"
+      ]
+    }
+  }
+]
