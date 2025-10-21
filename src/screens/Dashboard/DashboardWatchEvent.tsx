@@ -154,10 +154,10 @@ export const DashboardWatchEvent = (): JSX.Element => {
       
       <div className="flex flex-col w-full lg:px-8 md:px-6 px-0 mx-auto items-start py-6 md:py-8 lg:py-10">
         <div className="flex flex-col w-full items-start gap-8 md:gap-10 lg:gap-14">
-          <StreamingProvider 
+          <StreamingProvider
             eventData={{
-              playbackUrl: singleEvent.playbackUrl, 
-              chatRoomArn: singleEvent.chatRoomArn, 
+              playbackUrl: singleEvent.playbackUrl,
+              chatRoomArn: singleEvent.chatRoomArn,
               chatToken: singleEvent.chatToken
             }}
             eventType={eventType}
@@ -166,6 +166,7 @@ export const DashboardWatchEvent = (): JSX.Element => {
             streampassId={singleStreampass}
             sessionToken={sessionToken}
             isSessionActive={isSessionActive}
+            streamingDeviceType={singleEvent.streamingDeviceType}
           />
           <div className="lg:px-0 md:px-0 px-4">
             <WatchEventDetails event={singleEvent} />

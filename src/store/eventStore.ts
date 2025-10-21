@@ -20,6 +20,7 @@ export interface Event {
   chatToken: string;
   hasStreamPass: boolean;
   timezone?: string;
+  streamingDeviceType?: string;
 }
 
 interface PaginationData {

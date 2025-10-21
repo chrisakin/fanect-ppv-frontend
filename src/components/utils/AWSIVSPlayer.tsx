@@ -19,6 +19,7 @@ interface AWSIVSPlayerProps {
   eventName?: string;
   sessionToken?: string | null;
   isSessionActive?: boolean;
+  streamingDeviceType?: string;
 }
 
 export const AWSIVSPlayer = ({
@@ -30,7 +31,8 @@ export const AWSIVSPlayer = ({
   eventId,
   eventName,
   sessionToken,
-  isSessionActive
+  isSessionActive,
+  streamingDeviceType
 }: AWSIVSPlayerProps): JSX.Element => {
   const {
     videoContainerRef,
@@ -50,6 +52,7 @@ export const AWSIVSPlayer = ({
     chatRoomArn,
     chatToken,
     username,
+    streamingDeviceType: streamingDeviceType || 'Not Mobile',
     onPlayerStateChange: (state) => {
       // Show feedback modal when stream ends
       if (state === "ENDED" && eventId) {

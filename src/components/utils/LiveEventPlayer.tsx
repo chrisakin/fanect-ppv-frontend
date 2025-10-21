@@ -23,15 +23,17 @@ interface LiveEventPlayerProps {
   streampassId: string | null;
   sessionToken?: string | null;
   isSessionActive?: boolean;
+  streamingDeviceType?: string;
 }
 
-export const LiveEventPlayer = ({ 
-  eventId, 
-  eventName, 
-  eventType, 
+export const LiveEventPlayer = ({
+  eventId,
+  eventName,
+  eventType,
   streampassId,
+  streamingDeviceType,
   // sessionToken,
-  // isSessionActive 
+  // isSessionActive
 }: LiveEventPlayerProps): JSX.Element => {
   const [streamingData, setStreamingData] = useState<StreamingData | null>(null);
   const [isLoadingStream, setIsLoadingStream] = useState(true);
@@ -148,6 +150,7 @@ export const LiveEventPlayer = ({
     onPlayerStateChange: handlePlayerStateChange,
     onChatMessage: handleChatMessage,
     onStreamEnd: handleStreamEnd,
+    streamingDeviceType: streamingDeviceType || 'Not Mobile',
   });
 
   const [messageInput, setMessageInput] = useState("");

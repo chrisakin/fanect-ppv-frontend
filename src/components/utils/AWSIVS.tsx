@@ -16,6 +16,7 @@ interface AWSIVSServiceProps {
   onPlayerStateChange?: (state: string) => void;
   onChatMessage?: (message: ChatMessage) => void;
   onStreamEnd?: () => void;
+  streamingDeviceType?: string;
 }
 
 export function useAWSIVSService({
@@ -26,6 +27,7 @@ export function useAWSIVSService({
   onPlayerStateChange,
   onChatMessage,
   onStreamEnd,
+  streamingDeviceType = 'Not Mobile',
 }: AWSIVSServiceProps) {
   const playerRef = useRef<any>(null);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -181,6 +183,19 @@ export function useAWSIVSService({
         videoElement.style.objectFit = "contain";
         videoElement.style.backgroundColor = "#000";
         videoElement.style.display = "block";
+
+        // Apply landscape orientation for mobile streaming
+        if (streamingDeviceType === 'Mobile') {
+          videoElement.style.transform = "rotate(90deg)";
+          videoElement.style.transformOrigin = "center center";
+          videoElement.style.width = "100vh";
+          videoElement.style.height = "100vw";
+          videoElement.style.position = "absolute";
+          videoElement.style.top = "50%";
+          videoElement.style.left = "50%";
+          videoElement.style.marginLeft = "-50vh";
+          videoElement.style.marginTop = "-50vw";
+        }
 
         if (videoContainerRef.current) {
           videoContainerRef.current.innerHTML = "";

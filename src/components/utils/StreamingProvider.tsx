@@ -17,6 +17,7 @@ interface StreamingProviderProps {
   enableRecordingProtection?: boolean;
   strictRecordingProtection?: boolean;
   streampassId: string | null;
+  streamingDeviceType?: string;
 }
 
 export const StreamingProvider = ({
@@ -29,6 +30,7 @@ export const StreamingProvider = ({
   isSessionActive,
   enableRecordingProtection = true,
   strictRecordingProtection = false,
+  streamingDeviceType,
 }: StreamingProviderProps): JSX.Element => {
   console.log(streampassId, "Streampass ID in StreamingProvider2");
 
@@ -38,6 +40,7 @@ export const StreamingProvider = ({
         <PastEventPlayer
           eventId={eventId}
           eventName={eventName}
+          streamingDeviceType={streamingDeviceType}
         />
       );
     }
@@ -52,6 +55,7 @@ export const StreamingProvider = ({
             streampassId={streampassId}
             sessionToken={sessionToken}
             isSessionActive={isSessionActive}
+            streamingDeviceType={streamingDeviceType}
           />
         </ErrorBoundary>
       );
@@ -66,6 +70,7 @@ export const StreamingProvider = ({
         eventName={eventName}
         sessionToken={sessionToken}
         isSessionActive={isSessionActive}
+        streamingDeviceType={streamingDeviceType}
       />
     );
   };

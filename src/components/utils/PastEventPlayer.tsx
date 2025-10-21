@@ -13,9 +13,10 @@ import { useToast } from "../ui/use-toast";
 interface PastEventPlayerProps {
   eventId: string;
   eventName?: string;
+  streamingDeviceType?: string;
 }
 
-export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): JSX.Element => {
+export const PastEventPlayer = ({ eventId, eventName, streamingDeviceType }: PastEventPlayerProps): JSX.Element => {
   const [streamingData, setStreamingData] = useState<StreamingData | null>(null);
   const [isLoadingStream, setIsLoadingStream] = useState(true);
   const [streamError, setStreamError] = useState<string | null>(null);
@@ -38,7 +39,8 @@ export const PastEventPlayer = ({ eventId, eventName }: PastEventPlayerProps): J
     chatApiEndpoint: import.meta.env.REACT_APP_CHAT_API_ENDPOINT as string,
     chatRoomArn: streamingData?.chatRoomArn,
     chatToken: streamingData?.chatToken,
-    username: "viewer"
+    username: "viewer",
+    streamingDeviceType: streamingDeviceType || 'Not Mobile',
   });
 
   const [messageInput, setMessageInput] = useState("");
