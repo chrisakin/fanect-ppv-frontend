@@ -11,7 +11,7 @@ import axios from "../../lib/axios";
 import { useEventStore } from "@/store/eventStore";
 import { CustomDatePicker } from "../ui/custom-date-picker";
 import { CustomTimePicker } from "../ui/custom-time-picker";
-import { Currency, IPrice } from "../../types/event";
+import { Currency, IPrice, StreamingDeviceType } from "../../types/event";
 import { formatTime } from "@/lib/utils";
 
 interface EventModalProps {
@@ -29,6 +29,7 @@ interface FormData {
   haveBroadcastRoom: string;
   broadcastSoftware: string;
   scheduledTestDate: string | null;
+  streamingDeviceType: string;
   bannerUrl: File | null;
   watermarkUrl: File | null;
   eventTrailer: File | null;
@@ -43,6 +44,7 @@ interface FormErrors {
   haveBroadcastRoom?: string;
   broadcastSoftware?: string;
   scheduledTestDate?: string;
+  streamingDeviceType?: string;
   bannerUrl?: string;
   watermarkUrl?: string;
   eventTrailer?: string;
@@ -60,6 +62,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
     haveBroadcastRoom: "",
     broadcastSoftware: "",
     scheduledTestDate: null,
+    streamingDeviceType: "",
     bannerUrl: null,
     watermarkUrl: null,
     eventTrailer: null,
@@ -102,6 +105,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
           haveBroadcastRoom: event.haveBroadcastRoom == true ? "yes" : "no" ,
           broadcastSoftware: event.broadcastSoftware || "",
           scheduledTestDate: scheduledDate,
+          streamingDeviceType: event.streamingDeviceType || "",
           bannerUrl: null,
           watermarkUrl: null,
           eventTrailer: null,
@@ -288,6 +292,10 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
       newErrors.scheduledTestDate = "Test stream date is required";
     }
 
+    if (!formData.streamingDeviceType) {
+      newErrors.streamingDeviceType = "Streaming device type is required";
+    }
+
     if (!event && !formData.bannerUrl) {
       newErrors.bannerUrl = "Event banner is required";
     }
@@ -327,6 +335,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
         formDataToSend.append('prices', JSON.stringify(formData.prices));
         formDataToSend.append('haveBroadcastRoom', formData.haveBroadcastRoom);
         formDataToSend.append('broadcastSoftware', formData.broadcastSoftware);
+        formDataToSend.append('streamingDeviceType', formData.streamingDeviceType);
         formDataToSend.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
         if (formData.scheduledTestDate) {
           formDataToSend.append('scheduledTestDate', formData.scheduledTestDate);
@@ -371,6 +380,7 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
           haveBroadcastRoom: "",
           broadcastSoftware: "",
           scheduledTestDate: null,
+          streamingDeviceType: "",
           bannerUrl: null,
           watermarkUrl: null,
           eventTrailer: null,
@@ -389,24 +399,25 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
   };
 
   const handleClose = () => {
-    onOpenChange(false);
-    setCurrentStep(1);
-    setFormData({
-      name: "",
-      date: null,
-      time: "",
-      description: "",
-      prices: [{ currency: Currency.NONE, amount: 0 }],
-      haveBroadcastRoom: "",
-      broadcastSoftware: "",
-      scheduledTestDate: null,
-      bannerUrl: null,
-      watermarkUrl: null,
-      eventTrailer: null,
-    });
-    setImagePreviews({});
-    setErrors({});
-  };
+      onOpenChange(false);
+      setCurrentStep(1);
+      setFormData({
+        name: "",
+        date: null,
+        time: "",
+        description: "",
+        prices: [{ currency: Currency.NONE, amount: 0 }],
+        haveBroadcastRoom: "",
+        broadcastSoftware: "",
+        scheduledTestDate: null,
+        streamingDeviceType: "",
+        bannerUrl: null,
+        watermarkUrl: null,
+        eventTrailer: null,
+      });
+      setImagePreviews({});
+      setErrors({});
+    };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -681,6 +692,29 @@ export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.
                         />
                         {errors.scheduledTestDate && (
                           <span className="text-xs text-red-500">{errors.scheduledTestDate}</span>
+                        )}
+                      </div>
+
+                      {/* Streaming Device Type */}
+                      <div className="flex flex-col items-start gap-1.5 w-full">
+                        <h3 className="font-text-lg-medium text-gray-800 dark:text-[#CCCCCC] text-[length:var(--text-lg-medium-font-size)] tracking-[var(--text-lg-medium-letter-spacing)] leading-[var(--text-lg-medium-line-height)]">
+                          Streaming Device Type
+                        </h3>
+
+                        <Select value={formData.streamingDeviceType} onValueChange={(value) => handleSelectChange('streamingDeviceType', value)}>
+                          <SelectTrigger className="h-[50px] bg-gray-50 dark:bg-[#13201A] border-[#d5d7da] dark:border-gray-600 w-full cursor-pointer">
+                            <SelectValue placeholder="Select device type" />
+                          </SelectTrigger>
+                          <SelectContent className="cursor-pointer dark:!bg-[#FFFFFF]">
+                            <SelectItem className="!cursor-pointer dark:!text-[#000000] dark:hover:bg-[#13201A] dark:hover:!text-[#FFFFFF] hover:bg-[#13201A] hover:text-[#FFFFFF]" value={StreamingDeviceType.MOBILE}>{StreamingDeviceType.MOBILE}</SelectItem>
+                            <SelectItem className="!cursor-pointer dark:!text-[#000000] dark:hover:bg-[#13201A] dark:hover:!text-[#FFFFFF] hover:bg-[#13201A] hover:text-[#FFFFFF]" value={StreamingDeviceType.NOTMOBILE}>{StreamingDeviceType.NOTMOBILE}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Note: "Not Mobile" includes cameras, laptops, and other professional streaming devices.
+                        </p>
+                        {errors.streamingDeviceType && (
+                          <span className="text-xs text-red-500">{errors.streamingDeviceType}</span>
                         )}
                       </div>
 

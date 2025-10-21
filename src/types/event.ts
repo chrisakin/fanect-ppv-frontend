@@ -1,3 +1,8 @@
+export enum StreamingDeviceType {
+  MOBILE = 'Mobile',
+  NOTMOBILE = 'Not Mobile',
+}
+
 export enum Currency {
   NONE = 'Select Currency',
   USD = 'USD',
@@ -18,7 +23,7 @@ export enum Currency {
     CLP = "CLP", // Chilean Peso
     COP = "COP", // Colombian Peso
     PEN = "PEN", // Peruvian Sol
-    PHP = "PHP", // Philippine Peso 
+    PHP = "PHP", // Philippine Peso
     MYR = "MYR", // Malaysian Ringgit
     SGD = "SGD", // Singapore Dollar
     IDR = "IDR", // Indonesian Rupiah
@@ -31,7 +36,7 @@ export enum Currency {
     OMR = "OMR", // Omani Rial
     BHD = "BHD", // Bahraini Dinar
     JOD = "JOD", // Jordanian Dinar
-    LBP = "LBP", // Lebanese Pound 
+    LBP = "LBP", // Lebanese Pound
     ILS = "ILS", // Israeli New Shekel
     PKR = "PKR", // Pakistani Rupee
     BDT = "BDT", // Bangladeshi Taka
@@ -80,4 +85,5 @@ export interface IEvent {
   broadcastSoftware: string;
   scheduledTestDate: Date;
   eventTrailer: string;
+  streamingDeviceType: StreamingDeviceType;
 }
