@@ -20,4 +20,15 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    middlewareMode: false,
+    headers: {
+      'Cache-Control': 'no-cache',
+    }
+  },
+  preview: {
+    headers: {
+      'Cache-Control': 'no-cache',
+    }
+  }
 });
