@@ -8,6 +8,17 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
+// Serve .well-known files with correct Content-Type
+app.get('/.well-known/apple-app-site-association', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile(join(__dirname, 'dist', '.well-known', 'apple-app-site-association'));
+});
+
+app.get('/.well-known/assetlinks.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile(join(__dirname, 'dist', '.well-known', 'assetlinks.json'));
+});
+
 // Serve static files from the dist directory
 app.use(express.static(join(__dirname, 'dist')));
 
