@@ -30,7 +30,7 @@ export const EventCardsSection = ( { events, eventType }: EventCardsSectionProps
                           />
                           <CardContent className="p-3">
                             <div className="flex flex-col gap-1">
-                              <h3 className="text-base font-semibold text-foreground">
+                              <h3 className="text-base font-semibold text-foreground overflow-hidden text-ellipsis whitespace-nowrap" title={event.title}>
                                 {event.title}
                               </h3>
                               <p className="text-sm text-foreground">

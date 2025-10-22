@@ -80,7 +80,7 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
             />
             <CardContent className="flex flex-col h-full justify-between py-[20px] px-4 md:pl-6 md:pr-0 flex-1">
               <div className="flex flex-col w-full md:w-[250px] items-start">
-                <h3 className="text-xl md:text-2xl font-medium dark:text-[#828b86] mb-2">
+                <h3 className="text-xl md:text-2xl font-medium dark:text-[#828b86] mb-2 overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
                   {(type === 'live' || type === 'upcoming') ? (
                   <Link
                     to={
@@ -88,11 +88,13 @@ export const StreampassCardsSection = ({ events, type }: EventCardsSectionProps)
                   ? `/dashboard/tickets/watch-event/live/${event._id}`
                   : `/dashboard/tickets/event/paid/${event._id}`
                   }
+                    className="overflow-hidden text-ellipsis whitespace-nowrap block"
+                    title={event.name}
                 >
                   {event.name}
                 </Link>
                 ) : (
-                <span className="cursor-not-allowed">
+                <span className="cursor-not-allowed overflow-hidden text-ellipsis whitespace-nowrap block" title={event.name}>
                   {event.name}
                 </span>
                   )}
