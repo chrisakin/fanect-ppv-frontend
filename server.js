@@ -16,6 +16,13 @@ app.get('/.well-known/apple-app-site-association', (req, res) => {
     res.sendFile(join(__dirname, 'dist', '.well-known', 'apple-app-site-association'));
 });
 
+app.get('/apple-app-site-association', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'inline');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.sendFile(join(__dirname, 'dist', '.well-known', 'apple-app-site-association'));
+});
+
 app.get('/.well-known/assetlinks.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', 'inline');
