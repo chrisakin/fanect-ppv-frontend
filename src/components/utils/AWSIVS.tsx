@@ -184,19 +184,6 @@ export function useAWSIVSService({
         videoElement.style.backgroundColor = "#000";
         videoElement.style.display = "block";
 
-        // Apply landscape orientation for mobile streaming
-        if (streamingDeviceType === 'Mobile') {
-          videoElement.style.transform = "rotate(90deg)";
-          videoElement.style.transformOrigin = "center center";
-          videoElement.style.width = "100vh";
-          videoElement.style.height = "100vw";
-          videoElement.style.position = "absolute";
-          videoElement.style.top = "50%";
-          videoElement.style.left = "50%";
-          videoElement.style.marginLeft = "-50vh";
-          videoElement.style.marginTop = "-50vw";
-        }
-
         if (videoContainerRef.current) {
           videoContainerRef.current.innerHTML = "";
           videoContainerRef.current.appendChild(videoElement);
@@ -324,14 +311,15 @@ export function useAWSIVSService({
         // Progress tracking for live streams
         videoElement.addEventListener('timeupdate', () => {
           if (hasStartedPlayingRef.current && !streamEndedRef.current) {
-            lastProgressTimeRef.current = videoElement.currentTime;
-            
+            const currentTime = videoElement.currentTime;
+            lastProgressTimeRef.current = currentTime;
+
             // For VOD content with known duration
-            if (videoElement.duration && videoElement.duration > 0) {
-              const timeRemaining = videoElement.duration - videoElement.currentTime;
-              if (timeRemaining < 0.5 && timeRemaining > 0 && videoElement.currentTime > 10) {
-                console.log("🔚 Video reached end via timeupdate (VOD)");
-                handleStreamEnd();
+            if (videoElement.duration && isFinite(videoElement.duration) && videoElement.duration > 0) {
+              const timeRemaining = videoElement.duration - currentTime;
+              // Only trigger end when we're within 1 second of the end and have been playing for at least 5 seconds
+              if (timeRemaining < 1 && timeRemaining >= 0 && currentTime > 5) {
+                console.log("🔚 Video near end via timeupdate (VOD)", { currentTime, duration: videoElement.duration, timeRemaining });
               }
             }
           }

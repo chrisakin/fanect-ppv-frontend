@@ -117,7 +117,7 @@ export const useEventStatus = ({
           try {
             console.log('📨 SSE message received:', event.data);
             
-            const data: EventStatusMessage = JSON.parse(event.data).data;
+            const data: EventStatusMessage = JSON.parse(event.data);
             const { message, status: newStatus } = data;
             
             console.log('📊 Event status update:', { message, status: newStatus });
