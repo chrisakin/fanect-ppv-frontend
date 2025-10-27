@@ -517,7 +517,7 @@ export function useAWSIVSService({
           console.log("🔌 WebSocket closed:", event.code, event.reason);
           setIsConnected(false);
           
-          if (reconnectAttempts < maxReconnectAttempts && event.code !== 1000) {
+          if (reconnectAttempts < maxReconnectAttempts && event.code !== 1000 && playerRef.current != null) {
             const delay = baseReconnectDelay * Math.pow(2, reconnectAttempts);
             reconnectAttempts++;
             console.log(`🔄 Reconnecting to chat in ${delay}ms (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);

@@ -41,9 +41,10 @@ export const LiveEventPlayer = ({
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackShown, setFeedbackShown] = useState(false);
   const [hasStreamStarted, setHasStreamStarted] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const { toast } = useToast();
   const playbackCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Initialize streampass session tracking with error handling
   const {
     sessionData,
@@ -54,46 +55,20 @@ export const LiveEventPlayer = ({
     startSession
   } = useStreampassSession({
     streampassId,
-    enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming')
+    enabled: !!streampassId && (eventType === 'live' || eventType === 'upcoming'),
+    onVideoPlaying: isVideoPlaying
   });
 
-  // Handle session errors with automatic retry for session conflicts
+  // Handle session errors
   useEffect(() => {
     if (sessionError) {
-      // Check if this is a "already streaming" error
-      const isSessionConflict = sessionError.toLowerCase().includes('already streaming') ||
-                                sessionError.toLowerCase().includes('another session') ||
-                                sessionError.toLowerCase().includes('logged in from');
-
-      if (isSessionConflict) {
-        console.log('🔄 Session conflict detected, will retry in 15 seconds');
-        toast({
-          title: "Session Conflict",
-          description: "You're still logged in from another session. This may happen if you just refreshed the page. We'll automatically reconnect your stream in 15 seconds.",
-        });
-
-        // Retry starting the session after 15 seconds
-        const retryTimeout = setTimeout(() => {
-          console.log('🔄 Retrying session start after conflict...');
-          if (streampassId) {
-            clearError();
-            startSession(streampassId).catch(err => {
-              console.error('Failed to restart session:', err);
-            });
-          }
-        }, 15000);
-
-        return () => clearTimeout(retryTimeout);
-      } else {
-        // For other errors, just show the toast
-        toast({
-          variant: "destructive",
-          title: "Session Error",
-          description: sessionError,
-        });
-      }
+      toast({
+        variant: "destructive",
+        title: "Session Error",
+        description: sessionError,
+      });
     }
-  }, [sessionError, toast, clearError, startSession, streampassId]);
+  }, [sessionError, toast]);
 
   // SSE connection for reliable event status monitoring
   const { status: eventStatus, isConnected: sseConnected, error: sseError } = useEventStatus({
@@ -121,8 +96,9 @@ export const LiveEventPlayer = ({
 
   const handlePlayerStateChange = useCallback((state: string) => {
     console.log('🎬 Player state changed to:', state);
-    if (state === "PLAYING") {
+    if (state === "PLAYING" || state === "READY") {
       setHasStreamStarted(true);
+      setIsVideoPlaying(true);
     }
   }, []);
 
