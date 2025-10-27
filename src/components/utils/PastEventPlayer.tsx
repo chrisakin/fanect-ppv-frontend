@@ -77,7 +77,7 @@ export const PastEventPlayer = ({ eventId, eventName, streamingDeviceType }: Pas
     if (eventId) {
       fetchStreamingData();
     }
-  }, [eventId, toast]);
+  }, [eventId]);
 
   const handleSendMessage = async () => {
     if (messageInput.trim() && isConnected) {
