@@ -30,6 +30,60 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
     res.sendFile(join(__dirname, 'dist', '.well-known', 'assetlinks.json'));
 });
 
+app.get("/deeplink", (req, res) => {
+  const iosStore = "https://apps.apple.com/app/id123456789"; // your real iOS app link
+  const androidStore = "https://play.google.com/store/apps/details?id=com.fanect.ppv";
+  const appDeepLink = `fanectppv://event?user_id=${req.query.user_id}&eventId=${req.query.eventId}`;
+
+  // Detect Apple/Google validation bots → must return 200, not redirect
+  const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
+  if (userAgent.includes("applebot") || userAgent.includes("googlebot")) {
+    return res.status(200).send("Validation OK");
+  }
+
+  // Serve HTML page that attempts app open, then store redirect
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Opening App...</title>
+      <script>
+        const isAndroid = /android/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        window.onload = function() {
+          const appLink = "${appDeepLink}";
+          window.location = appLink;
+
+          setTimeout(() => {
+            if (isIOS) {
+              window.location = "${iosStore}";
+            } else if (isAndroid) {
+              window.location = "${androidStore}";
+            } else {
+              window.location = "https://${req.headers.host}";
+            }
+          }, 1500);
+        };
+      </script>
+      <style>
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          font-family: system-ui, sans-serif;
+        }
+      </style>
+    </head>
+    <body>
+      <p>Opening Fanect...</p>
+    </body>
+    </html>
+  `);
+});
+
 // Serve static files from the dist directory
 app.use(express.static(join(__dirname, 'dist')));
 
