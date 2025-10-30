@@ -31,85 +31,171 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
 });
 
 app.get("/deeplink", (req, res) => {
-  const iosStore = "https://apps.apple.com/app/id123456789"; // <-- replace with your App Store link
+  const iosStore = "https://apps.apple.com/app/id123456789"; // real App Store link
   const androidStore = "https://play.google.com/store/apps/details?id=com.fanect.ppv";
-  const appDeepLink = `fanectppv://deeplink?user_id=${req.query.user_id}&eventId=${req.query.eventId}`;
-  const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
+  const appDeepLink = `fanectppv://event?user_id=${req.query.user_id || ""}&eventId=${req.query.eventId || ""}`;
+  const userAgent = (req.headers["user-agent"] || "").toLowerCase();
+  // :brain: STEP 1 — Ignore Apple/Google validation and prefetch bots
+  const isValidationBot =
+    userAgent.includes("applebot") ||
+    userAgent.includes("googlebot") ||
+    req.headers["purpose"] === "prefetch" ||
+    req.headers["x-purpose"] === "preview" ||
+    req.headers["sec-fetch-purpose"] === "prefetch";
+  if (isValidationBot) {
+    return res.status(204).end(); // :white_check_mark: return 204 (no content, no redirect)
+  }
+  // :jigsaw: STEP 2 — Detect device type
   const isAndroid = /android/i.test(userAgent);
   const isIOS = /iphone|ipad|ipod/i.test(userAgent);
-  // :large_green_circle: STEP 1: Handle Apple / Google validation & background prefetches
-  const isBackgroundCheck =
-    req.headers["purpose"] === "prefetch" ||
-    req.headers["x-purposes"] === "preview" ||
-    userAgent.includes("applebot") ||
-    userAgent.includes("mobilesafari/");
-  if (isBackgroundCheck) {
-    return res.status(204).end(); // :white_check_mark: No redirect, prevents iOS bounce
-  }
-  // :large_orange_circle: STEP 2: Detect Chrome on iOS (Crios)
-  const isChromeOniOS = userAgent.includes("crios/");
-  if (isChromeOniOS) {
-    return res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>FaNect PPV</title>
-      </head>
-      <body style="font-family: system-ui, sans-serif; text-align:center; padding-top:40vh;">
-        <p>Open this link in Safari to continue to the app.</p>
-        <p style="margin-top:20px;">
-          Or <a href="${iosStore}" target="_blank" style="color:#007AFF;">download the app from the App Store</a>.
-        </p>
-      </body>
-      </html>
-    `);
-  }
-  // :large_purple_circle: STEP 3: Handle iOS Universal Links (serve static fallback page)
+  // :green_apple: STEP 3 — iOS: Manual deep link (no auto redirect)
   if (isIOS) {
     return res.send(`
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>FaNect PPV</title>
+        <meta name="apple-itunes-app" content="app-id=123456789, app-argument=${appDeepLink}">
+        <title>Open Fanect</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #F9FAFB;
+            color: #333;
+          }
+          a.btn {
+            background: #007AFF;
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 12px;
+          }
+          p { font-size: 16px; margin-top: 10px; }
+        </style>
       </head>
-      <body style="font-family: system-ui, sans-serif; text-align:center; padding-top:40vh;">
-        <p>Continue to event in your app:</p>
-        <a href="${appDeepLink}"
-           style="display:inline-block;margin-top:20px;background:#007AFF;color:#fff;
-           padding:12px 20px;border-radius:8px;text-decoration:none;">Open in App</a>
-        <p style="margin-top:15px;">
-          Don’t have the app? <a href="${iosStore}" target="_blank">Get it on the App Store</a>
-        </p>
+      <body>
+        <h2>Open in Fanect App</h2>
+        <a class="btn" href="${appDeepLink}">Open in App</a>
+        <p>Don't have the app? <a href="${iosStore}">Download on the App Store</a></p>
       </body>
       </html>
     `);
   }
-  // :large_green_circle: STEP 4: Handle Android deep link
+  // :robot_face: STEP 4 — Android: Try app link, then fallback to Play Store
   if (isAndroid) {
     return res.send(`
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Opening Fanect...</title>
         <script>
           window.onload = function() {
-            window.location = "${appDeepLink}";
-            setTimeout(() => { window.location = "${androidStore}"; }, 1500);
+            window.location.href = "${appDeepLink}";
+            setTimeout(() => {
+              window.location.href = "${androidStore}";
+            }, 1500);
           };
         </script>
       </head>
-      <body style="font-family: system-ui, sans-serif; text-align:center;padding-top:40vh;">
-        <p>Opening FaNect...</p>
+      <body style="font-family: sans-serif; text-align: center; padding-top: 40vh;">
+        <p>Opening Fanect...</p>
       </body>
       </html>
     `);
   }
-  // :large_blue_circle: Default fallback (unknown device)
-  res.redirect(androidStore);
+  // :globe_with_meridians: STEP 5 — Default fallback
+  return res.redirect(androidStore);
 });
+
+// app.get("/deeplink", (req, res) => {
+//   const iosStore = "https://apps.apple.com/app/id123456789"; // <-- replace with your App Store link
+//   const androidStore = "https://play.google.com/store/apps/details?id=com.fanect.ppv";
+//   const appDeepLink = `fanectppv://deeplink?user_id=${req.query.user_id}&eventId=${req.query.eventId}`;
+//   const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
+//   const isAndroid = /android/i.test(userAgent);
+//   const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+//   // :large_green_circle: STEP 1: Handle Apple / Google validation & background prefetches
+//   const isBackgroundCheck =
+//     req.headers["purpose"] === "prefetch" ||
+//     req.headers["x-purposes"] === "preview" ||
+//     userAgent.includes("applebot") ||
+//     userAgent.includes("mobilesafari/");
+//   if (isBackgroundCheck) {
+//     return res.status(204).end(); // :white_check_mark: No redirect, prevents iOS bounce
+//   }
+//   // :large_orange_circle: STEP 2: Detect Chrome on iOS (Crios)
+//   const isChromeOniOS = userAgent.includes("crios/");
+//   if (isChromeOniOS) {
+//     return res.send(`
+//       <!DOCTYPE html>
+//       <html>
+//       <head>
+//         <meta name="viewport" content="width=device-width, initial-scale=1" />
+//         <title>FaNect PPV</title>
+//       </head>
+//       <body style="font-family: system-ui, sans-serif; text-align:center; padding-top:40vh;">
+//         <p>Open this link in Safari to continue to the app.</p>
+//         <p style="margin-top:20px;">
+//           Or <a href="${iosStore}" target="_blank" style="color:#007AFF;">download the app from the App Store</a>.
+//         </p>
+//       </body>
+//       </html>
+//     `);
+//   }
+//   // :large_purple_circle: STEP 3: Handle iOS Universal Links (serve static fallback page)
+//   if (isIOS) {
+//     return res.send(`
+//       <!DOCTYPE html>
+//       <html>
+//       <head>
+//         <meta name="viewport" content="width=device-width, initial-scale=1" />
+//         <title>FaNect PPV</title>
+//       </head>
+//       <body style="font-family: system-ui, sans-serif; text-align:center; padding-top:40vh;">
+//         <p>Continue to event in your app:</p>
+//         <a href="${appDeepLink}"
+//            style="display:inline-block;margin-top:20px;background:#007AFF;color:#fff;
+//            padding:12px 20px;border-radius:8px;text-decoration:none;">Open in App</a>
+//         <p style="margin-top:15px;">
+//           Don’t have the app? <a href="${iosStore}" target="_blank">Get it on the App Store</a>
+//         </p>
+//       </body>
+//       </html>
+//     `);
+//   }
+//   // :large_green_circle: STEP 4: Handle Android deep link
+//   if (isAndroid) {
+//     return res.send(`
+//       <!DOCTYPE html>
+//       <html>
+//       <head>
+//         <meta name="viewport" content="width=device-width, initial-scale=1" />
+//         <title>Opening Fanect...</title>
+//         <script>
+//           window.onload = function() {
+//             window.location = "${appDeepLink}";
+//             setTimeout(() => { window.location = "${androidStore}"; }, 1500);
+//           };
+//         </script>
+//       </head>
+//       <body style="font-family: system-ui, sans-serif; text-align:center;padding-top:40vh;">
+//         <p>Opening FaNect...</p>
+//       </body>
+//       </html>
+//     `);
+//   }
+//   // :large_blue_circle: Default fallback (unknown device)
+//   res.redirect(androidStore);
+// });
 
 // app.get("/deeplink", (req, res) => {
 //   const iosStore = "https://apps.apple.com/app/id123456789";
