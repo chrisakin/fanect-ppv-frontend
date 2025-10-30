@@ -4,7 +4,7 @@
     "details": [
       {
         "appID": "4ZCKT4W8J5.com.fanect.ppv",
-        "paths": [ "/deeplink/*" ]
+        "paths": []
       }
     ]
   }
