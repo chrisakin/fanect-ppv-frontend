@@ -9,13 +9,30 @@ import {
 } from "../../components/ui/pagination";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
+/**
+ * PaginationIndex component interface
+ * @interface PaginationIndexProps
+ * @property {number} currentPage - Current active page (1-indexed)
+ * @property {number} totalPages - Total number of pages
+ * @property {(page: number) => void} onPageChange - Callback on page selection
+ */
 interface PaginationIndexProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 }
 
+/**
+ * PaginationIndex - pagination controls with smart page number display
+ * @component
+ * Features: Smart ellipsis, shows first/last/current+1 pages, prev/next buttons
+ * MaxVisiblePages: 5. Highlights current page in green-600
+ */
 export const PaginationIndex = ({ currentPage, totalPages, onPageChange }: PaginationIndexProps): JSX.Element => {
+  /**
+   * Render page numbers with ellipsis logic
+   * Shows max 5 pages: first, prev, current, next, last
+   */
   const renderPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;

@@ -14,12 +14,35 @@ import { CustomTimePicker } from "../ui/custom-time-picker";
 import { Currency, IPrice, StreamingDeviceType } from "../../types/event";
 import { formatTime } from "@/lib/utils";
 
+/**
+ * Props for EventModal
+ * @interface EventModalProps
+ * @property {boolean} open - Modal visibility state
+ * @property {Function} onOpenChange - Callback to toggle modal
+ * @property {any} [event] - Existing event for edit mode (undefined for create)
+ */
 interface EventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   event?: any;
 }
 
+/**
+ * Form data structure for event creation/editing
+ * @interface FormData
+ * @property {string} name - Event name
+ * @property {string | null} date - Event date (YYYY-MM-DD format)
+ * @property {string} time - Event time
+ * @property {string} description - Event description
+ * @property {IPrice[]} prices - Price tiers
+ * @property {string} haveBroadcastRoom - Broadcast room availability
+ * @property {string} broadcastSoftware - Software to use
+ * @property {string | null} scheduledTestDate - Test date
+ * @property {string} streamingDeviceType - Device type (desktop/mobile)
+ * @property {File | null} bannerUrl - Event banner image
+ * @property {File | null} watermarkUrl - Event watermark
+ * @property {File | null} eventTrailer - Event trailer video
+ */
 interface FormData {
   name: string;
   date: string | null;
@@ -35,6 +58,10 @@ interface FormData {
   eventTrailer: File | null;
 }
 
+/**
+ * Form validation errors
+ * @interface FormErrors
+ */
 interface FormErrors {
   name?: string;
   date?: string;
@@ -51,6 +78,20 @@ interface FormErrors {
   timezone?: string;
 }
 
+/**
+ * EventModal Component - Multi-step form for creating/editing events
+ * 
+ * Features:
+ * - Multi-step wizard (event details → broadcast setup → files)
+ * - Event creation and editing
+ * - Image and video file uploads with previews
+ * - Multi-currency pricing support
+ * - Form validation and error handling
+ * - Date/time pickers for scheduling
+ * 
+ * @param {EventModalProps} props - Component props
+ * @returns {JSX.Element} Event creation/edit modal
+ */
 export const EventModal = ({ open, onOpenChange, event }: EventModalProps): JSX.Element => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({

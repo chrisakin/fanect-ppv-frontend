@@ -1,3 +1,12 @@
+/**
+ * services/locationService
+ * Centralized location utilities for the app. Responsibilities:
+ *  - obtain user location via GPS or IP-based lookup
+ *  - enhanced VPN/proxy detection using heuristics and secondary APIs
+ *  - cache location and permission state, expose helpers for permission checks
+ *
+ * Exports: locationService singleton and LocationData type
+ */
 interface LocationData {
   latitude: number;
   longitude: number;

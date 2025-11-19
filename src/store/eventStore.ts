@@ -2,6 +2,24 @@ import { create } from 'zustand';
 import axios from '@/lib/axios';
 import { isAuthenticated } from '@/lib/auth';
 
+/**
+ * Event
+ *
+ * Represents a complete event object returned from the backend.
+ *  - _id: MongoDB/unique identifier
+ *  - name: Event title
+ *  - date, time: Event start date and time (strings)
+ *  - description: Event description
+ *  - bannerUrl, watermarkUrl, trailerUrl: Media URLs
+ *  - price: Object with currency and amount
+ *  - eventDateTime: Formatted datetime string
+ *  - canWatchSavedStream: Whether recording is available for replay
+ *  - adminStatus: Status from admin dashboard (e.g. 'approved', 'pending')
+ *  - chatRoomArn, chatToken: AWS IVS chat room identifiers
+ *  - playbackUrl: URL for accessing event replay
+ *  - hasStreamPass: Whether event requires a subscription/pass to view
+ *  - timezone, streamingDeviceType: Optional metadata fields
+ */
 export interface Event {
   _id: string;
   name: string;
@@ -23,6 +41,16 @@ export interface Event {
   streamingDeviceType?: string;
 }
 
+/**
+ * PaginationData
+ *
+ * Response metadata for paginated API endpoints.
+ *  - totalDocs: Total number of items across all pages
+ *  - totalPages: Total number of pages available
+ *  - currentPage: Current page number (1-indexed)
+ *  - nextPage, previousPage: Page numbers for navigation or null if not available
+ *  - limit: Number of items per page
+ */
 interface PaginationData {
   totalDocs: number;
   totalPages: number;
@@ -32,6 +60,21 @@ interface PaginationData {
   limit: number;
 }
 
+/**
+ * EventState
+ *
+ * Zustand store state for managing event data across the application.
+ *  - events: Array of Event objects (varies based on fetch method)
+ *  - isLoading: Loading state for list fetches
+ *  - isDeleteLoading, isUpdateLoading: Loading states for mutations
+ *  - pagination: Pagination metadata for current event list
+ *  - selectedEvent: Single event selected for detail view/interaction
+ *  - singleEvent: Event fetched individually (not part of list)
+ *  - singleStreampass: Streampass/subscription identifier for purchased events
+ *  - Various fetch methods: Populate events array based on filter/search
+ *  - Mutation methods: deleteEvent, updateEvent
+ *  - UI methods: setSelectedEvent, resetSingleEvent
+ */
 interface EventState {
   events: Event[];
   isLoading: boolean;
@@ -54,6 +97,15 @@ interface EventState {
   resetSingleEvent: () => void;
 }
 
+/**
+ * useEventStore
+ *
+ * Global Zustand store for event management with methods for:
+ *  - Fetching events (upcoming, live, my events, search)
+ *  - Managing single event details
+ *  - Creating, updating, and deleting events
+ *  - Handling pagination and loading states
+ */
 export const useEventStore = create<EventState>((set) => ({
   events: [],
   isLoading: false,

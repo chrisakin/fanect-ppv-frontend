@@ -9,6 +9,10 @@ import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
 import axios from "../../lib/axios";
 
+/**
+ * Zod schema for password reset form validation
+ * Validates: oldPassword (required), newPassword (min 8 chars), confirmPassword (must match)
+ */
 const passwordResetSchema = z.object({
   oldPassword: z.string().min(1, "Current password is required"),
   newPassword: z.string().min(8, "New password must be at least 8 characters"),
@@ -18,14 +22,27 @@ const passwordResetSchema = z.object({
   path: ["confirmPassword"],
 });
 
+/** Form data type inferred from passwordResetSchema */
 type PasswordResetFormData = z.infer<typeof passwordResetSchema>;
 
+/**
+ * Modal interface for changing user password
+ * @interface PasswordResetModalProps
+ * @property {boolean} isOpen - Modal visibility
+ * @property {() => void} onClose - Callback to close modal
+ */
 interface PasswordResetModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * Modal for changing user password
+ * @component
+ * Features: 3-field form with Zod validation, password visibility toggles, API call to POST /auth/change-password
+ */
 export const PasswordResetModal = ({ isOpen, onClose }: PasswordResetModalProps) => {
+  // Password visibility toggles for UX
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -42,6 +59,10 @@ export const PasswordResetModal = ({ isOpen, onClose }: PasswordResetModalProps)
     mode: "onChange",
   });
 
+  /**
+   * Handle form submission: validate and call POST /auth/change-password
+   * Clears form and closes modal on success
+   */
   const onSubmit = async (data: PasswordResetFormData) => {
     setIsLoading(true);
     try {
@@ -68,6 +89,9 @@ export const PasswordResetModal = ({ isOpen, onClose }: PasswordResetModalProps)
     }
   };
 
+  /**
+   * Clean up form state and close modal
+   */
   const handleClose = () => {
     reset();
     onClose();

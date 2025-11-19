@@ -4,12 +4,24 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Select - dropdown menu component
+ * @component
+ * Use: Select (root), SelectTrigger, SelectValue, SelectContent, SelectItem
+ */
 const Select = SelectPrimitive.Root
 
+/** Option group wrapper */
 const SelectGroup = SelectPrimitive.Group
 
+/** Selected value display */
 const SelectValue = SelectPrimitive.Value
 
+/**
+ * SelectTrigger - clickable button that opens dropdown
+ * @component
+ * Shows selected value with ChevronDown icon
+ */
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
@@ -30,6 +42,10 @@ const SelectTrigger = React.forwardRef<
 ))
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
+/**
+ * SelectScrollUpButton - scroll up arrow in dropdown
+ * @component
+ */
 const SelectScrollUpButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
@@ -47,6 +63,10 @@ const SelectScrollUpButton = React.forwardRef<
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
 
+/**
+ * SelectScrollDownButton - scroll down arrow in dropdown
+ * @component
+ */
 const SelectScrollDownButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
@@ -65,6 +85,11 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
 
+/**
+ * SelectContent - dropdown menu list container
+ * @component
+ * Portal-rendered with fade/zoom/slide animations, max-height with scroll
+ */
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>

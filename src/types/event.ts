@@ -1,8 +1,23 @@
+/**
+ * StreamingDeviceType
+ *
+ * Enum that specifies the type of device used for streaming the event.
+ *  - MOBILE: Event is streamed from a mobile device
+ *  - NOTMOBILE: Event is streamed from a desktop/web-based setup
+ */
 export enum StreamingDeviceType {
   MOBILE = 'Mobile',
   NOTMOBILE = 'Not Mobile',
 }
 
+/**
+ * Currency
+ *
+ * Enum containing all supported ISO 4217 currency codes for event pricing.
+ * Includes major global currencies (USD, EUR, GBP) and regional currencies
+ * from Africa, Asia, Middle East, Americas, and other regions.
+ *  - NONE: Default/unselected currency placeholder
+ */
 export enum Currency {
   NONE = 'Select Currency',
   USD = 'USD',
@@ -66,11 +81,37 @@ export enum Currency {
   STN = "STN",
 }
 
+/**
+ * IPrice
+ *
+ * Represents a pricing tier for an event.
+ *  - currency: ISO 4217 currency code from the Currency enum
+ *  - amount: Numeric price value in the specified currency
+ */
 export interface IPrice {
   currency: Currency;
   amount: number;
 }
 
+/**
+ * IEvent
+ *
+ * Represents the complete structure of a publishable event.
+ *  - name: Event title
+ *  - date: Event date (JavaScript Date object)
+ *  - time: Event start time as string (e.g. "14:30")
+ *  - description: Detailed event description
+ *  - bannerUrl: URL to event banner/cover image
+ *  - watermarkUrl: URL to watermark/logo image applied during streaming
+ *  - createdBy: User ID of the event creator
+ *  - published: Boolean flag indicating if event is live/published
+ *  - prices: Array of pricing tiers (multiple currencies supported)
+ *  - haveBroadcastRoom: Whether a dedicated broadcast room/chat is enabled
+ *  - broadcastSoftware: Name of streaming software used (e.g. "OBS", "Streamlabs")
+ *  - scheduledTestDate: Date when a test broadcast is scheduled
+ *  - eventTrailer: URL to promotional trailer/teaser video
+ *  - streamingDeviceType: Whether stream is from mobile or desktop/web
+ */
 export interface IEvent {
   name: string;
   date: Date;

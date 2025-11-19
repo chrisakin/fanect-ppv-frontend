@@ -1,3 +1,13 @@
+/**
+ * services/streampassSessionService
+ * Singleton service to start/end streampass sessions for viewers.
+ *
+ * Responsibilities:
+ *  - startSession(streampassId): obtain a session token from backend and cache it
+ *  - endSession(streampassId): notify backend to end a session and clean local cache
+ *  - sendHeartbeat(streampassId): keep session alive
+ *  - helper methods to check/get active session tokens
+ */
 import axios from '../lib/axios';
 
 interface SessionResponse {

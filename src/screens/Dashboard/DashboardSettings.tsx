@@ -8,6 +8,12 @@ import { DeleteAccountModal } from "../../components/modals/DeleteAccountModal";
 import { useToast } from "../../components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Dashboard settings page for user profile management.
+ * Manages account info (name, email, password reset), withdrawal banking details,
+ * notification preferences (in-app and email), account deletion with confirmation modal.
+ * Provides form validation and error handling for all settings updates.
+ */
 export const DashboardSettings = (): JSX.Element => {
   const { 
     settings, 

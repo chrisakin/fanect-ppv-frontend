@@ -1,16 +1,40 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+/**
+ * EventStatus
+ *
+ * Enum representing the three possible states of an event timeline:
+ *  - UPCOMING: Event has not started yet
+ *  - LIVE: Event is currently broadcasting
+ *  - PAST: Event has finished broadcasting
+ */
 export enum EventStatus {
   UPCOMING = 'Upcoming',
   LIVE = 'Live',
   PAST = 'Past'
 }
 
+/**
+ * EventStatusMessage
+ *
+ * Structure of SSE (Server-Sent Events) messages from the server containing event updates.
+ *  - message: Human-readable status message
+ *  - status: Current EventStatus enum value
+ */
 interface EventStatusMessage {
   message: string;
   status: EventStatus;
 }
 
+/**
+ * UseEventStatusOptions
+ *
+ * Configuration options for the useEventStatus hook.
+ *  - eventId: (required) Unique identifier of the event to monitor
+ *  - onEventEnd: (optional) Callback fired when event status changes to PAST
+ *  - onStatusChange: (optional) Callback fired whenever status changes, receives (status, message)
+ *  - enabled: (optional, default: true) Whether SSE connection is active
+ */
 interface UseEventStatusOptions {
   eventId: string;
   onEventEnd?: () => void;
@@ -18,6 +42,28 @@ interface UseEventStatusOptions {
   enabled?: boolean;
 }
 
+/**
+ * useEventStatus
+ *
+ * React hook for real-time event status monitoring via Server-Sent Events (SSE).
+ *
+ * Features:
+ *  - Establishes persistent SSE connection to monitor event status changes
+ *  - Auto-reconnects with exponential backoff (up to 5 attempts)
+ *  - Pauses connection when page is hidden and resumes when visible
+ *  - Fires callbacks on status changes and event end
+ *  - Proper cleanup on unmount to prevent memory leaks
+ *
+ * Arguments: UseEventStatusOptions
+ *
+ * Returns: {
+ *   status: EventStatus | null - Current event status
+ *   isConnected: boolean - Whether SSE connection is active
+ *   error: string | null - Error message if connection failed
+ *   reconnect: () => void - Manual function to force reconnection
+ *   disconnect: () => void - Manual function to close connection
+ * }
+ */
 export const useEventStatus = ({
   eventId,
   onEventEnd,

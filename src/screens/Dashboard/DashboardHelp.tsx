@@ -7,6 +7,11 @@ import {
 } from "../../components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 
+/**
+ * Dashboard help & support page.
+ * Displays tabbed FAQ sections (General, Events, Payments, Streaming, Account),
+ * uses accordion UI for collapsible Q&A pairs, provides comprehensive help documentation.
+ */
 export const DashboardHelp = (): JSX.Element => {
   // Data for tabs
   const tabs = ["General", "Events", "Payments", "Streaming", "Account"];

@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
 import { useScreenRecordingProtection } from '../../hooks/useScreenRecordingProtection';
-import { AlertTriangle, Shield, Eye, EyeOff } from 'lucide-react';
+import { AlertTriangle, Shield, EyeOff } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { useToast } from '../ui/use-toast';
 
+/**
+ * ScreenRecordingProtection props interface
+ * @interface ScreenRecordingProtectionProps
+ * @property {React.ReactNode} children - Content to protect
+ * @property {boolean} [enableWatermark] - Add watermark overlay (default: true)
+ * @property {boolean} [enableBlurOnFocusLoss] - Blur on window blur (default: true)
+ * @property {boolean} [enableDevToolsDetection] - Detect developer tools (default: true)
+ * @property {() => void} [onRecordingDetected] - Callback on recording detection
+ * @property {boolean} [strictMode] - Block content if recording detected (default: false)
+ */
 interface ScreenRecordingProtectionProps {
   children: React.ReactNode;
   enableWatermark?: boolean;

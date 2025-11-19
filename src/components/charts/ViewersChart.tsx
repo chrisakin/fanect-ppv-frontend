@@ -1,20 +1,51 @@
 import { Card, CardContent } from "../../components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
+/**
+ * Props for the ViewersChart component.
+ *
+ * stats: object expected to contain viewer and chat statistics. Expected shape:
+ *   {
+ *     viewers: {
+ *       total: number,
+ *       replay: number,
+ *       peak: number
+ *     },
+ *     chat: {
+ *       count: number
+ *     }
+ *   }
+ */
 interface ViewersChartProps {
   stats: any;
 }
 
+/**
+ * ViewersChart
+ *
+ * Displays two side-by-side area charts:
+ *  - Left chart (50%): Concurrent Viewers over time, showing peak concurrent viewer count.
+ *  - Right chart (50%): Chat Activity over time, showing message volume during the event.
+ *
+ * Uses sample/mock data derived from totalViewers when real event data exists.
+ * If no data is available, displays empty state cards with friendly messages.
+ *
+ * Returns: JSX.Element
+ */
 export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
   const textColor = 'dark:#828b86 #333333';
   const chartColor = 'dark:#1aaa65 #22c55e';
 
   // Handle both old and new data structure
   const totalViewers = stats?.viewers?.total || 0;
-  const replayViews = stats?.viewers?.replay || 0;
+  // Note: replayViews currently unused but available in stats structure for future features
   const peakViewers = stats?.viewers?.peak;
 
-  // Generate sample data for demonstration when no real data exists
+  /**
+   * Generate sample viewer data for chart when real data exists.
+   * Creates 7 time points showing viewer count progression over time (0:00 to 1:30).
+   * Returns: Array<{ time: string, viewers: number }>
+   */
   const viewersData = totalViewers > 0 ? [
     { time: '0:00', viewers: Math.floor(totalViewers * 0.1) },
     { time: '0:15', viewers: Math.floor(totalViewers * 0.3) },
@@ -25,6 +56,11 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
     { time: '1:30', viewers: Math.floor(totalViewers * 0.7) },
   ] : [];
 
+  /**
+   * Generate sample chat data for chart when real data exists.
+   * Creates 7 time points showing message count progression over time (0:00 to 1:30).
+   * Returns: Array<{ time: string, messages: number }>
+   */
   const chatData = totalViewers > 0 ? [
     { time: '0:00', messages: 5 },
     { time: '0:15', messages: 12 },
@@ -35,11 +71,12 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
     { time: '1:30', messages: 28 },
   ] : [];
 
+  // Determines whether to show data charts or empty states
   const hasViewerData = totalViewers > 0;
 
   return (
     <div className="lg:flex items-start gap-4 w-full">
-      {/* Concurrent Viewers Card */}
+      {/* Concurrent Viewers Card - Left column (50% on lg screens) */}
       <div className="flex flex-col w-full lg:w-1/2 items-center justify-center gap-4">
         <Card className="w-full h-[495px] dark:bg-[#04311a] bg-gray-50 rounded-lg shadow-shadow-shadow-xs overflow-hidden">
           <CardContent className="p-4">
@@ -54,6 +91,7 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
                 </div>
 
                 {hasViewerData ? (
+                  // Concurrent viewers chart with peak viewer metric
                   <>
                     <div className="w-full h-[300px] mt-4">
                       <ResponsiveContainer width="100%" height="100%">
@@ -93,6 +131,7 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
                     </div>
 
                     <div className="flex h-16 items-end gap-4 px-5 py-0 w-full mt-4">
+                      {/* Peak viewers metric display */}
                       <div className="flex items-center justify-center gap-2.5 px-4 py-2.5 dark:bg-[#062013] border-[#828b86] bg-white border-gray-200 rounded-[100px] border border-solid">
                         <div className="w-1.5 h-1.5 bg-[#ff8642] rounded-[3px]" />
                         <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-xs tracking-[-0.24px] leading-4 dark:text-[#828b86] text-gray-600 whitespace-nowrap">
@@ -102,6 +141,7 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
                     </div>
                   </>
                 ) : (
+                  // Empty state template: shown when no viewer data is available
                   <div className="flex flex-col items-center justify-center gap-4 flex-1">
                     <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                       <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,7 +162,7 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
         </Card>
       </div>
 
-      {/* Chat Activity Card */}
+      {/* Chat Activity Card - Right column (50% on lg screens) */}
       <div className="flex flex-col w-full lg:w-1/2 items-center justify-center gap-4">
         <Card className="w-full h-[495px] dark:bg-[#04311a] bg-gray-50 rounded-lg shadow-shadow-shadow-xs overflow-hidden">
           <CardContent className="p-4">
@@ -137,6 +177,7 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
                 </div>
 
                 {hasViewerData ? (
+                  // Chat activity chart with total message count
                   <>
                     <div className="w-full h-[300px] mt-4">
                       <ResponsiveContainer width="100%" height="100%">
@@ -176,6 +217,7 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
                     </div>
 
                     <div className="flex h-16 items-end gap-4 px-5 py-0 w-full mt-4">
+                      {/* Total messages metric display */}
                       <div className="flex items-center justify-center gap-2.5 px-4 py-2.5 dark:bg-[#062013] border-[#828b86] bg-white border-gray-200 rounded-[100px] border border-solid">
                         <div className="w-1.5 h-1.5 bg-[#ff8642] rounded-[3px]" />
                         <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-xs tracking-[-0.24px] leading-4 dark:text-[#828b86] text-gray-600 whitespace-nowrap">
@@ -185,6 +227,7 @@ export const ViewersChart = ({ stats }: ViewersChartProps): JSX.Element => {
                     </div>
                   </>
                 ) : (
+                  // Empty state template: shown when no chat data is available
                   <div className="flex flex-col items-center justify-center gap-4 flex-1">
                     <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                       <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

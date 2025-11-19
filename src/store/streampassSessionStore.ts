@@ -1,5 +1,11 @@
 import { create } from 'zustand';
 
+/**
+ * store/streampassSessionStore
+ * Zustand store to track client-side streampass sessions.
+ * - stores session tokens by streampassId
+ * - helpers to add/remove sessions, update heartbeat timestamps and query tokens
+ */
 interface SessionData {
   streampassId: string;
   sessionToken: string;

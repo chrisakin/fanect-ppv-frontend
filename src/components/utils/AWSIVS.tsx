@@ -1,5 +1,17 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
+/**
+ * useAWSIVSService
+ * Lightweight IVS player + chat service hook.
+ *
+ * Inputs: playbackUrl, optional chat config (chatApiEndpoint, chatToken), username
+ * Outputs: refs for player/container, player state, connection status, chat messages,
+ *          and controls (play, pause, sendMessage, setMuted, setVolume).
+ *
+ * Behavior: lazy-loads Amazon IVS player script, attaches a video element, manages
+ * IVS player events (playing, buffering, ended, error), implements retry logic for
+ * startup failures, and opens a WebSocket for chat when chat credentials are present.
+ */
 interface ChatMessage {
   id: string;
   sender: string;

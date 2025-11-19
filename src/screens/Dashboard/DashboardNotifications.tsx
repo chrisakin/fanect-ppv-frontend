@@ -7,6 +7,11 @@ import { PaginationIndex } from "../../components/utils/Pagination";
 import { EmptyState } from "../../components/layout/EmptyState";
 import { useToast } from "../../components/ui/use-toast";
 
+/**
+ * Dashboard notifications center.
+ * Fetches and displays paginated notifications, allows marking individual or all as read,
+ * shows unread count, time-ago formatting, and empty state when no notifications exist.
+ */
 export const DashboardNotifications = () => {
   const { 
     notifications, 

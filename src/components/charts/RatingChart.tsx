@@ -1,10 +1,47 @@
 import { StarIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 
+/**
+ * Props for the RatingChart component.
+ *
+ * stats: object expected to contain viewer statistics and rating data. Expected shape:
+ *   {
+ *     viewers: {
+ *       total: number,
+ *       replay: number
+ *     },
+ *     ratings: [
+ *       {
+ *         avg: number (0-5),
+ *         count: number,
+ *         breakdown: {
+ *           "1": number,
+ *           "2": number,
+ *           "3": number,
+ *           "4": number,
+ *           "5": number
+ *         }
+ *       }
+ *     ]
+ *   }
+ */
 interface RatingChartProps {
   stats: any;
 }
 
+/**
+ * RatingChart
+ *
+ * Displays viewer statistics and event ratings in a two-column layout:
+ *  - Left column (70%): Shows viewer metrics (Total Viewers, Watch Replay Views)
+ *    with horizontal progress bars.
+ *  - Right column (30%): Shows rating distribution (1-5 stars) with counts and
+ *    summary statistics (total ratings, average rating).
+ *
+ * If no data is available, displays empty state cards with friendly messages.
+ *
+ * Returns: JSX.Element
+ */
 export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
   // Handle both old and new data structure
   const totalViewers = stats?.viewers?.total || 0;
@@ -16,7 +53,11 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
   const totalRatings = ratingsData.count || 0;
   const ratingBreakdown = ratingsData.breakdown || { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 };
   
-  // Calculate viewer progress percentages
+  /**
+   * Calculate viewer progress percentages
+   * Returns an array of viewer metrics with labels, values, and progress percentages.
+   * These are used to render progress bars in the left column.
+   */
   const viewerData = [
     { 
       label: "Total Viewers", 
@@ -30,12 +71,17 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
     },
   ];
 
-  // Convert rating breakdown to array format for display
+  /**
+   * Convert rating breakdown to array format for display
+   * Maps from object { "1": count, "2": count, ... } to array of objects with stars and count.
+   * Returns: Array<{ stars: number, count: number }> ordered from 5 stars down to 1.
+   */
   const ratingData = [5, 4, 3, 2, 1].map(stars => ({
     stars,
     count: parseInt(ratingBreakdown[stars.toString()]) || 0
   }));
 
+  // Determines whether to show data or empty states
   const hasData = totalViewers > 0 || totalRatings > 0;
 
   return (
@@ -49,10 +95,12 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
           </div>
 
           {hasData ? (
+            // Viewers data section: displays total viewers and replay views with progress bars
             <CardContent className="flex flex-col items-start gap-6 p-0 w-full">
               {viewerData.map((item, index) => (
                 <div key={index} className="flex items-center gap-6 w-full">
                   <div className="flex flex-col items-start justify-center gap-1 w-full">
+                    {/* Progress bar: width represents percentage of progress */}
                     <div className="relative w-full h-[5px] dark:bg-[#04311a] bg-[#CFEFDF] rounded-[10px] overflow-hidden">
                       <div
                         className="absolute top-0 left-0 h-full bg-[#1aaa65]"
@@ -60,6 +108,7 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
                       />
                     </div>
 
+                    {/* Label and value row */}
                     <div className="flex items-center justify-between w-full">
                       <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal text-[#828b86] text-sm tracking-[-0.28px] leading-5 whitespace-nowrap">
                         {item.label}
@@ -74,6 +123,7 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
               ))}
             </CardContent>
           ) : (
+            // Empty state template: shown when no viewer data is available
             <div className="flex flex-col items-center justify-center gap-4 p-8 w-full">
               <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,12 +148,14 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
           </div>
 
           {totalRatings > 0 ? (
+            // Ratings breakdown section: displays star distribution and summary
             <CardContent className="p-0 w-full">
               <div className="flex items-start gap-6 w-full">
                 <div className="flex flex-col w-[234px] items-start gap-2.5">
                   {ratingData.map((rating, index) => (
                     <div key={index} className="flex items-center gap-6 w-full">
                       <div className="w-[140px] flex flex-col items-start justify-center gap-1">
+                        {/* Star display: filled stars up to rating.stars, unfilled stars for remainder */}
                         <div className="flex items-center justify-between w-full">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <StarIcon
@@ -119,7 +171,7 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
                     </div>
                   ))}
                   
-                  {/* Summary */}
+                  {/* Summary section: total ratings and average rating with separator */}
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 w-full">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-[#828b86]">Total Ratings:</span>
@@ -134,6 +186,7 @@ export const RatingChart = ({ stats }: RatingChartProps): JSX.Element => {
               </div>
             </CardContent>
           ) : (
+            // Empty state template: shown when no ratings have been submitted
             <div className="flex flex-col items-center justify-center gap-4 p-4 w-full">
               <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 <StarIcon className="w-6 h-6 text-gray-400" />

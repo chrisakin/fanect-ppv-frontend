@@ -1,5 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 
+/**
+ * VideoProtectionProps
+ * Props for the VideoProtection wrapper component.
+ * - children: content to protect (usually a video container)
+ * - enableTextSelection: allow/deny text selection
+ * - enableRightClick: allow/deny context menu
+ * - enableDragAndDrop: allow/deny drag/drop of elements
+ * - enablePrintScreen: allow/deny common print/screenshot shortcuts
+ */
 interface VideoProtectionProps {
   children: React.ReactNode;
   enableTextSelection?: boolean;
@@ -8,6 +17,12 @@ interface VideoProtectionProps {
   enablePrintScreen?: boolean;
 }
 
+/**
+ * VideoProtection
+ * Small wrapper to apply DOM/CSS protections intended to reduce casual copying
+ * of streamed video content. It disables selection, drag/drop, right-click and
+ * common keyboard shortcuts by default; options allow opting features back in.
+ */
 export const VideoProtection: React.FC<VideoProtectionProps> = ({
   children,
   enableTextSelection = false,

@@ -10,7 +10,11 @@ import { DashboardSingleEvent } from './DashboardSingleEvent';
 import { DashboardWatchEvent } from './DashboardWatchEvent';
 import { DashboardEventAnalytics } from './DashboardEventAnalytics';
 
-
+/**
+ * Main dashboard router and layout wrapper.
+ * Manages all nested dashboard routes (home, tickets, organise, settings, notifications, help, etc.)
+ * Wraps content in DashboardLayout with sidebar navigation.
+ */
 export const Dashboard = () => {
   return (
     <DashboardLayout>

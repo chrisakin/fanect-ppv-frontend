@@ -10,6 +10,13 @@ import { Loader2, AlertCircle, PlayCircle, Clock } from "lucide-react";
 import { eventStreamingService, StreamingData } from "../../services/eventStreamingService";
 import { useToast } from "../ui/use-toast";
 
+/**
+ * PastEventPlayer
+ * Renders a replay (VOD) player for past events. Fetches replay/playback data
+ * and uses `useAWSIVSService` to attach an IVS player for the saved broadcast URL.
+ *
+ * Props: eventId, optional eventName and device type.
+ */
 interface PastEventPlayerProps {
   eventId: string;
   eventName?: string;

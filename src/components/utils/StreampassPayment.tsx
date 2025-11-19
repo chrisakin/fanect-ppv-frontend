@@ -6,6 +6,16 @@ import { useEffect, useState } from "react";
 import intaxios from "../../lib/axios"
 import { locationService } from "@/services/locationService";
 
+/**
+ * StreampassPaymentButton
+ * Small helper component that chooses a payment provider (Flutterwave vs Stripe)
+ * based on detected user country and initializes the chosen payment flow.
+ *
+ * Props: friends (optional gift recipients), totalPrice and currency.
+ * Behavior: detects location, posts initialization request to backend and redirects
+ * to the provider checkout link.
+ */
+
 type StreampassPaymentButtonProps = {
   friends?: any[] | null;
   totalPrice?: number;

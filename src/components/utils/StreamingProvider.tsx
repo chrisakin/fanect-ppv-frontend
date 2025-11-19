@@ -3,6 +3,15 @@ import { PastEventPlayer } from "./PastEventPlayer";
 import { LiveEventPlayer } from "./LiveEventPlayer";
 import { ErrorBoundary } from "./ErrorBoundary";
 
+/**
+ * StreamingProvider
+ * Chooses and renders the correct player for the event type.
+ * - live/upcoming: wraps `LiveEventPlayer` inside an `ErrorBoundary`.
+ * - past: renders `PastEventPlayer`.
+ * - default/fallback: renders `AWSIVSPlayer` with provided playback data.
+ *
+ * Props: eventData (playback/chat info), eventType, metadata and protection/session flags.
+ */
 interface StreamingProviderProps {
   eventData?: {
     playbackUrl?: string;

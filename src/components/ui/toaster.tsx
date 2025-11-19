@@ -8,6 +8,11 @@ import {
 } from "./toast"
 import { useToast } from "./use-toast"
 
+/**
+ * Toaster - main toast notification renderer
+ * @component
+ * Renders all active toasts from useToast hook. Integrates Toast, ToastViewport, ToastProvider
+ */
 export function Toaster() {
   const { toasts } = useToast()
 

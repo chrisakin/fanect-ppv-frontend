@@ -2,8 +2,17 @@ import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { cn } from "../../lib/utils"
 
+/**
+ * DropdownMenu - context menu component
+ * @component
+ * Use: DropdownMenu (root), DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem
+ */
 const DropdownMenu = DropdownMenuPrimitive.Root
 
+/**
+ * DropdownMenuTrigger - button that opens the menu
+ * @component
+ */
 const DropdownMenuTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
@@ -17,6 +26,11 @@ const DropdownMenuTrigger = React.forwardRef<
 DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName
 
 
+/**
+ * DropdownMenuContent - menu list container
+ * @component
+ * Portal-rendered with animations. Min-width 8rem, side offset 4px
+ */
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
@@ -35,6 +49,11 @@ const DropdownMenuContent = React.forwardRef<
 ))
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
+/**
+ * DropdownMenuItem - individual menu option
+ * @component
+ * Cursor-default, focus:bg-accent. Supports disabled state
+ */
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item>

@@ -3,6 +3,14 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 
+/**
+ * Modal interface for multi-device streampass conflict
+ * @interface SessionConflictModalProps
+ * @property {boolean} isOpen - Modal visibility
+ * @property {() => void} onClose - Callback for "Go Back" action
+ * @property {() => void} onForceStart - Callback to terminate other session and start here
+ * @property {string} [eventName] - Optional event name for context display
+ */
 interface SessionConflictModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,6 +18,12 @@ interface SessionConflictModalProps {
   eventName?: string;
 }
 
+
+/**
+ * Alert for concurrent streampass usage on multiple devices
+ * @component
+ * Shows warning with device icons and options: Go Back or Force Start (terminates other session)
+ */
 export const SessionConflictModal = ({ 
   isOpen, 
   onClose, 

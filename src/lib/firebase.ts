@@ -1,3 +1,16 @@
+/**
+ * lib/firebase
+ * Firebase initialization and helper utilities used by the app's FCM integration.
+ *
+ * Exports:
+ *  - messaging: initialized firebase.messaging instance (when available)
+ *  - requestNotificationPermission(): requests browser notification permission
+ *  - registerServiceWorker(): registers `firebase-messaging-sw.js` and returns the registration
+ *  - getFCMToken(): retrieves a device FCM token (registers SW if needed)
+ *  - onMessageListener(): promise wrapper for foreground messages
+ *
+ * Notes: functions gracefully degrade when service workers or environment variables are missing.
+ */
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 

@@ -3,6 +3,17 @@ import { getAccessToken, getRefreshToken, setTokens, clearTokens, getSessionToke
 import { locationService } from '../services/locationService';
 import { redirectToLogin } from '../services/redirectService';
 
+/**
+ * lib/axios
+ * Centralized axios instance with authentication and retry handling.
+ *
+ * Features:
+ *  - Adds access token and streampass/session headers to requests
+ *  - Injects user country header from `locationService`
+ *  - Handles 401 responses by refreshing tokens (single-refresh queue)
+ *  - Redirects to login on unrecoverable auth errors (402/refresh failure)
+ */
+
 const baseURL = import.meta.env.VITE_BASE_URL;
 
 export const axiosInstance = axios.create({

@@ -11,6 +11,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Dashboard watch event screen (live/upcoming/past replay).
+ * Fetches purchased event details, initializes streampass session tracking,
+ * displays video player with chat, handles multi-device conflicts,
+ * and shows session error alerts with auto-redirect on conflicts.
+ */
 export const DashboardWatchEvent = (): JSX.Element => {
   const { type, id } = useParams();
   const navigate = useNavigate();

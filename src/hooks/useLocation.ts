@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react';
 import { locationService, LocationData } from '../services/locationService';
 
+/**
+ * UseLocationReturn
+ * Lightweight contract for location hook return values.
+ * - location: LocationData or null
+ * - isLoading: whether a location lookup is in progress
+ * - error: human-friendly error message when lookup fails
+ * - isVPNDetected: boolean flag if VPN was detected
+ * - requestLocation: function to trigger user geolocation (may fallback to IP)
+ * - clearError: clears stored errors
+ */
 interface UseLocationReturn {
   location: LocationData | null;
   isLoading: boolean;
@@ -10,6 +20,13 @@ interface UseLocationReturn {
   clearError: () => void;
 }
 
+/**
+ * useLocation
+ * Hook that wraps `locationService` to provide: cached location, VPN detection,
+ * loading and error state, and a requestLocation() helper which tries geolocation
+ * then falls back to IP-based lookup. Designed for simple consumer components and
+ * permission flows.
+ */
 export const useLocation = (): UseLocationReturn => {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [isLoading, setIsLoading] = useState(false);

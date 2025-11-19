@@ -4,14 +4,42 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { ScrollArea, ScrollBar } from "../../components/ui/scroll-area";
 
+/**
+ * Props for the FeedbackChart component.
+ *
+ * stats: object expected to contain a `feedback` array. Expected shape:
+ *   {
+ *     feedback: Array<{
+ *       id?: string,
+ *       comment?: string,
+ *       userName?: string,
+ *       rating?: number (1-5)
+ *     }>
+ *   }
+ */
 interface FeedbackChartProps {
   stats: any;
 }
 
+/**
+ * FeedbackChart
+ *
+ * Displays viewer feedback and ratings for an event in a horizontally-scrollable card list.
+ * Each feedback card shows:
+ *  - The comment text (truncated to 2 lines if needed)
+ *  - The viewer's name (or "Anonymous" if not provided)
+ *  - A star rating (1-5 filled stars)
+ *
+ * If no feedback is available, displays an empty state with a message.
+ * If feedback exists, a circular arrow button is shown on the right side (likely for navigation).
+ *
+ * Returns: JSX.Element
+ */
 export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
   // Use feedback data from stats - handle the new backend structure
   const feedbackData = stats?.feedback || [];
 
+  // Determines whether to show feedback cards or an empty state
   const hasFeedback = feedbackData && feedbackData.length > 0;
 
   return (
@@ -26,14 +54,17 @@ export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
             </div>
 
             {hasFeedback ? (
+              // Scrollable feedback cards section
               <ScrollArea className="w-full flex-1 overflow-x-auto">
                 <div className="flex items-start gap-4 pb-4">
+                  {/* Map each feedback item to a feedback card component */}
                   {feedbackData.map((feedback: any, index: number) => (
                     <Card
                       key={feedback.id || index}
                       className="w-[339px] h-[104px] flex-shrink-0 dark:bg-[#062013] bg-white border border-solid dark:border-[#1aaa654c] border-gray-200 rounded-[10px]"
                     >
                       <CardContent className="p-4 flex flex-col gap-2.5 h-full">
+                        {/* Feedback comment and username section */}
                         <div className="flex flex-col items-start justify-center gap-[5px]">
                           <div className="[font-family:'Sofia_Pro-Regular',Helvetica] font-normal dark:text-[#828b86] text-gray-700 text-sm tracking-[-0.28px] leading-5 line-clamp-2">
                             "{feedback.comment || 'Great event!'}"
@@ -42,6 +73,7 @@ export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
                             - {feedback.userName || 'Anonymous'}
                           </div>
                         </div>
+                        {/* Star rating display: fills stars based on feedback.rating (1-5) */}
                         <div className="flex items-center gap-1">
                           {[...Array(5)].map((_, starIndex) => (
                             <StarIcon
@@ -62,6 +94,7 @@ export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
                 <ScrollBar orientation="horizontal" className="h-2" />
               </ScrollArea>
             ) : (
+              // Empty state template: shown when there is no feedback data
               <div className="flex flex-col items-center justify-center gap-4 flex-1">
                 <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,6 +113,7 @@ export const FeedbackChart = ({ stats }: FeedbackChartProps): JSX.Element => {
         </div>
       </CardContent>
       
+      {/* Navigation button: only shown if feedback exists */}
       {hasFeedback && (
         <Button
           className="absolute right-8 top-1/2 -translate-y-1/2 p-2 dark:bg-[#04311a] dark:hover:bg-[#054525] bg-green-600 hover:bg-green-700 rounded-full shadow-lg"

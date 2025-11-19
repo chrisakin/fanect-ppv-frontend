@@ -2,6 +2,12 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Input - text field with placeholder and focus ring
+ * @component
+ * Props: type (text, email, password, etc.), placeholder, disabled, etc.
+ * Styling: rounded border, focus ring, dark mode support
+ */
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
 

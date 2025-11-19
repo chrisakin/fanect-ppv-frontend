@@ -5,6 +5,13 @@ import { useLocation } from '../hooks/useLocation';
 import { LocationData } from '../services/locationService';
 import { locationService } from '../services/locationService';
 
+/**
+ * LocationContextType
+ * Minimal context exposed by `LocationProvider`:
+ *  - location: current LocationData (or null)
+ *  - isLocationLoading: whether a location request is in-flight
+ *  - requestLocation: function to request location (geolocation/IP fallback)
+ */
 interface LocationContextType {
   location: LocationData | null;
   isLocationLoading: boolean;
@@ -25,6 +32,16 @@ interface LocationProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * LocationProvider
+ * React context provider that centralizes user location state and permission UX.
+ * Behavior:
+ *  - exposes `location`, `isLocationLoading` and `requestLocation` via context
+ *  - shows a `LocationPermissionModal` when permissions are undecided
+ *  - shows `VPNDetectedModal` when the `useLocation` hook reports a VPN
+ *
+ * Consumers should call `useLocationContext()` to access the location and helper.
+ */
 export const LocationProvider = ({ children }: LocationProviderProps) => {
   const { location, isLoading, error, isVPNDetected, requestLocation, clearError } = useLocation();
   const [showPermissionModal, setShowPermissionModal] = useState(false);

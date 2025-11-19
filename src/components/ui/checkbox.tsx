@@ -4,6 +4,11 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Checkbox - 4x4px toggle input with CheckIcon
+ * @component
+ * Custom styling: green border (#1AAA65), dark bg when checked, focus ring support
+ */
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>

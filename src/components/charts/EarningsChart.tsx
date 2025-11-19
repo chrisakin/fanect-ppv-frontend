@@ -2,6 +2,23 @@ import { Card, CardContent } from "../../components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
+/**
+ * Props for the EarningsChart component.
+ *
+ * stats: object containing earnings summary and transaction list. Expected shape (commonly):
+ *   {
+ *     earnings: {
+ *       totalRevenue: number,
+ *       totalTransactions: number,
+ *       transactions: Array<{ date: string, amount: number }>
+ *     }
+ *   }
+ *
+ * selectedMonth: currently selected month key in the format YYYY-MM.
+ * selectedCurrency: ISO currency code (e.g. 'USD', 'NGN') used to format amounts.
+ * onMonthChange: callback invoked when the month selector changes (receives month key).
+ * onCurrencyChange: callback invoked when the currency selector changes (receives currency code).
+ */
 interface EarningsChartProps {
   stats: any;
   selectedMonth: string;
@@ -10,6 +27,19 @@ interface EarningsChartProps {
   onCurrencyChange: (currency: string) => void;
 }
 
+/**
+ * EarningsChart
+ *
+ * This React component renders two main cards:
+ *  - A summary card showing total revenue, total transactions and a short list of recent transactions.
+ *  - A revenue-over-time chart (area chart) that visualizes daily revenue for the selected month.
+ *
+ * It accepts the `EarningsChartProps` described above. Internally it derives month options, groups
+ * transactions by date, and formats currency amounts for display. If there is no earnings data, it
+ * displays friendly empty-state UI instead of charts.
+ *
+ * Returns: JSX.Element
+ */
 export const EarningsChart = ({ 
   stats, 
   selectedMonth, 
@@ -18,6 +48,15 @@ export const EarningsChart = ({
   onCurrencyChange 
 }: EarningsChartProps): JSX.Element => {
 
+  /**
+   * generateMonthOptions
+   *
+   * Generates an array of month option objects for the past 12 months. Each option has:
+   *  - key: string in YYYY-MM format (used as the Select value)
+   *  - label: human-readable month label (e.g. "November 2025")
+   *
+   * Returns: Array<{ key: string, label: string }>
+   */
   // Generate month options for the last 12 months
   const generateMonthOptions = () => {
     const months = [];
@@ -51,6 +90,16 @@ export const EarningsChart = ({
   const totalTransactions = stats?.earnings?.totalTransactions || 0;
   const transactions = stats?.earnings?.transactions || [];
   
+  /**
+   * processTransactionsForChart
+   *
+   * Reads the `transactions` array from the `stats` prop and groups items by `date`.
+   * For each date it sums the amounts and counts the number of transactions. The result
+   * is returned as an array sorted by date (ascending), which is the shape required
+   * by the Recharts AreaChart data prop.
+   *
+   * Returns: Array<{ date: string, amount: number, count: number }>
+   */
   // Process transactions for chart display
   const processTransactionsForChart = () => {
     if (!transactions || transactions.length === 0) return [];
@@ -77,6 +126,16 @@ export const EarningsChart = ({
   const textColor = '#828b86'; // Use a consistent color that works in both modes
   const chartColor = 'dark:#1aaa65 #22c55e';
 
+  /**
+   * formatCurrency
+   *
+   * Formats a numeric amount to a localized currency string using Intl.NumberFormat.
+   * It uses 'en-US' locale for formatting and accepts an ISO currency code.
+   *
+   * Example: formatCurrency(1200, 'USD') -> "$1,200"
+   *
+   * Returns: string
+   */
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

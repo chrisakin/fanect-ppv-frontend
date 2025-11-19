@@ -1,3 +1,12 @@
+/**
+ * store/notificationStore
+ * Zustand store that centralizes notifications from two sources:
+ *  - backend database (via `/notifications` endpoints)
+ *  - local FCM notifications (persisted by `fcmService`)
+ *
+ * Exposes: fetchNotifications, fetchUnreadNotifications, markAsRead, markAllAsRead,
+ * addNotification, addFCMNotification, and updateUnreadCount.
+ */
 import { create } from 'zustand';
 import axios from '../lib/axios';
 import { fcmService } from '../services/fcmService';

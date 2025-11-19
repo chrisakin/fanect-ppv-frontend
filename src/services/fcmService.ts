@@ -1,3 +1,15 @@
+/**
+ * services/fcmService
+ * Singleton wrapper around Firebase Cloud Messaging for the frontend.
+ *
+ * Responsibilities:
+ *  - Initialize FCM (register SW, request permission, obtain token)
+ *  - Send token to backend and persist locally
+ *  - Listen for foreground messages and persist them in localStorage
+ *  - Provide helpers to read/mark/clear FCM notifications
+ *
+ * Exposes: fcmService (singleton instance)
+ */
 import { getFCMToken, requestNotificationPermission, onMessageListener, registerServiceWorker } from '../lib/firebase';
 import axios from '../lib/axios';
 

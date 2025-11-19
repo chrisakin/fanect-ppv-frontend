@@ -9,6 +9,15 @@ import { useAWSIVSService } from "./AWSIVS";
 import { Loader2, AlertCircle } from "lucide-react";
 import { FeedbackModal } from "../modals/FeedbackModal";
 
+/**
+ * AWSIVSPlayer
+ * Wrapper React component that renders a video player powered by Amazon IVS and a
+ * lightweight chat UI. Intended for embedding playback + chat for a streampass event.
+ *
+ * Props: playbackUrl, chat endpoint/token/room, username, event metadata and session info.
+ * Behavior: uses `useAWSIVSService` hook to manage the IVS player and chat websocket,
+ * exposes local controls (play/pause/mute/volume), and shows loading/error overlays.
+ */
 interface AWSIVSPlayerProps {
   playbackUrl?: string;
   chatApiEndpoint?: string;

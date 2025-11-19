@@ -6,6 +6,11 @@ import { Button } from "../../components/ui/button";
 import axios from "@/lib/axios";
 import { Header } from "@/components/layout/Header";
 
+/**
+ * Payment Success verification screen.
+ * Verifies payment from Stripe or Flutterwave (checks session_id or tx_ref),
+ * handles gift status and streaming status, auto-redirects after 30s countdown.
+ */
 export const PaymentSuccess = () => {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [giftStatus, setGiftStatus] = useState(false)

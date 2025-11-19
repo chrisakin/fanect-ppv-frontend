@@ -4,6 +4,11 @@ import { Slot } from "@radix-ui/react-slot"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Breadcrumb - navigation path component
+ * @component
+ * Use: Breadcrumb (nav), BreadcrumbList (ol), BreadcrumbItem (li), BreadcrumbLink (a), BreadcrumbPage (span)
+ */
 const Breadcrumb = React.forwardRef<
   HTMLElement,
   React.ComponentPropsWithoutRef<"nav"> & {
@@ -12,6 +17,11 @@ const Breadcrumb = React.forwardRef<
 >(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />)
 Breadcrumb.displayName = "Breadcrumb"
 
+/**
+ * BreadcrumbList - ordered list for breadcrumb items
+ * @component
+ * Flex row with ChevronRight separators. Text-sm muted foreground
+ */
 const BreadcrumbList = React.forwardRef<
   HTMLOListElement,
   React.ComponentPropsWithoutRef<"ol">
@@ -27,6 +37,11 @@ const BreadcrumbList = React.forwardRef<
 ))
 BreadcrumbList.displayName = "BreadcrumbList"
 
+/**
+ * BreadcrumbItem - individual breadcrumb list item
+ * @component
+ * List item container for link or page. Inline-flex with gap
+ */
 const BreadcrumbItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentPropsWithoutRef<"li">
@@ -39,6 +54,11 @@ const BreadcrumbItem = React.forwardRef<
 ))
 BreadcrumbItem.displayName = "BreadcrumbItem"
 
+/**
+ * BreadcrumbLink - clickable link in breadcrumb
+ * @component
+ * Anchor or asChild component. Hover changes text to foreground
+ */
 const BreadcrumbLink = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentPropsWithoutRef<"a"> & {
@@ -57,6 +77,11 @@ const BreadcrumbLink = React.forwardRef<
 })
 BreadcrumbLink.displayName = "BreadcrumbLink"
 
+/**
+ * BreadcrumbPage - current page (non-clickable) in breadcrumb
+ * @component
+ * Span element. Displays as plain text (not a link)
+ */
 const BreadcrumbPage = React.forwardRef<
   HTMLSpanElement,
   React.ComponentPropsWithoutRef<"span">

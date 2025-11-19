@@ -22,6 +22,11 @@ const passwordResetSchema = z.object({
 
 type PasswordResetFormData = z.infer<typeof passwordResetSchema>;
 
+/**
+ * Password Reset flow screen.
+ * Allows users to set a new password via a reset token from email link.
+ * Validates matching passwords, posts to /auth/reset/{token}, and shows success/error states.
+ */
 export const PasswordReset = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

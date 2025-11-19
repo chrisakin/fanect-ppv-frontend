@@ -9,7 +9,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { useEventStore } from "@/store/eventStore";
 import { useEffect, useState } from "react";
-
+/**
+ * Home screen
+ * - Renders hero, event list and pagination controls
+ * - Redirects authenticated users to dashboard home
+ * - Accepts internal state to toggle upcoming/live events and fetches via `useEventStore`
+ */
 export const Home = (): JSX.Element => {
   const navigate = useNavigate();
   const [eventType, setEventType] = useState<'upcoming' | 'live'>('upcoming');
@@ -53,6 +58,7 @@ export const Home = (): JSX.Element => {
     hour12: true,    
     }),
     image: event.bannerUrl,
+    hasStreamPass: event.hasStreamPass ?? false,
   }));
 
   return (
@@ -128,3 +134,4 @@ export const Home = (): JSX.Element => {
     </main>
   );
 };
+

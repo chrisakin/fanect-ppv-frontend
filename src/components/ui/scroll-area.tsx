@@ -3,6 +3,11 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * ScrollArea - custom scrollable container with styled scrollbars
+ * @component
+ * Use: ScrollArea (root), ScrollBar (custom scrollbar), children
+ */
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
@@ -21,6 +26,11 @@ const ScrollArea = React.forwardRef<
 ));
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
+/**
+ * ScrollBar - custom scrollbar for scroll area
+ * @component
+ * Props: orientation (vertical/horizontal). Styled thumb with rounded appearance
+ */
 const ScrollBar = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>

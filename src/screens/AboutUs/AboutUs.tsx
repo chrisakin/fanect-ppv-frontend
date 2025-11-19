@@ -1,6 +1,10 @@
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 
+/**
+ * About Us static page.
+ * Displays company mission, vision, and brand story with hero banner and styled content sections.
+ */
 export const AboutUs = (): JSX.Element => {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">

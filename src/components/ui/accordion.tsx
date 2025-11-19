@@ -3,8 +3,18 @@ import * as AccordionPrimitive from "@radix-ui/react-accordion"
 import { ChevronDown } from "lucide-react"
 import { cn } from "../../lib/utils"
 
+/**
+ * Accordion component - collapsible section container (Root)
+ * @component
+ * Wrapper for accordion items. Use with AccordionItem, AccordionTrigger, AccordionContent
+ */
 const Accordion = AccordionPrimitive.Root
 
+/**
+ * AccordionItem - individual expandable section wrapper
+ * @component
+ * Container for trigger and content. Supports disabled and value props
+ */
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
@@ -17,6 +27,11 @@ const AccordionItem = React.forwardRef<
 ))
 AccordionItem.displayName = "AccordionItem"
 
+/**
+ * AccordionTrigger - clickable header that toggles content visibility
+ * @component
+ * Shows ChevronDown icon that rotates on open state. Flex container with justify-between
+ */
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
@@ -37,6 +52,11 @@ const AccordionTrigger = React.forwardRef<
 ))
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 
+/**
+ * AccordionContent - collapsible content area revealed on trigger click
+ * @component
+ * Animated with slide up/down. Hidden when closed, visible when open
+ */
 const AccordionContent = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>

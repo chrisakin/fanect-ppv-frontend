@@ -15,11 +15,19 @@ import { useAuthStore } from "../../store/authStore";
 import { setLoggedinUser, setTokens } from "@/lib/auth";
 import { useEventStore } from "@/store/eventStore";
 
+/**
+ * Login form validation schema
+ * @type {ZodSchema}
+ */
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+/**
+ * Signup form validation schema
+ * @type {ZodSchema}
+ */
 const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   userName: z.string().min(1, "User name is required"),
@@ -28,24 +36,56 @@ const signupSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+/**
+ * Verification code schema (6-digit OTP)
+ * @type {ZodSchema}
+ */
 const verificationSchema = z.object({
   code: z.string().length(6, "Verification code must be 6 digits"),
 });
 
+/**
+ * Password reset email schema
+ * @type {ZodSchema}
+ */
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
 
+/**
+ * Props for LoginModal
+ * @interface LoginModalProps
+ * @property {boolean} isOpen - Modal visibility state
+ * @property {Function} onClose - Callback to close modal
+ */
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * Type definitions for form data
+ */
 type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 type VerificationFormData = z.infer<typeof verificationSchema>;
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
+/**
+ * LoginModal Component - Multi-step authentication modal
+ * 
+ * Features:
+ * - Login/Signup tabs with form validation
+ * - Email verification with 6-digit OTP
+ * - Forgot password flow
+ * - Google OAuth integration
+ * - Password visibility toggle
+ * - Loading states and error handling
+ * - Multi-step form wizard
+ * 
+ * @param {LoginModalProps} props - Component props
+ * @returns {JSX.Element} Authentication modal with multiple flows
+ */
 export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSignup, setIsSignup] = useState(false);

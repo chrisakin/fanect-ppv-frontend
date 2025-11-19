@@ -44,6 +44,12 @@ interface EventStats {
   }>;
 }
 
+/**
+ * Dashboard event analytics view for organizers.
+ * Fetches event statistics (earnings, viewers, ratings, feedback) by month and currency,
+ * displays charts for revenue, viewer counts, ratings distribution, and user feedback.
+ * Allows month/currency filtering for dynamic analytics updates.
+ */
 export const DashboardEventAnalytics = (): JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const [stats, setStats] = useState<EventStats | null>(null);

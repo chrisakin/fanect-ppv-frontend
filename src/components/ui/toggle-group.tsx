@@ -5,6 +5,10 @@ import * as React from "react";
 import { cn } from "../../lib/utils";
 import { toggleVariants } from "./toggle";
 
+/**
+ * ToggleGroupContext - provides variant/size to child ToggleGroupItems
+ * @internal
+ */
 const ToggleGroupContext = React.createContext<
   VariantProps<typeof toggleVariants>
 >({
@@ -12,6 +16,11 @@ const ToggleGroupContext = React.createContext<
   variant: "default",
 });
 
+/**
+ * ToggleGroup - grouped toggle buttons (radio or checkbox style)
+ * @component
+ * Flex container providing variant/size context to child items via provider
+ */
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
@@ -30,6 +39,11 @@ const ToggleGroup = React.forwardRef<
 
 ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
 
+/**
+ * ToggleGroupItem - individual toggle button inside ToggleGroup
+ * @component
+ * Inherits variant/size from context. Can override with explicit props
+ */
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &

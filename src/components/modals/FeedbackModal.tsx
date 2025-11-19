@@ -8,6 +8,14 @@ import { useToast } from "../ui/use-toast";
 import axios from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Props for FeedbackModal
+ * @interface FeedbackModalProps
+ * @property {boolean} isOpen - Modal visibility state
+ * @property {Function} onClose - Callback to close modal
+ * @property {string} eventId - Event to provide feedback for
+ * @property {string} [eventName] - Event name for display
+ */
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,18 +23,59 @@ interface FeedbackModalProps {
   eventName?: string;
 }
 
+/**
+ * FeedbackModal Component - Collect viewer feedback on events
+ * 
+ * Features:
+ * - 1-5 star rating system with hover preview
+ * - Optional comment textarea
+ * - Submit to /feedback endpoint
+ * - Loading state during submission
+ * - Validation (rating required)
+ * - Redirect to tickets page after submission
+ * 
+ * @param {FeedbackModalProps} props - Component props
+ * @returns {JSX.Element} Feedback collection modal
+ */
 export const FeedbackModal = ({ isOpen, onClose, eventId, eventName }: FeedbackModalProps): JSX.Element => {
+  /**
+   * Selected rating (1-5 stars)
+   * @type {[number | null, Function]}
+   */
   const [rating, setRating] = useState<number | null>(null);
+  
+  /**
+   * Hovered rating for preview effect
+   * @type {[number | null, Function]}
+   */
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
+  
+  /**
+   * Optional feedback comment
+   * @type {[string, Function]}
+   */
   const [comment, setComment] = useState("");
+  
+  /**
+   * Loading state during form submission
+   * @type {[boolean, Function]}
+   */
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
    const navigate = useNavigate();
 
+  /**
+   * Updates rating when star clicked
+   * @param {number} selectedRating - Rating value (1-5)
+   */
   const handleRatingClick = (selectedRating: number) => {
     setRating(selectedRating);
   };
 
+  /**
+   * Submits feedback to server, validates rating required
+   * Redirects to tickets page on success
+   */
   const handleSubmit = async () => {
     if (!rating) {
       toast({

@@ -1,6 +1,10 @@
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 
+/**
+ * Privacy Policy static page.
+ * Displays data collection practices, information sharing, security measures, and policy update procedures.
+ */
 export const PrivacyPolicy = (): JSX.Element => {
   const policySections = [
     {

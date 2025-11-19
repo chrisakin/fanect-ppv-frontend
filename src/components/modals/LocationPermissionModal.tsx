@@ -4,6 +4,14 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 
+/**
+ * Props for LocationPermissionModal
+ * @interface LocationPermissionModalProps
+ * @property {boolean} isOpen - Modal visibility state
+ * @property {Function} onLocationGranted - Callback when location approved
+ * @property {Function} onLocationDenied - Callback when location denied
+ * @property {Function} onVPNDetected - Callback when VPN detected
+ */
 interface LocationPermissionModalProps {
   isOpen: boolean;
   onLocationGranted: () => void;
@@ -11,6 +19,19 @@ interface LocationPermissionModalProps {
   onVPNDetected: () => void;
 }
 
+/**
+ * LocationPermissionModal Component - Request user location permission
+ * 
+ * Features:
+ * - Browser geolocation API request
+ * - VPN detection
+ * - Error handling for denied/unavailable location
+ * - Loading state during location fetch
+ * - Separate callbacks for different outcomes
+ * 
+ * @param {LocationPermissionModalProps} props - Component props
+ * @returns {JSX.Element} Location permission request dialog
+ */
 export const LocationPermissionModal = ({
   isOpen,
   onLocationGranted,

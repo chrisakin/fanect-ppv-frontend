@@ -10,6 +10,12 @@ import { formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GiftCard } from "@/components/layout/GiftCard";
 
+/**
+ * Dashboard single event detail screen for ticket purchasing/gifting.
+ * Displays event banner, trailer (if available), description, pricing,
+ * and conditional purchase/gift/confirmation cards based on route type parameter.
+ * Includes breadcrumb navigation and responsive layout for mobile/desktop views.
+ */
 export const DashboardSingleEvent = (): JSX.Element => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const { singleEvent, isLoading, fetchSingleEvent } = useEventStore();

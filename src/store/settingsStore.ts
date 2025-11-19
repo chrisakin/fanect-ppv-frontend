@@ -1,3 +1,11 @@
+/**
+ * store/settingsStore
+ * Zustand store for user settings and withdrawal details.
+ * Responsibilities:
+ *  - fetch and persist user profile settings
+ *  - fetch and persist withdrawal/bank details
+ *  - provide update helpers and save methods
+ */
 import { create } from 'zustand';
 import axios from '../lib/axios';
 

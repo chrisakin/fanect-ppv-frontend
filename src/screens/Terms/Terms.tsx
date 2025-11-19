@@ -1,6 +1,10 @@
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 
+/**
+ * Terms of Service static page.
+ * Displays legal terms and conditions with sections on acceptance, accounts, content, and service changes.
+ */
 export const Terms = (): JSX.Element => {
   const termsSections = [
     {

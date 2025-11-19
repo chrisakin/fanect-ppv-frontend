@@ -13,6 +13,12 @@ import { useAuthStore } from "../../store/authStore";
 import { useEventStore } from "../../store/eventStore";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Search results page.
+ * Queries events from eventStore using 'q' param, displays paginated results.
+ * Differs layout for authenticated vs public users (DashboardLayout vs Header/Footer).
+ * Handles streampass purchase navigation based on auth status.
+ */
 export const Search = (): JSX.Element => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();

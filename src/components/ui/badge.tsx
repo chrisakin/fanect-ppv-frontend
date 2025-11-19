@@ -3,6 +3,10 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Badge styling variants: default (primary), secondary, destructive (error), outline
+ * Small inline labels with focus ring and hover states
+ */
 const badgeVariants = cva(
   "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
@@ -27,6 +31,11 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
+/**
+ * Badge - small status label or tag
+ * @component
+ * Inline-flex with rounded border. Variants: default, secondary, destructive, outline
+ */
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
     <div className={cn(badgeVariants({ variant }), className)} {...props} />

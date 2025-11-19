@@ -3,6 +3,12 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Separator - horizontal or vertical divider line
+ * @component
+ * Props: orientation (horizontal/vertical), decorative (default true)
+ * Styling: 1px border with bg-border color
+ */
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>

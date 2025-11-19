@@ -7,12 +7,37 @@ import { formatInputDate, formatTime } from "@/lib/utils";
 import { Badge } from "../ui/badge";
 import { useState } from "react";
 
+/**
+ * EventCardsSectionProps
+ *
+ * Props for the CreatedEventList component.
+ *  - events: Event[] – Array of Event objects to display in the list
+ *  - onEdit: (event: Event) => void – Callback fired when Edit action is selected
+ *  - onDelete: (id: string) => void – Callback fired when Delete action is selected
+ */
 interface EventCardsSectionProps {
   events: Event[];
   onEdit: (event: Event) => void;
   onDelete: (id: string) => void;
 }
 
+/**
+ * getStatusClass
+ *
+ * Helper function that returns Tailwind CSS classes based on event admin approval status.
+ *
+ * Status Mappings:
+ *  - 'Approved' → Green background with green text and check icon styling
+ *  - 'Pending' → Yellow/amber background with warning text styling
+ *  - Default (Rejected) → Red/salmon background with error text styling
+ *
+ * All statuses support dark mode colors and hover states.
+ *
+ * Arguments:
+ *  - status: string – Event admin status (typically 'Approved', 'Pending', or 'Rejected')
+ *
+ * Returns: string – Tailwind CSS class string for Badge styling
+ */
 const getStatusClass = (status: string) => {
   switch (status) {
     case 'Approved':
@@ -24,6 +49,18 @@ const getStatusClass = (status: string) => {
   }
 };
 
+/**
+ * dateFormat
+ *
+ * Formats a date string into a human-readable format with day, date, month, year, and time.
+ *
+ * Output Format: "Monday, 19 November 2025, 02:30 PM"
+ *
+ * Arguments:
+ *  - date: string – ISO 8601 date string or any format parseable by JavaScript Date constructor
+ *
+ * Returns: string – Formatted date/time string in en-US locale
+ */
 const dateFormat = (date: string) => {
   return new Date(date).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -36,6 +73,27 @@ const dateFormat = (date: string) => {
     });
 }
 
+/**
+ * CreatedEventList
+ *
+ * React component that displays a list of created/organized events in a table-like card format.
+ *
+ * Features:
+ *  - Event card showing banner image, title, date/time, and admin approval status
+ *  - Responsive design: stacked layout on mobile, row layout on desktop (md breakpoint)
+ *  - Status badges: Green (Approved), Yellow (Pending), Red (Rejected)
+ *  - Dropdown menu with Edit, View Stats, and Delete actions
+ *  - Mobile-specific and desktop-specific dropdown positioning
+ *  - "View Stats" link only visible for Approved events
+ *  - Dark mode support with color customization
+ *
+ * Arguments:
+ *  - events: Event[] – Array of Event objects to render
+ *  - onEdit: (event: Event) => void – Callback when user selects Edit (typically opens modal)
+ *  - onDelete: (id: string) => void – Callback when user selects Delete
+ *
+ * Returns: JSX.Element
+ */
 export const CreatedEventList = ({ events, onEdit, onDelete }: EventCardsSectionProps) => {
 const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 const [screenType, setScreenType] = useState<string>('')
@@ -46,15 +104,16 @@ const [screenType, setScreenType] = useState<string>('')
       <Card className="w-full h-auto md:h-[122px] dark:bg-[#062013] dark:border-[#2e483a] bg-white border-gray-200 rounded-lg overflow-hidden border">
         <CardContent className="p-4 md:p-6">
           <div className="flex flex-col md:flex-row w-full items-start md:items-center justify-between gap-4">
-            {/* Left section */}
+            {/* Left section: Event image and details */}
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4 flex-1 w-full">
+              {/* Event banner image */}
               <img
                 className="w-full md:w-[272px] h-[79px] object-cover rounded-lg"
                 alt="Event image"
                 src={event.bannerUrl}
               />
               <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 flex-1">
-                {/* Event name */}
+                {/* Event name column */}
                 <div className="w-full truncate">
                   <div className="font-display-sm-medium text-xl md:text-2xl dark:text-[#828b86] text-gray-800 truncate">
                     {event.name}
@@ -65,7 +124,7 @@ const [screenType, setScreenType] = useState<string>('')
                     {`${dateFormat((event.eventDateTime))}`}
                   </div>
 
-                  {/* Badge + Dropdown - mobile only */}
+                  {/* Status badge + Dropdown menu - mobile only */}
                   <div className="md:hidden block mt-2 flex items-center justify-between w-full">
                     <Badge
                       className={`flex h-[30px] items-center justify-center gap-2 px-3 rounded-[8px] font-medium text-sm tracking-[-0.32px] whitespace-nowrap border-none ${getStatusClass(event.adminStatus)}`}
@@ -76,6 +135,7 @@ const [screenType, setScreenType] = useState<string>('')
                       {event.adminStatus}
                     </Badge>
 
+                    {/* Mobile dropdown menu */}
                     <DropdownMenu
                     key={event._id}
                     open={openDropdownId === event._id && screenType == 'isMobile'}
@@ -117,12 +177,12 @@ const [screenType, setScreenType] = useState<string>('')
                   </div>
                 </div>
 
-                {/* Date/Time - desktop */}
+                {/* Date/Time column - desktop only */}
                 <div className="hidden md:block font-text-lg-regular text-base text-gray-600 dark:text-[#828b86] mt-2">
                   {`${dateFormat(event.eventDateTime)}`}
                 </div>
 
-                {/* Badge - desktop */}
+                {/* Status badge - desktop only */}
                 <div className="hidden md:block ml-12">
                   <Badge
                     className={`flex h-[30px] items-center justify-center gap-2 px-2 max-w-[170px]  rounded-[8px] font-medium text-sm tracking-[-0.32px] whitespace-nowrap border-none ${getStatusClass(event.adminStatus)}`}
@@ -136,7 +196,7 @@ const [screenType, setScreenType] = useState<string>('')
               </div>
             </div>
 
-            {/* Dropdown - desktop */}
+            {/* Right section: Desktop-only dropdown menu */}
             <div className="hidden md:block">
               <DropdownMenu
                   key={event._id}

@@ -1,3 +1,9 @@
+/**
+ * src/index.tsx
+ * Application bootstrap: mounts React app, sets up routing and global providers.
+ * - Initializes auth state, FCM, and redirect helper
+ * - Wraps app with GoogleOAuthProvider, ThemeProvider, Router and global Toaster
+ */
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";

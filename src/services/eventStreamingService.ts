@@ -1,3 +1,12 @@
+/**
+ * services/eventStreamingService
+ * Encapsulates fetching and caching of streaming metadata used by player components.
+ *
+ * Responsibilities:
+ *  - Fetch playback/live URLs, chat tokens and stream keys from backend
+ *  - Cache streaming metadata in sessionStorage to reduce network calls
+ *  - Provide convenient methods for organizers (getOrganizerStreamData)
+ */
 import axios from '../lib/axios';
 
 export interface StreamingData {

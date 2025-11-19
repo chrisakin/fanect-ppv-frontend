@@ -8,6 +8,11 @@ import * as React from "react";
 import { cn } from "../../lib/utils";
 import { ButtonProps, buttonVariants } from "./button";
 
+/**
+ * Pagination - page navigation navigation
+ * @component
+ * Use: Pagination (nav), PaginationContent, PaginationItem, PaginationLink, etc.
+ */
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     role="navigation"
@@ -18,6 +23,11 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
 );
 Pagination.displayName = "Pagination";
 
+/**
+ * PaginationContent - ul wrapper for pagination items
+ * @component
+ * Flex row with gap-1
+ */
 const PaginationContent = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
@@ -30,6 +40,10 @@ const PaginationContent = React.forwardRef<
 ));
 PaginationContent.displayName = "PaginationContent";
 
+/**
+ * PaginationItem - li wrapper for individual pagination item
+ * @component
+ */
 const PaginationItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
@@ -38,6 +52,11 @@ const PaginationItem = React.forwardRef<
 ));
 PaginationItem.displayName = "PaginationItem";
 
+/**
+ * PaginationLink - page link button
+ * @component
+ * Props: isActive (highlights current page). Icon size
+ */
 type PaginationLinkProps = {
   isActive?: boolean;
 } & Pick<ButtonProps, "size"> &
@@ -63,6 +82,11 @@ const PaginationLink = ({
 );
 PaginationLink.displayName = "PaginationLink";
 
+/**
+ * PaginationPrevious - "Previous" button with left chevron
+ * @component
+ * Navigates to previous page. Gap-1 padding
+ */
 const PaginationPrevious = ({
   className,
   ...props
@@ -79,6 +103,11 @@ const PaginationPrevious = ({
 );
 PaginationPrevious.displayName = "PaginationPrevious";
 
+/**
+ * PaginationNext - "Next" button with right chevron
+ * @component
+ * Navigates to next page. Gap-1 padding
+ */
 const PaginationNext = ({
   className,
   ...props
@@ -95,6 +124,11 @@ const PaginationNext = ({
 );
 PaginationNext.displayName = "PaginationNext";
 
+/**
+ * PaginationEllipsis - "..." separator between page numbers
+ * @component
+ * MoreHorizontalIcon. Aria-hidden
+ */
 const PaginationEllipsis = ({
   className,
   ...props

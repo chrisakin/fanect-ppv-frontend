@@ -2,6 +2,11 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Card - container box with border, shadow, and rounded corners
+ * @component
+ * Wrapper for CardHeader, CardTitle, CardDescription, CardContent, CardFooter
+ */
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -17,6 +22,11 @@ const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
+/**
+ * CardHeader - top section of card (6px padding)
+ * @component
+ * Flex column with space-y-1.5
+ */
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -29,6 +39,11 @@ const CardHeader = React.forwardRef<
 ));
 CardHeader.displayName = "CardHeader";
 
+/**
+ * CardTitle - bold heading inside CardHeader
+ * @component
+ * Font-semibold with tracking
+ */
 const CardTitle = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -41,6 +56,11 @@ const CardTitle = React.forwardRef<
 ));
 CardTitle.displayName = "CardTitle";
 
+/**
+ * CardDescription - secondary text under CardTitle
+ * @component
+ * Text-sm with muted foreground color
+ */
 const CardDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -53,6 +73,11 @@ const CardDescription = React.forwardRef<
 ));
 CardDescription.displayName = "CardDescription";
 
+/**
+ * CardContent - main content area (6px padding, no top padding)
+ * @component
+ * Flex wrapper for card body
+ */
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -61,6 +86,11 @@ const CardContent = React.forwardRef<
 ));
 CardContent.displayName = "CardContent";
 
+/**
+ * CardFooter - bottom section of card (flex row, no top padding)
+ * @component
+ * Flex items-center with 6px padding
+ */
 const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

@@ -3,6 +3,10 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Alert styling variants: default, destructive (error), secondary
+ * Supports left-side icon with auto-alignment
+ */
 const alertVariants = cva(
   "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
   {
@@ -34,6 +38,11 @@ const Alert = React.forwardRef<
 ));
 Alert.displayName = "Alert";
 
+/**
+ * AlertTitle - bold heading for alert message
+ * @component
+ * Styled as h5 with medium font weight and tracking
+ */
 const AlertTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
@@ -46,6 +55,11 @@ const AlertTitle = React.forwardRef<
 ));
 AlertTitle.displayName = "AlertTitle";
 
+/**
+ * AlertDescription - secondary text content for alert
+ * @component
+ * Wrapper div with text-sm and relaxed line height
+ */
 const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>

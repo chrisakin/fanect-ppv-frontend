@@ -2,6 +2,12 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Textarea - multi-line text input field
+ * @component
+ * Props: placeholder, disabled, value, onChange, etc. (standard textarea)
+ * Styling: min-height 60px, border, focus ring, dark mode support
+ */
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
   React.ComponentProps<"textarea">

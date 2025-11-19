@@ -6,6 +6,12 @@ import { PaginationIndex } from "@/components/utils/Pagination";
 import { useEventStore } from "@/store/eventStore";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Dashboard streampass/tickets management screen.
+ * Displays user's purchased event tickets, filterable by upcoming/live/past status,
+ * shows paginated streampass cards with event details, purchase confirmation info,
+ * and empty state guiding users to purchase events.
+ */
 export const DashboardTickets = () => {
   const [eventType, setEventType] = useState<'upcoming' | 'live' | 'past'>('upcoming');
 const nav = useNavigate()

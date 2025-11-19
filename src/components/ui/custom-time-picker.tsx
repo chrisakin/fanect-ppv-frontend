@@ -3,6 +3,15 @@ import { Clock as ClockIcon } from 'lucide-react';
 import { Input } from './input';
 import { cn } from '../../lib/utils';
 
+/**
+ * CustomTimePicker interface
+ * @interface CustomTimePickerProps
+ * @property {string} value - Selected time (HH:MM format)
+ * @property {(time: string) => void} onChange - Callback on time selection (returns HH:MM string)
+ * @property {string} [placeholder] - Input placeholder text
+ * @property {boolean} [disabled] - Disable time picker
+ * @property {string} [className] - Custom CSS class
+ */
 interface CustomTimePickerProps {
   value: string;
   onChange: (time: string) => void;
@@ -18,6 +27,11 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
   disabled = false,
   className
 }) => {
+  /**
+   * CustomTimePicker - scrollable 12-hour time picker
+   * @component
+   * Features: Hour/Minute/Period (AM/PM) spinners, scrollable selection, 24-hour conversion
+   */
   const [isOpen, setIsOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState(value ? parseInt(value.split(':')[0]) : 12);
   const [selectedMinute, setSelectedMinute] = useState(value ? parseInt(value.split(':')[1]) : 0);

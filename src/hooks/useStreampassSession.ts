@@ -1,17 +1,37 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import axios from '../lib/axios';
 
+/**
+ * Options for useStreampassSession
+ * - streampassId: ID of the streampass to start/end sessions for
+ * - enabled: whether session management should be active
+ * - onVideoPlaying: boolean indicating whether to auto-start when playback begins
+ */
 interface UseStreampassSessionOptions {
   streampassId: string | null;
   enabled?: boolean;
   onVideoPlaying?: boolean;
 }
 
+/**
+ * SessionData
+ * Minimal shape describing an active streampass session
+ */
 interface SessionData {
   sessionToken: string | null;
   isActive: boolean;
 }
 
+/**
+ * useStreampassSession
+ * Hook to manage server-side streampass sessions. Responsibilities:
+ *  - startSession(id): requests server to start a session and stores token
+ *  - endSession(id, token): ends session on server
+ *  - auto-start when video playback begins (controlled by onVideoPlaying)
+ *  - ensure session is ended on page unload (sendBeacon)
+ *
+ * Returns: { sessionData, sessionError, isSessionActive, sessionToken, startSession, endSession, clearError }
+ */
 export const useStreampassSession = ({
   streampassId,
   enabled = true,

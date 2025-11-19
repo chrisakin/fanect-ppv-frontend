@@ -8,6 +8,12 @@ import { useState, useEffect } from "react";
 import { useEventStore } from "@/store/eventStore";
 import { PaginationIndex } from "@/components/utils/Pagination";
 
+/**
+ * Dashboard event organizer tools page.
+ * Lists user's created events with pagination, allows event creation/editing via modal,
+ * handles event deletion with confirmation, shows empty state when no events exist,
+ * provides quick access to event management and creation workflows.
+ */
 export const DashboardOrganise = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

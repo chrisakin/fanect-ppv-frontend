@@ -8,21 +8,52 @@ import { Event } from "@/store/eventStore";
 import { useToast } from "../ui/use-toast";
 import { StreampassPaymentButton } from "../utils/StreampassPayment";
 
+/**
+ * Props for GiftFriend component
+ * @typedef {Object} GiftFriendProps
+ * @property {Event} event - Event object containing price and details
+ */
 type GiftFriendProps = {
   event: Event;
 };
 
+/**
+ * Friend data structure for gift recipient
+ * @interface Friend
+ * @property {string} id - Unique identifier
+ * @property {string} firstName - Friend's first name
+ * @property {string} email - Friend's email address
+ */
 interface Friend {
   id: string;
   firstName: string;
   email: string;
 }
 
+/**
+ * Form validation error messages
+ * @interface FormErrors
+ * @property {string} [firstName] - First name validation error
+ * @property {string} [email] - Email validation error
+ */
 interface FormErrors {
   firstName?: string;
   email?: string;
 }
 
+/**
+ * GiftFriend Component - Form to gift streampass to multiple friends
+ * 
+ * Features:
+ * - Add multiple friends with name and email validation
+ * - Display added friends as removable badges
+ * - Real-time form error handling
+ * - Calculate total price based on number of friends
+ * - Integration with payment button
+ * 
+ * @param {GiftFriendProps} props - Component props
+ * @returns {JSX.Element} Gift friend form with friend list and payment
+ */
 export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -39,7 +70,11 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // Validation function
+  /**
+   * Validates current friend form input
+   * Checks: non-empty name, valid email format, no duplicates
+   * @returns {boolean} True if validation passes
+   */
   const validateCurrentFriend = useCallback((): boolean => {
     const newErrors: FormErrors = {};
 
@@ -59,6 +94,10 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
     return Object.keys(newErrors).length === 0;
   }, [currentFriend, friends]);
 
+  /**
+   * Adds validated friend to list and resets form
+   * Shows success toast notification
+   */
   const addFriend = useCallback(() => {
     if (validateCurrentFriend()) {
       const newFriend = {
@@ -76,6 +115,11 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
     }
   }, [currentFriend, validateCurrentFriend, toast]);
 
+  /**
+   * Removes friend from list by ID
+   * Shows removal toast notification
+   * @param {string} friendId - ID of friend to remove
+   */
   const removeFriend = useCallback((friendId: string) => {
     const friendToRemove = friends.find(friend => friend.id === friendId);
     setFriends(prev => prev.filter(friend => friend.id !== friendId));
@@ -88,6 +132,11 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
     }
   }, [friends, toast]);
 
+  /**
+   * Updates current friend form field and clears related error
+   * @param {keyof Friend} field - Field to update (firstName, email)
+   * @param {string} value - New field value
+   */
   const handleInputChange = useCallback((field: keyof Friend, value: string) => {
     setCurrentFriend(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -131,12 +180,18 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
     }));
   }, [friends, currentFriend]);
 
-  // Validate that we have friends for payment
+  /**
+   * Validates that we have friends for payment
+   * @type {boolean}
+   */
   const canProceedWithPayment = useMemo(() => {
     return friendsForPayment.length > 0;
   }, [friendsForPayment]);
 
-  // Handle payment button click with validation
+  /**
+   * Handles payment button click - returns friends list for payment
+   * @returns {Array} Friends array for payment processing
+   */
   const handlePaymentClick = useCallback(() => {
     // if (!canProceedWithPayment) {
     //   toast({
@@ -149,13 +204,17 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
     return friendsForPayment;
   }, [canProceedWithPayment, friendsForPayment, toast]);
 
-  const totalFriends = friends.length + (currentFriend.firstName.trim() && currentFriend.email.trim() ? 1 : 0);
+  /**
+   * Calculate total payment amount
+   * Price = event price × number of friends (minimum 1)
+   * @type {number}
+   */
   const totalPrice = Number(event.price.amount) * Math.max(friendsForPayment.length, 1);
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-gray-50 dark:bg-[#092D1B] border border-dashed border-[#a4a7ae] dark:border-[#1AAA65] rounded-[10px] p-6 sm:p-8 md:p-10">
       <div className="flex flex-col items-start gap-8">
-        {/* Header Section */}
+        {/* Header - Title and description */}
         <div className="flex flex-col items-start gap-1">
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 dark:text-[#CCCCCC]">
             Gift Streampass to a Friend
@@ -166,7 +225,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
         </div>
 
         <div className="flex flex-col items-start gap-11 w-full">
-          {/* Price Section */}
+          {/* Price Section - Displays cost per friend */}
           <div className="flex flex-col items-start gap-6 w-full">
             <div className="flex flex-col items-start gap-2 w-full">
               <label className="text-sm font-medium text-gray-800 dark:text-[#CCCCCC]">
@@ -178,9 +237,9 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
             </div>
           </div>
 
-          {/* Friends Section */}
+          {/* Friends Section - Added friends list and form */}
           <div className="flex flex-col items-start gap-8 w-full">
-            {/* Email Badges */}
+            {/* Added Friends Badges - Removable list of emails */}
             {friends.length > 0 && (
               <div className="flex items-start gap-3 flex-wrap">
                 {friends.map((friend) => (
@@ -201,7 +260,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
               </div>
             )}
 
-            {/* Current Friend Form */}
+            {/* Add Friend Form - Input fields for name and email */}
             <div className="flex flex-col items-start gap-6 w-full">
               <h2 className="text-lg font-medium text-[#1aaa65] dark:text-[#1aaa65]">
                 Friend {friends.length + 1}
@@ -209,7 +268,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
 
               <div className="flex flex-col items-center gap-6 w-full">
                 <div className="flex flex-col items-start gap-6 w-full">
-                  {/* First Name Field */}
+                  {/* First Name Input - Friend's first name field */}
                   <div className="flex flex-col items-start gap-2 w-full">
                     <label className="text-base sm:text-lg font-medium text-gray-800 dark:text-[#CCCCCC]">
                       Friend's First Name
@@ -225,7 +284,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
                     )}
                   </div>
 
-                  {/* Email Field */}
+                  {/* Email Input - Friend's email field with validation */}
                   <div className="flex flex-col items-start gap-2 w-full">
                     <label className="text-base sm:text-lg font-medium text-gray-800 dark:text-[#CCCCCC]">
                       Friend's Email Address
@@ -246,7 +305,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
             </div>
           </div>
 
-          {/* Add More Friend Button */}
+          {/* Add More Friend Button - Adds friend to list, disabled if form incomplete */}
           <Button
             variant="ghost"
             className="flex items-center gap-2 p-0 hover:bg-transparent disabled:opacity-50"
@@ -259,7 +318,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
             </span>
           </Button>
 
-          {/* Payment Section */}
+          {/* Payment Section - Checkout and terms */}
           <div className="flex flex-col items-center gap-5 w-full">
             <StreampassPaymentButton 
               friends={handlePaymentClick()}
@@ -271,7 +330,7 @@ export const GiftFriend = ({ event }: GiftFriendProps): JSX.Element => {
             </p>
           </div>
 
-          {/* Purchase for Self Link */}
+          {/* Self Purchase Link - Alternative to gift */}
           <div className="text-center w-full">
             <Button
               variant="link"

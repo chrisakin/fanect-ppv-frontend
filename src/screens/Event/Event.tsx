@@ -1,3 +1,9 @@
+/**
+ * screens/Event
+ * Event detail screen. Fetches a single event by id and displays details,
+ * pricing and action buttons (buy streampass, gift). Handles redirects for
+ * unauthenticated users via a login modal and preserves pre-login redirect state.
+ */
 import { GiftIcon, ArrowLeft } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";

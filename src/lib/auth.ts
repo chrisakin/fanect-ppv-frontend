@@ -1,5 +1,18 @@
 import { jwtDecode } from 'jwt-decode';
 
+/**
+ * lib/auth
+ * Small client-side auth helpers for token and user management.
+ *
+ * Exports:
+ *  - setTokens / clearTokens: persist access/refresh/session tokens
+ *  - getAccessToken / getRefreshToken / getSessionToken: read tokens
+ *  - setLoggedinUser / getUser: local user storage helper
+ *  - isAuthenticated: simple JWT expiration check
+ *
+ * These helpers are intentionally lightweight and synchronous (localStorage/sessionStorage).
+ */
+
 interface DecodedToken {
   sub: string;
   email: string;

@@ -15,11 +15,30 @@ import { LoginModal } from "../modals/LoginModal";
 import { useAuthStore } from "../../store/authStore";
 import { clearTokens, getUser } from "../../lib/auth";
 
+/**
+ * Header component props
+ * @interface HeaderProps
+ * @property {boolean} [withSidebar] - If true, header adjusts for sidebar layout
+ * @property {Function} [onMenuClick] - Callback when menu clicked with sidebar
+ */
 interface HeaderProps {
   withSidebar?: boolean;
   onMenuClick?: () => void;
 }
 
+/**
+ * Header Component - Responsive navigation header with search, theme toggle, and auth
+ * 
+ * Features:
+ * - Mobile: Hamburger menu, collapsible navigation, search bar
+ * - Desktop: Search bar, theme toggle, create event button, user profile/login
+ * - Auth-aware: Different UI for authenticated vs unauthenticated users
+ * - Dark/Light theme toggle
+ * - Search event functionality
+ * 
+ * @param {HeaderProps} props - Component props
+ * @returns {JSX.Element} Responsive header navigation
+ */
 export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.Element => {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,12 +47,18 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
 
+  /**
+   * Logs out user, clears tokens, and redirects to home
+   */
   const handleLogout = () => {
     clearTokens();
     logout();
     navigate('/');
   };
 
+  /**
+   * Toggles mobile menu or calls sidebar callback
+   */
   const handleMenuClick = () => {
     if (withSidebar && onMenuClick) {
       onMenuClick();
@@ -42,7 +67,10 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
     }
   };
 
-    const handleCreateEvent = () => {
+  /**
+   * Navigates to create event page if authenticated, opens login modal otherwise
+   */
+  const handleCreateEvent = () => {
     if (isAuthenticated) {
       navigate("/dashboard/organise");
     } else {
@@ -51,6 +79,11 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
     }
   };
 
+  /**
+   * Handles search form submission
+   * Navigates to search page with encoded query string
+   * @param {React.FormEvent} e - Form event
+   */
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -59,6 +92,10 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
     }
   };
 
+  /**
+   * Triggers search on Enter key press in search input
+   * @param {React.KeyboardEvent} e - Keyboard event
+   */
   const handleSearchInputKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch(e);
@@ -72,18 +109,20 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
         onClose={() => setIsLoginModalOpen(false)} 
       />
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile overlay - Closes mobile menu when clicked */}
       {isMenuOpen && !withSidebar && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)} />
       )}
 
+      {/* Header container - Adjusts layout for sidebar presence */}
       <header className={withSidebar ? "fixed left-0 top-0 z-50 w-full md:ml-sidebar-desktop md:w-header-desktop bg-background" : "fixed top-0 left-0 right-0 bg-background z-50" }>
-        {/* Mobile Header */}
+        {/* Mobile header - Logo, theme toggle, menu button (visible only on mobile) */}
         <div className="flex md:hidden items-center justify-between px-3 py-2">
           <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
             FaNect
           </Link>
           <div className="flex items-center gap-2">
+            {/* Theme toggle - Dark/Light mode selector */}
             <ToggleGroup
               type="single"
               value={theme}
@@ -103,6 +142,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
                  <SunIcon className="w-10 h-10 dark:text-[#1AAA65]" />
               </ToggleGroupItem>
             </ToggleGroup>
+            {/* Menu toggle button - Hamburger/X icon */}
             <button
               onClick={handleMenuClick}
               className="text-gray-500 p-1"
@@ -112,7 +152,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
+        {/* Mobile search bar - Visible on mobile only */}
         <div className="md:hidden px-3 py-2">
           <form onSubmit={handleSearch} className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] w-full bg-background">
             <SearchIcon className="w-4 h-4 text-gray-400" />
@@ -127,7 +167,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
           </form>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile menu dropdown - Login/Create Event buttons (unauthenticated only) */}
         {!withSidebar && (
           <div 
             className={`md:hidden fixed right-0 top-0 bg-background transform transition-transform duration-300 ease-in-out ${
@@ -165,7 +205,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
           </div>
         )}
 
-        {/* Desktop/Tablet Header */}
+        {/* Desktop/Tablet header - Search, theme toggle, create event, user profile/login */}
         <div className="hidden md:flex items-center justify-between px-4 lg:px-16 py-4 my-4 mx-5 gap-3 rounded-lg bg-[#F5F5F5] dark:bg-dash-dark">
         {!isAuthenticated && (
           <Link to="/" className="text-xl font-semibold text-green-600 hover:text-green-700 transition-colors">
@@ -173,6 +213,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
           </Link>
         )}
 
+          {/* Search bar */}
           <form onSubmit={handleSearch} className="flex items-center gap-2 p-2 rounded-lg border border-solid border-[#d5d7da] dark:border-[#2E483A] w-[300px]">
             <SearchIcon className="w-6 h-6 text-gray-400 cursor-pointer" onClick={handleSearch} />
             <input
@@ -185,7 +226,9 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
             />
           </form>
 
+          {/* Right section - Theme toggle, create event, user/login */}
           <div className="flex items-center gap-2">
+            {/* Theme toggle */}
             <ToggleGroup
               type="single"
               value={theme}
@@ -216,7 +259,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
             </Button>
             )} */}
 
-            {/* <Link to="/dashboard/organise">
+            {/* {<Link to="/dashboard/organise">
             <Button
               variant="outline"
               size="lg"
@@ -226,6 +269,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
             </Button>
             </Link> */}
 
+            {/* Create Event button */}
             <Button
               variant="outline"
               size="lg"
@@ -235,6 +279,7 @@ export const Header = ({ withSidebar = false, onMenuClick }: HeaderProps): JSX.E
               Create an Event
             </Button>
 
+            {/* User profile or login button */}
             {isAuthenticated ? (
               <Button
                 variant="outline"

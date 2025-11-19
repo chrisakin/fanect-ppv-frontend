@@ -1,6 +1,15 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/**
+ * lib/utils
+ * Small UI and date/time helper utilities used across the app.
+ * Exports:
+ *  - cn(...): className merger using clsx + tailwind-merge
+ *  - formatTime / convertTo24Hour / formatInputDate / createLocalDate: date/time helpers
+ *  - formatCurrency: simple currency formatter
+ */
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

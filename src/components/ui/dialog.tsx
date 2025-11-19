@@ -4,14 +4,27 @@ import { X } from "lucide-react"
 
 import { cn } from "../../lib/utils"
 
+/**
+ * Dialog - modal component. Use: Dialog (root), DialogTrigger, DialogContent, etc.
+ * @component
+ * Features: overlay with fade animation, centered content, close button (optional)
+ */
 const Dialog = DialogPrimitive.Root
 
+/** Dialog open/close trigger button */
 const DialogTrigger = DialogPrimitive.Trigger
 
+/** Portal for rendering dialog outside DOM hierarchy */
 const DialogPortal = DialogPrimitive.Portal
 
+/** Manual close trigger button */
 const DialogClose = DialogPrimitive.Close
 
+/**
+ * DialogOverlay - semi-transparent backdrop (bg-black/80)
+ * @component
+ * Fixed inset-0 with fade animation on open/close
+ */
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -27,6 +40,12 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+/**
+ * DialogContent - modal box with centered positioning
+ * @component
+ * Props: hideCloseButton (optional), children. Contains overlay, content, close button (X icon)
+ * Animations: fade, zoom, slide on open/close
+ */
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
@@ -55,6 +74,11 @@ const DialogContent = React.forwardRef<
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
+/**
+ * DialogHeader - top section of dialog (centered text on mobile, left on desktop)
+ * @component
+ * Flex column with space-y-1.5
+ */
 const DialogHeader = ({
   className,
   ...props
@@ -69,6 +93,11 @@ const DialogHeader = ({
 )
 DialogHeader.displayName = "DialogHeader"
 
+/**
+ * DialogFooter - bottom section of dialog (flex row on desktop, column on mobile)
+ * @component
+ * Flex justify-end with space-x-2 on desktop
+ */
 const DialogFooter = ({
   className,
   ...props
@@ -83,6 +112,11 @@ const DialogFooter = ({
 )
 DialogFooter.displayName = "DialogFooter"
 
+/**
+ * DialogTitle - bold heading inside DialogHeader
+ * @component
+ * Text-lg font-semibold with tracking
+ */
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -98,6 +132,11 @@ const DialogTitle = React.forwardRef<
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
+/**
+ * DialogDescription - secondary text inside dialog
+ * @component
+ * Text-sm with muted foreground color
+ */
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>

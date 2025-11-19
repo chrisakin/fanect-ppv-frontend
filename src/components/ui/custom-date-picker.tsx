@@ -4,6 +4,15 @@ import { Button } from './button';
 import { Input } from './input';
 import { cn } from '../../lib/utils';
 
+/**
+ * CustomDatePicker interface
+ * @interface CustomDatePickerProps
+ * @property {Date | null} value - Selected date
+ * @property {(date: Date | null | string) => void} onChange - Callback on date selection (returns YYYY-MM-DD string)
+ * @property {string} [placeholder] - Input placeholder text
+ * @property {boolean} [disabled] - Disable date picker
+ * @property {string} [className] - Custom CSS class
+ */
 interface CustomDatePickerProps {
   value: Date | null;
   onChange: (date: Date | null | string) => void;
@@ -19,6 +28,11 @@ const months = [
 
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+/**
+ * CustomDatePicker - calendar date input with month/year navigation
+ * @component
+ * Features: Month/year picker, today highlighting, past date graying, controlled input
+ */
 export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   value,
   onChange,

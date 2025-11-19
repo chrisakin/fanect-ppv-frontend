@@ -3,12 +3,28 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 
+/**
+ * Modal interface for VPN detection alert
+ * @interface VPNDetectedModalProps
+ * @property {boolean} isOpen - Modal visibility
+ * @property {() => void} onClose - Callback for "Go Back" action
+ */
 interface VPNDetectedModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+
+/**
+ * Alert for VPN/proxy detection with licensing and security explanation
+ * @component
+ * Triggered by LocationPermissionModal when geolocation rejects VPN
+ * Shows explanation and "I've Disabled VPN" button to retry location check
+ */
 export const VPNDetectedModal = ({ isOpen, onClose }: VPNDetectedModalProps) => {
+  /**
+   * Reload page to retry geolocation detection after VPN is disabled
+   */
   const handleDisableVPN = () => {
     // Reload the page to retry location detection
     window.location.reload();

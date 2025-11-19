@@ -11,6 +11,12 @@ import { useEffect, useState } from "react";
 import { fcmService } from "@/services/fcmService";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Dashboard home screen.
+ * Displays hero section, toggles between upcoming/live events with pagination,
+ * listens for FCM "Live Stream Started" notifications, shows start streaming alert,
+ * and manages dismissed notifications.
+ */
 export const DashboardHome = (): JSX.Element => {
   const [eventType, setEventType] = useState<'upcoming' | 'live'>('upcoming');
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());

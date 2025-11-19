@@ -3,6 +3,18 @@ import { fcmService } from '../services/fcmService';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 
+/**
+ * useFCM
+ * Lightweight hook to initialize Firebase Cloud Messaging for authenticated users.
+ *
+ * Behavior:
+ *  - Initializes FCM after a small delay when the user is authenticated
+ *  - Listens for custom window events (fcm-message, refresh-notifications)
+ *  - Periodically refreshes the FCM token and updates unread counts
+ *
+ * Side-effects: calls fcmService.initializeFCM() and fcmService.refreshToken(),
+ * updates notification store via updateUnreadCount()
+ */
 export const useFCM = () => {
   const { isAuthenticated } = useAuthStore();
   const { updateUnreadCount } = useNotificationStore();

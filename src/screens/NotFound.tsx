@@ -1,3 +1,8 @@
+/**
+ * screens/NotFound
+ * Simple 404 screen shown when route is not matched.
+ * Renders a user-friendly message and a button to return home.
+ */
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
 

@@ -16,6 +16,14 @@ import { useStreampassSession } from "@/hooks/useStreampassSession";
 import { Alert, AlertDescription } from "../ui/alert";
 import { TriangleAlert as AlertTriangle } from "lucide-react";
 
+/**
+ * LiveEventPlayer
+ * Component that fetches streaming metadata for a live event and renders the
+ * IVS player (via `useAWSIVSService`). Handles session tracking, SSE event
+ * status updates and shows feedback modal when the event ends.
+ *
+ * Props: eventId, eventName, eventType, streampassId, optional session/token and device type.
+ */
 interface LiveEventPlayerProps {
   eventId: string;
   eventName?: string;

@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
+/**
+ * Options for useScreenRecordingProtection
+ * - onRecordingDetected: callback when an active recording is detected
+ * - onSuspiciousActivity: callback for lower-confidence suspicious events
+ * - enableWatermark: injects a visible dynamic watermark into the DOM
+ * - enableBlurOnFocusLoss: blur the page when focus is lost
+ * - enableDevToolsDetection: try to detect opened devtools
+ */
 interface ScreenRecordingProtectionOptions {
   onRecordingDetected?: () => void;
   onSuspiciousActivity?: (activity: string) => void;
@@ -8,6 +16,15 @@ interface ScreenRecordingProtectionOptions {
   enableDevToolsDetection?: boolean;
 }
 
+/**
+ * useScreenRecordingProtection
+ * Hook that implements multiple lightweight heuristics to detect screen capture
+ * or recording activity. It offers:
+ *  - DOM monitoring, watermarking, keyboard & context-menu interception
+ *  - DevTools & extension heuristics, canvas and performance checks
+ *
+ * Returns: { isRecordingDetected, isProtectionActive, runManualCheck }
+ */
 export const useScreenRecordingProtection = (options: ScreenRecordingProtectionOptions = {}) => {
   const [isRecordingDetected, setIsRecordingDetected] = useState(false);
   const [isProtectionActive, setIsProtectionActive] = useState(false);
